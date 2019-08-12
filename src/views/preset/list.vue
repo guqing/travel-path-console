@@ -6,7 +6,7 @@
     <div class="table-operator operator-btn-group">
       <a-button type="primary" icon="plus" @click="createScheme">新建方案</a-button>
       <a-button type="dashed" v-if="drawerBtnVisible" @click="showPresetSchemeDrawer">查看已选数据</a-button>
-      
+
       <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
           <a-menu-item key="1">
@@ -22,13 +22,24 @@
       </a-dropdown>
     </div>
 
-    <s-table ref="table" size="default" rowKey="id" :columns="columns" :data="loadData"
+    <s-table
+      ref="table"
+      size="default"
+      rowKey="id"
+      :columns="columns"
+      :data="loadData"
       :alert="{ show: true, clear: true }"
       :rowSelection="{ selectedRowKeys: this.selectedRowKeys, onChange: this.onSelectChange }">
-      <template v-for="(col, index) in columns" v-show="col.scopedSlots" :slot="col.dataIndex"
+      <template
+        v-for="(col, index) in columns"
+        v-show="col.scopedSlots"
+        :slot="col.dataIndex"
         slot-scope="text, record">
         <div :key="index">
-          <a-input v-if="record.editable" style="margin: -5px 0" :value="text"
+          <a-input
+            v-if="record.editable"
+            style="margin: -5px 0"
+            :value="text"
             @change="e => handleChange(e.target.value, record.key, col, record)" />
           <template v-else>{{ text }}</template>
         </div>
@@ -56,13 +67,16 @@
     <div>
       <a-drawer
         title="Basic Drawer"
-        width=420
+        width="420"
         placement="right"
         :closable="false"
         :visible="drawerVisible"
-        @close="onDrawerClose"
-      >
-        <a-table :columns="drawTableColumns" rowKey="lat" :dataSource="markerDataArray" bordered>
+        @close="onDrawerClose">
+        <a-table
+          :columns="drawTableColumns"
+          rowKey="lat"
+          :dataSource="markerDataArray"
+          bordered>
         </a-table>
       </a-drawer>
     </div>
@@ -70,18 +84,16 @@
 </template>
 
 <script>
-// leaflet/dist/leaflet.css
 import { STable } from '@/components'
 import * as L from 'leaflet'
 import '@/mystatic/js/loadTiles'
 import { HashTable } from '@/mystatic/js/HashTable'
 import { tileUrl } from '@/api/tile'
-import { listScheme } from '@/api/presetScheme'
-import { presetIcon, presetMarkerOption } from '@/mystatic/js/common'
+import { presetMarkerOption } from '@/mystatic/js/common'
 import moment from 'moment'
 
 export default {
-  name: 'TableList',
+  name: 'PresetSchemeList',
   components: {
     STable
   },
@@ -91,7 +103,7 @@ export default {
       drawerVisible: false,
       markerCount: 0,
       markerDataArray: [],
-      markerHashTable: new HashTable(),// 创建一个hashTable容器
+      markerHashTable: new HashTable(), // 创建一个hashTable容器
       tempPointString: '',
       map: null,
       // 高级搜索 展开/关闭
@@ -131,7 +143,7 @@ export default {
           sorter: true,
           scopedSlots: { customRender: 'modifyTime' },
           customRender: function (text, record, index) {
-            return moment(text).format("YYYY-MM-DD")
+            return moment(text).format('YYYY-MM-DD')
           }
         },
         {
@@ -147,10 +159,10 @@ export default {
           params: Object.assign(parameter, this.queryParam)
         }).then(res => {
           return res.data
-        }).catch((err) => {
+        }).catch(err => {
           this.$notification.error({
             message: '失败',
-            description: '获取预设卡口方案列表失败'
+            description: '获取预设卡口方案列表失败：' + err.message
           })
         })
       },
@@ -158,7 +170,7 @@ export default {
       selectedRows: [],
       drawTableColumns: [{
         title: '维度',
-        dataIndex: 'lat',
+        dataIndex: 'lat'
       }, {
         title: '经度',
         dataIndex: 'lng'
@@ -181,7 +193,7 @@ export default {
       this.L.tileLayer.loadTileLayer(tileUrl, {
         attribution: 'Map data &copy;<a href="https://github.com/guqing">guqing</a>',
         minZoom: 11,
-        maxZoom: 19,
+        maxZoom: 19
       }).addTo(this.map)
     },
     handleChange (value, key, column, record) {
@@ -240,7 +252,7 @@ export default {
         description: '已开启地图标注功能，请手动点击地图标记卡口位置'
       })
       // 为地图注册点击事件
-      this.map.on("click", e => this.handleMapClick(e))
+      this.map.on('click', e => this.handleMapClick(e))
     },
     handleMapClick (e) {
       var point = e.latlng
@@ -257,51 +269,51 @@ export default {
       marker.on('dragstart', e => this.handleOnMarkerDragstart(e))
       marker.on('moveend', e => this.handlerOnMarkerMoveEnd(e))
     },
-    handleOnMarkerClick(e) {
+    handleOnMarkerClick (e) {
       // 标记物点击事件
       var point = JSON.stringify(e.target.getLatLng())
       // 保存this对象
       var that = this
       this.$confirm({
         title: '你确定要删除该预设卡口点吗?',
-        onOk() {
+        onOk () {
           var marker = that.markerHashTable.getValue(point)
           that.map.removeLayer(marker)
           // marker标记点数量-1
           this.markerCount--
         },
-        onCancel() {}
+        onCancel () { }
       })
     },
-    handleOnMarkerDragstart(e) {
-      //标记点开始被拖拽时记录下被拖拽的标记，用于修改hash中的记录
+    handleOnMarkerDragstart (e) {
+      // 标记点开始被拖拽时记录下被拖拽的标记，用于修改hash中的记录
       var tempPoint = e.target.getLatLng()
       this.tempPointString = JSON.stringify(tempPoint)
     },
-    handlerOnMarkerMoveEnd(e) {
+    handlerOnMarkerMoveEnd (e) {
       var point = e.target.getLatLng()
       var pointJSONString = JSON.stringify(point)
-      if(this.tempPointString) {
-          // 删除原来的marker
-          this.markerHashTable.remove(this.tempPointString)
-          //插入移动后的新marker
-          this.markerHashTable.add(pointJSONString, e.target)
+      if (this.tempPointString) {
+        // 删除原来的marker
+        this.markerHashTable.remove(this.tempPointString)
+        // 插入移动后的新marker
+        this.markerHashTable.add(pointJSONString, e.target)
       }
-      //置空，防止产生脏数据
+      // 置空，防止产生脏数据
       this.tempPointString = ''
     },
-    showPresetSchemeDrawer() {
+    showPresetSchemeDrawer () {
       // 打开抽屉
       this.drawerVisible = true
     },
-    onDrawerClose() {
+    onDrawerClose () {
       // 关闭抽屉
       this.drawerVisible = false
     },
-    markerHashDataConvert(){
+    markerHashDataConvert () {
       var array = []
       var keys = this.markerHashTable.getKeys()
-      keys.forEach((item)=>{
+      keys.forEach((item) => {
         var point = JSON.parse(item)
         array.push(point)
       })
@@ -310,7 +322,7 @@ export default {
   },
   watch: {
     markerCount (count) {
-      if(count > 0) {
+      if (count > 0) {
         this.drawerBtnVisible = true
         // 数据转换
         this.markerDataArray = this.markerHashDataConvert()

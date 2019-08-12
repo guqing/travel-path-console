@@ -20,9 +20,9 @@ export const asyncRouterMap = [
       // presetScheme
       {
         path: '/preset/list',
-        name: 'presetSchemeList',
+        name: 'PresetSchemeList',
         // redirect: '/preset/list',
-        component: () => import('@/views/preset/list'),
+        component: () => import('@/views/preset/List'),
         meta: { title: '预设卡口方案管理', keepAlive: true, icon: 'form' }
       },
 
