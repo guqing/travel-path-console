@@ -143,8 +143,8 @@ const info = (options) => {
       'dataAccess': null
     }, {
       'roleId': 'admin',
-      'permissionId': 'personnel',
-      'permissionName': '人员管理权限',
+      'permissionId': 'preset',
+      'permissionName': '预设卡口方案管理权限',
       'actions': '[{"action":"add","defaultCheck":false,"describe":"新增"},{"action":"get","defaultCheck":false,"describe":"详情"},{"action":"query","defaultCheck":false,"describe":"查询"},{"action":"update","defaultCheck":false,"describe":"修改"},{"action":"delete","defaultCheck":false,"describe":"删除"}]',
       'actionEntitySet': [{
         'action': 'add',
@@ -231,7 +231,7 @@ const info = (options) => {
         'describe': '导入',
         'defaultCheck': false
       }, {
-        'action': 'get',
+        'action': 'info',
         'describe': '详情',
         'defaultCheck': false
       }, {

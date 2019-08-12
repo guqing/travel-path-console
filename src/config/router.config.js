@@ -15,34 +15,15 @@ export const asyncRouterMap = [
         path: '/dashboard/workplace',
         name: 'dashboard',
         component: () => import('@/views/dashboard/Workplace'),
-        meta: { title: '仪表盘', keepAlive: true, permission: [ 'dashboard' ] }
+        meta: { title: '仪表盘', keepAlive: true }
       },
-      // forms
+      // presetScheme
       {
-        path: '/personnel',
-        redirect: '/personnel/users',
-        component: PageView,
-        meta: { title: '人员管理', icon: 'form', permission: [ 'personnel' ] },
-        children: [
-          {
-            path: '/personnel/users',
-            name: 'personnelUsers',
-            component: () => import('@/views/personnel/users'),
-            meta: { title: '用户', keepAlive: true, permission: [ 'personnel' ] }
-          },
-          {
-            path: '/personnel/groups',
-            name: 'personnelGroups',
-            component: () => import('@/views/personnel/groups'),
-            meta: { title: '用户组', keepAlive: true, permission: [ 'personnel' ] }
-          },
-          {
-            path: '/personnel/settings',
-            name: 'personnelSettings',
-            component: () => import('@/views/personnel/settings'),
-            meta: { title: '设置', keepAlive: true, permission: [ 'personnel' ] }
-          }
-        ]
+        path: '/preset/list',
+        name: 'presetSchemeList',
+        // redirect: '/preset/list',
+        component: () => import('@/views/preset/list'),
+        meta: { title: '预设卡口方案管理', keepAlive: true, icon: 'form' }
       },
 
       // permissions
@@ -51,7 +32,7 @@ export const asyncRouterMap = [
         name: 'permissions',
         component: PageView,
         redirect: '/permissions/permission-list',
-        meta: { title: '权限管理', icon: 'table', permission: [ 'permissions' ] },
+        meta: { title: '权限管理', icon: 'table' },
         children: [
           {
             path: '/permissions/permission-list/:pageNo([1-9]\\d*)?',
