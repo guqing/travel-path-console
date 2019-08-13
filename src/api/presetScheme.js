@@ -5,6 +5,7 @@ const api = {
   save: '/preset/save',
   getScheme: '/preset/getScheme',
   trash: '/preset/trash',
+  batchTrash: '/preset/batch-trash',
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree'
 }
@@ -41,6 +42,17 @@ presetApi.trash = id => {
   return axios({
     url: api.trash + '/' + id,
     method: 'post'
+  })
+}
+
+presetApi.batchTrash = ids => {
+  return axios({
+    url: api.batchTrash,
+    method: 'post',
+    data: ids,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
   })
 }
 

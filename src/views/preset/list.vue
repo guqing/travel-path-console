@@ -20,7 +20,7 @@
 
       <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
-          <a-menu-item key="3">
+          <a-menu-item key="3" @click="handleBatchDeleteScheme">
             <a-icon type="delete" />删除</a-menu-item>
           <!-- lock | unlock -->
           <a-menu-item key="4">
@@ -326,6 +326,37 @@ export default {
           }).catch(err => {
             that.$notification.error({
               message: '错误提示',
+              description: '抱歉方案删除失败了，请稍后再试：' + err.message
+            })
+          })
+        },
+        onCancel () {
+          console.log('Cancel')
+        }
+      })
+    },
+    handleBatchDeleteScheme () {
+      var that = this
+      var deleteSize = this.selectedRows.length
+      this.$confirm({
+        title: '警告',
+        content: `确定要批量删除 ${deleteSize} 条记录吗?`,
+        okText: '删除',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk () {
+          presetApi.batchTrash(that.selectedRowKeys).then(res => {
+            if (res.code === 0) {
+              // 重新加载表格数据
+              that.loadPresetData()
+              that.$notification.success({
+                message: '提示',
+                description: '方案数据已批量丢进放入回收站'
+              })
+            }
+          }).catch(err => {
+            that.$notification.error({
+              message: '错误',
               description: '抱歉方案删除失败了，请稍后再试：' + err.message
             })
           })
