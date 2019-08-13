@@ -51,6 +51,7 @@
         ref="table"
         size="default"
         rowKey="id"
+        :loading="loading"
         :pagination="pagination"
         :columns="columns"
         :dataSource="presetSchemeData"
@@ -84,7 +85,7 @@
             <span v-else>
               <a class="show" @click="() => showData(record)">查看</a>
               <a-divider type="vertical" />
-              <a class="edit" @click="() => edit(record)">修改</a>
+              <a class="edit" @click="() => handleRecodeEdit(record)">修改</a>
               <a-divider type="vertical" />
               <a class="delete" @click="() => handleRecodeDelete(record)">删除</a>
             </span>
@@ -152,7 +153,7 @@
             取消
           </a-button>
           <a-button
-            @click="createPresetPointScheme"
+            @click="createOrUpdatePresetPointScheme"
             type="primary">
             提交
           </a-button>
@@ -179,12 +180,13 @@ export default {
   },
   data () {
     return {
+      loading: false,
       presetSchemeForm: {},
       drawerBtnVisible: false,
       drawerVisible: false,
       featureGroup: new L.featureGroup(), // eslint-disable-line
-      markerCount: 0,
-      markerDataArray: [],
+      markerCount: 0, // marker标记点的数量
+      markerDataArray: [], // maker标记的坐标点集合
       markerHashTable: new HashTable(), // 创建一个hashTable容器
       tempPointString: '',
       map: null,
@@ -274,6 +276,8 @@ export default {
       }).addTo(this.map)
     },
     loadPresetData () {
+      this.loading = true
+
       // 构建分页查询参数
       var pagination = {
         current: this.pagination.current,
@@ -283,7 +287,9 @@ export default {
       presetApi.listScheme(pagination).then(res => {
         this.presetSchemeData = res.data.list
         this.pagination.total = res.data.total
+        this.loading = false
       }).catch(err => {
+        this.loading = false
         this.$notification.error({
           message: '失败',
           description: '获取预设卡口方案列表失败：' + err.message
@@ -298,11 +304,15 @@ export default {
       console.log(value, key, column)
       record[column.dataIndex] = value
     },
-    edit (row) {
-      console.log(row)
-      row.editable = true
-      console.log('编辑')
-      // row = Object.assign({}, row)
+    handleRecodeEdit (row) {
+      // 开启地图点击监听事件
+      this.openMapMark()
+
+      // 设置方案id的值,用于编辑时作为主键
+      this.presetSchemeForm.id = row.id
+
+      // 查询方案坐标点集合回显到地图
+      this.getPresetPointById(row.id, true)
     },
     // eslint-disable-next-line
     handleRecodeDelete (row) {
@@ -367,11 +377,15 @@ export default {
       })
     },
     showData (row) {
-      presetApi.getScheme(row.id).then(res => {
+      this.getPresetPointById(row.id, false)
+    },
+    getPresetPointById (id, eventFlag) {
+      presetApi.getScheme(id).then(res => {
         if (res.code === 0) {
           var pointList = res.data.list
+
           // 批量将标记点绘制到地图上
-          this.batchDrawMarkers(pointList)
+          this.batchDrawMarkers(pointList, eventFlag)
         }
       }).catch(err => {
         this.$notification.error({
@@ -389,7 +403,6 @@ export default {
       row.editable = false
       console.log('取消保存')
     },
-
     onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
@@ -403,8 +416,9 @@ export default {
       this.advanced = !this.advanced
     },
     openMapMark () {
-      // 为地图注册点击事件
-      this.map.off().on('click', e => this.handleMapClick(e))
+      // 为地图注册点击事件，为了防止事件重复绑定，绑定前先解除先前的事件绑定
+      // 但是注意，一定要指明解除什么事件的绑定，否则会解除所有绑定事件
+      this.map.off('click').on('click', e => this.handleMapClick(e))
 
       this.$notification.info({
         message: '提示',
@@ -413,13 +427,11 @@ export default {
     },
     handleMapClick (e) {
       var point = e.latlng
+      // 返回的实际是markerLayer层
       var marker = L.marker([point.lat, point.lng], presetMarkerOption).addTo(this.map)
 
-      // 将marker添加到hashTable中,先转换为字符串在添加到hash否则会出现精度失真
-      var pointJSONString = JSON.stringify(point)
-      this.markerHashTable.add(pointJSONString, marker)
-      // marker标记点数量+1
-      this.markerCount++
+      // 将markerLayer添加到marker结合中
+      this.handleAddMarkerToColections(marker)
 
       // 为marker添加相应事件
       marker.on('click', e => this.handleOnMarkerClick(e))
@@ -434,10 +446,8 @@ export default {
       this.$confirm({
         title: '你确定要删除该预设卡口点吗?',
         onOk () {
-          var layer = that.markerHashTable.getValue(point)
-          layer.remove()
-          // marker标记点数量-1
-          that.markerCount--
+          // 从集合中删除marker
+          that.handleRemoveMarkerFromColections(point)
         },
         onCancel () { }
       })
@@ -477,7 +487,8 @@ export default {
       })
       return array
     },
-    createPresetPointScheme () {
+    createOrUpdatePresetPointScheme () {
+      // 填充表单
       const name = this.presetSchemeForm.name
       if (name === '' || name === undefined) {
         this.$notification.error({
@@ -487,21 +498,46 @@ export default {
         return
       }
       this.presetSchemeForm.presetpoints = this.markerDataArray
-      // 提交表单
-      presetApi.saveScheme(this.presetSchemeForm).then(res => {
-        // 更新表格数据
-        this.$notification.success({
-          message: '成功',
-          description: '方案保存成功'
+
+      // 获取id判断是修改还是保存
+      var preId = this.presetSchemeForm.id
+      if (preId !== null && preId !== undefined && preId !== '') {
+        // 如果predi不为空则编辑方案数据
+        presetApi.updateScheme(this.presetSchemeForm).then(res => {
+          // 重新加载表格数据
+          this.loadPresetData()
+          // 更新表格数据
+          this.$notification.success({
+            message: '更新成功',
+            description: '方案数据更新成功'
+          })
+          // 清除标记物
+          this.resetSchemeForm()
+        }).catch(err => {
+          this.$notification.error({
+            message: '更新失败',
+            description: '抱歉，方案数据更新失败了:' + err.message
+          })
         })
-        // 清除标记物
-        this.resetSchemeForm()
-      }).catch(err => {
-        this.$notification.error({
-          message: '失败',
-          description: '抱歉，方案保存失败了，请刷新页面后重试:' + err.message
+      } else {
+        // 保存方案数据
+        presetApi.saveScheme(this.presetSchemeForm).then(res => {
+          // 重新加载表格数据
+          this.loadPresetData()
+          // 更新表格数据
+          this.$notification.success({
+            message: '保存成功',
+            description: '方案保存成功'
+          })
+          // 清除标记物
+          this.resetSchemeForm()
+        }).catch(err => {
+          this.$notification.error({
+            message: '失败',
+            description: '抱歉，方案保存失败了，请刷新页面后重试:' + err.message
+          })
         })
-      })
+      }
     },
     resetSchemeForm () {
       this.markerCount = 0
@@ -513,14 +549,21 @@ export default {
       this.markerDataArray = []
       this.markerHashTable.clear()
     },
-    batchDrawMarkers (pointList) {
+    batchDrawMarkers (pointList, eventFlag) {
       // 批量绘制之前先清空地图
       this.batchRemoveLayers()
       pointList.forEach(point => {
         var markerLayer = L.marker([point.lat, point.lng], presetMarkerOption).addTo(this.map)
+        if (eventFlag) {
+          markerLayer.on('click', this.handleOnMarkerClick)
+        }
         // 纳入到featureGroup组管理
         this.featureGroup.addLayer(markerLayer)
 
+        // 将markerLayer添加到markerHashTable中
+        this.handleAddMarkerToColections(markerLayer)
+
+        // 自适应地图缩放级别
         this.map.fitBounds(this.featureGroup.getBounds())
       })
     },
@@ -529,6 +572,20 @@ export default {
         layer.remove()
       })
       this.featureGroup.clearLayers()
+    },
+    handleAddMarkerToColections (markerLayer) {
+      // 将marker添加到hashTable中,先转换为字符串在添加到hash否则会出现精度失真
+      var pointJSONString = JSON.stringify(markerLayer.getLatLng())
+      this.markerHashTable.add(pointJSONString, markerLayer)
+      // marker标记点数量+1
+      this.markerCount++
+    },
+    handleRemoveMarkerFromColections (point) {
+      var layer = this.markerHashTable.getValue(point)
+      layer.remove()
+      this.markerHashTable.remove(point)
+      // marker标记点数量-1
+      this.markerCount--
     }
   },
   watch: {

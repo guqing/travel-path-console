@@ -6,6 +6,7 @@ const api = {
   getScheme: '/preset/getScheme',
   trash: '/preset/trash',
   batchTrash: '/preset/batch-trash',
+  update: '/preset/update',
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree'
 }
@@ -50,6 +51,17 @@ presetApi.batchTrash = ids => {
     url: api.batchTrash,
     method: 'post',
     data: ids,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
+presetApi.updateScheme = parameter => {
+  return axios({
+    url: api.update,
+    method: 'put',
+    data: parameter,
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
     }
