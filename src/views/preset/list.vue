@@ -4,15 +4,26 @@
       <div id="mapContainer"></div>
     </div>
     <div class="table-operator operator-btn-group">
-      <a-button type="primary" icon="plus" @click="createScheme">新建方案</a-button>
+      <a-dropdown>
+        <a-menu slot="overlay">
+          <a-menu-item key="1" @click="openMapMark">
+            <a-icon type="delete"/>手动标注</a-menu-item>
+          <a-menu-item key="2">
+            <a-icon type="export" />批量上传</a-menu-item>
+        </a-menu>
+        <a-button type="primary" icon="plus">
+          新建方案
+          <a-icon type="down" />
+        </a-button>
+      </a-dropdown>
       <a-button type="dashed" v-if="drawerBtnVisible" @click="showPresetSchemeDrawer">查看已选数据</a-button>
 
       <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
-          <a-menu-item key="1">
+          <a-menu-item key="3">
             <a-icon type="delete" />删除</a-menu-item>
           <!-- lock | unlock -->
-          <a-menu-item key="2">
+          <a-menu-item key="4">
             <a-icon type="export" />导出</a-menu-item>
         </a-menu>
         <a-button style="margin-left: 8px">
@@ -66,7 +77,7 @@
 
     <div>
       <a-drawer
-        title="Basic Drawer"
+        title="预设卡口方案坐标点数据集"
         width="420"
         placement="right"
         :closable="false"
@@ -75,9 +86,60 @@
         <a-table
           :columns="drawTableColumns"
           rowKey="lat"
+          :pagination="{pageSize: 5}"
           :dataSource="markerDataArray"
           bordered>
         </a-table>
+
+        <a-form
+          layout="vertical">
+          <a-row :gutter="16">
+            <a-col :span="24">
+              <a-form-item label="方案名称">
+                <a-input
+                  v-model="presetSchemeForm.name"
+                  placeholder="请输入方案名称"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <a-row :gutter="16">
+            <a-col :span="24">
+              <a-form-item label="方案描述">
+                <a-input
+                  v-model="presetSchemeForm.description"
+                  placeholder="请输入方案描述"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+
+        <div
+          :style="{
+            position: 'absolute',
+            bottom: 0,
+            width: '100%',
+            borderTop: '1px solid #e8e8e8',
+            padding: '10px 16px',
+            textAlign: 'right',
+            left: 0,
+            background: '#fff',
+            borderRadius: '0 0 4px 4px',
+          }"
+        >
+          <a-button
+            style="marginRight: 8px"
+            @click="onDrawerClose"
+          >
+            取消
+          </a-button>
+          <a-button
+            @click="createPresetPointScheme"
+            type="primary">
+            提交
+          </a-button>
+        </div>
       </a-drawer>
     </div>
   </a-card>
@@ -89,6 +151,7 @@ import * as L from 'leaflet'
 import '@/mystatic/js/loadTiles'
 import { HashTable } from '@/mystatic/js/HashTable'
 import { tileUrl } from '@/api/tile'
+import presetApi from '@/api/presetScheme'
 import { presetMarkerOption } from '@/mystatic/js/common'
 import moment from 'moment'
 
@@ -99,8 +162,10 @@ export default {
   },
   data () {
     return {
+      presetSchemeForm: {},
       drawerBtnVisible: false,
       drawerVisible: false,
+      featureGroup: new L.featureGroup(), // eslint-disable-line
       markerCount: 0,
       markerDataArray: [],
       markerHashTable: new HashTable(), // 创建一个hashTable容器
@@ -210,16 +275,24 @@ export default {
     del (row) {
       this.$confirm({
         title: '警告',
-        content: `真的要删除 ${row.no} 吗?`,
+        content: `真的要删除 ${row.id} 吗?`,
         okText: '删除',
         okType: 'danger',
         cancelText: '取消',
         onOk () {
-          console.log('OK')
-          // 在这里调用删除接口
-          return new Promise((resolve, reject) => {
-            setTimeout(Math.random() > 0.5 ? resolve : reject, 1000)
-          }).catch(() => console.log('Oops errors!'))
+          presetApi.trash(row.id).then(res => {
+            if (res.code === 0) {
+              this.$notification.success({
+                message: '成功提示',
+                description: '方案已放入回收站，可前往回收站恢复记录'
+              })
+            }
+          }).catch(err => {
+            this.$notification.error({
+              message: '错误提示',
+              description: '抱歉方案删除失败了，请稍后再试：' + err.message
+            })
+          })
         },
         onCancel () {
           console.log('Cancel')
@@ -227,7 +300,18 @@ export default {
       })
     },
     showData (row) {
-      row.editable = false
+      presetApi.getScheme(row.id).then(res => {
+        if (res.code === 0) {
+          var pointList = res.data.list
+          // 批量将标记点绘制到地图上
+          this.batchDrawMarkers(pointList)
+        }
+      }).catch(err => {
+        this.$notification.error({
+          message: '错误提示',
+          description: '抱歉，查看方案信息失败，请稍后重试：' + err.message
+        })
+      })
     },
     save (row) {
       // 保存编辑
@@ -246,13 +330,14 @@ export default {
     toggleAdvanced () {
       this.advanced = !this.advanced
     },
-    createScheme () {
+    openMapMark () {
+      // 为地图注册点击事件
+      this.map.off().on('click', e => this.handleMapClick(e))
+
       this.$notification.info({
         message: '提示',
         description: '已开启地图标注功能，请手动点击地图标记卡口位置'
       })
-      // 为地图注册点击事件
-      this.map.on('click', e => this.handleMapClick(e))
     },
     handleMapClick (e) {
       var point = e.latlng
@@ -277,10 +362,10 @@ export default {
       this.$confirm({
         title: '你确定要删除该预设卡口点吗?',
         onOk () {
-          var marker = that.markerHashTable.getValue(point)
-          that.map.removeLayer(marker)
+          var layer = that.markerHashTable.getValue(point)
+          layer.remove()
           // marker标记点数量-1
-          this.markerCount--
+          that.markerCount--
         },
         onCancel () { }
       })
@@ -318,6 +403,60 @@ export default {
         array.push(point)
       })
       return array
+    },
+    createPresetPointScheme () {
+      const name = this.presetSchemeForm.name
+      if (name === '' || name === undefined) {
+        this.$notification.error({
+          message: '表单校验错误提示',
+          description: '方案名称不能为空'
+        })
+        return
+      }
+      this.presetSchemeForm.presetpoints = this.markerDataArray
+      // 提交表单
+      presetApi.saveScheme(this.presetSchemeForm).then(res => {
+        // 更新表格数据
+        this.loadData.push(res.data)
+        this.$notification.success({
+          message: '成功',
+          description: '方案保存成功'
+        })
+        // 清除标记物
+        this.resetSchemeForm()
+      }).catch(err => {
+        this.$notification.error({
+          message: '失败',
+          description: '抱歉，方案保存失败了，请刷新页面后重试:' + err.message
+        })
+      })
+    },
+    resetSchemeForm () {
+      this.markerCount = 0
+      // 清除地图标记物
+      var layers = this.markerHashTable.getValues()
+      layers.forEach(layer => {
+        layer.remove()
+      })
+      this.markerDataArray = []
+      this.markerHashTable.clear()
+    },
+    batchDrawMarkers (pointList) {
+      // 批量绘制之前先清空地图
+      this.batchRemoveLayers()
+      pointList.forEach(point => {
+        var markerLayer = L.marker([point.lat, point.lng], presetMarkerOption).addTo(this.map)
+        // 纳入到featureGroup组管理
+        this.featureGroup.addLayer(markerLayer)
+
+        this.map.fitBounds(this.featureGroup.getBounds())
+      })
+    },
+    batchRemoveLayers () {
+      this.featureGroup.eachLayer(layer => {
+        layer.remove()
+      })
+      this.featureGroup.clearLayers()
     }
   },
   watch: {
@@ -380,4 +519,5 @@ export default {
     margin-right: 8px;
   }
 }
+
 </style>

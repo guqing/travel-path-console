@@ -1,4 +1,4 @@
-L.TileLayer.loadTileLayer = L.TileLayer.extend({
+L.TileLayer.loadTileLayer = L.TileLayer.extend({ // eslint-disable-line
   getTileUrl: function (coords) {
     var data = {
       // r: retina ? '@2x' : '',
@@ -8,10 +8,10 @@ L.TileLayer.loadTileLayer = L.TileLayer.extend({
       z: this._getZoomForUrl()
     }
 
-    return L.Util.template(this._url, L.extend(data, this.options));
+    return L.Util.template(this._url, L.extend(data, this.options)) // eslint-disable-line
   }
 })
 
-L.tileLayer.loadTileLayer = function (url, options) {
-  return new L.TileLayer.loadTileLayer(url, options)
+L.tileLayer.loadTileLayer = function (url, options) {// eslint-disable-line
+  return new L.TileLayer.loadTileLayer(url, options) // eslint-disable-line
 }

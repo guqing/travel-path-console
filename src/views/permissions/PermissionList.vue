@@ -73,7 +73,7 @@
 import { STable } from '@/components'
 import STree from '@/components/Tree/Tree'
 import { getOrgTree, getServiceList } from '@/api/manage'
-import PermissionModal from './modules/PermissionModal'
+
 export default {
   name: 'TreeList',
   components: {
@@ -89,10 +89,8 @@ export default {
       },
       permissionForm: this.$form.createForm(this),
       openKeys: ['key-01'],
-
       // 查询参数
       queryParam: {},
-      
       orgTree: [],
       selectedRowKeys: [],
       selectedRows: []
