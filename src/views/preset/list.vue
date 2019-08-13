@@ -23,7 +23,7 @@
           <a-menu-item key="3" @click="handleBatchDeleteScheme">
             <a-icon type="delete" />删除</a-menu-item>
           <!-- lock | unlock -->
-          <a-menu-item key="4">
+          <a-menu-item key="4" @click="downloadSchemeToExcel">
             <a-icon type="export" />导出</a-menu-item>
         </a-menu>
         <a-button style="margin-left: 8px">
@@ -75,14 +75,7 @@
         </template>
         <template slot="action" slot-scope="text, record">
           <div class="editable-row-operations">
-            <span v-if="record.editable">
-              <a @click="() => save(record)">保存</a>
-              <a-divider type="vertical" />
-              <a-popconfirm title="真的放弃编辑吗?" @confirm="() => cancel(record)">
-                <a>取消</a>
-              </a-popconfirm>
-            </span>
-            <span v-else>
+            <span>
               <a class="show" @click="() => showData(record)">查看</a>
               <a-divider type="vertical" />
               <a class="edit" @click="() => handleRecodeEdit(record)">修改</a>
@@ -394,15 +387,6 @@ export default {
         })
       })
     },
-    save (row) {
-      // 保存编辑
-      row.editable = false
-      console.log('保存编辑')
-    },
-    cancel (row) {
-      row.editable = false
-      console.log('取消保存')
-    },
     onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
@@ -586,6 +570,34 @@ export default {
       this.markerHashTable.remove(point)
       // marker标记点数量-1
       this.markerCount--
+    },
+    downloadSchemeToExcel () {
+      presetApi.downloadScheme(this.selectedRowKeys).then(res => {
+        // 这里res是返回的blob对象
+        // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet这里表示xlsx类型
+        var blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8' })
+        var downloadElement = document.createElement('a')
+        // 创建下载的链接
+        var href = window.URL.createObjectURL(blob)
+        downloadElement.href = href
+        // 下载后文件名
+        downloadElement.download = '预设卡口方案.xlsx'
+        document.body.appendChild(downloadElement)
+        // 模拟点击下载
+        downloadElement.click()
+        // 下载完成移除元素
+        document.body.removeChild(downloadElement)
+        // 释放掉blob对象
+        window.URL.revokeObjectURL(href)
+
+        // 清空表格选择项
+        this.clearSelected()
+      }).catch(err => {
+        this.$notification.error({
+          message: '错误提示',
+          description: '抱歉，数据导出失败，请刷新页面后重试:' + err.message
+        })
+      })
     }
   },
   watch: {

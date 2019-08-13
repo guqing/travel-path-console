@@ -7,6 +7,7 @@ const api = {
   trash: '/preset/trash',
   batchTrash: '/preset/batch-trash',
   update: '/preset/update',
+  downloadScheme: '/preset/download',
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree'
 }
@@ -61,6 +62,17 @@ presetApi.updateScheme = parameter => {
   return axios({
     url: api.update,
     method: 'put',
+    data: parameter,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
+presetApi.downloadScheme = parameter => {
+  return axios({
+    url: api.downloadScheme,
+    method: 'post',
     data: parameter,
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
