@@ -33,48 +33,65 @@
       </a-dropdown>
     </div>
 
-    <s-table
-      ref="table"
-      size="default"
-      rowKey="id"
-      :columns="columns"
-      :data="loadData"
-      :alert="{ show: true, clear: true }"
-      :rowSelection="{ selectedRowKeys: this.selectedRowKeys, onChange: this.onSelectChange }">
-      <template
-        v-for="(col, index) in columns"
-        v-show="col.scopedSlots"
-        :slot="col.dataIndex"
-        slot-scope="text, record">
-        <div :key="index">
-          <a-input
-            v-if="record.editable"
-            style="margin: -5px 0"
-            :value="text"
-            @change="e => handleChange(e.target.value, record.key, col, record)" />
-          <template v-else>{{ text }}</template>
-        </div>
-      </template>
-      <template slot="action" slot-scope="text, record">
-        <div class="editable-row-operations">
-          <span v-if="record.editable">
-            <a @click="() => save(record)">保存</a>
-            <a-divider type="vertical" />
-            <a-popconfirm title="真的放弃编辑吗?" @confirm="() => cancel(record)">
-              <a>取消</a>
-            </a-popconfirm>
+    <div>
+      <a-alert
+        banner
+        style="margin-bottom: 16px"
+        type="info">
+        <template slot="message">
+          <span style="margin-right: 12px">已选择: <a style="font-weight: 600">{{ this.selectedRows.length }}</a></span>
+          <span style="margin-right: 12px">
+            预设卡口方案数据总计
+            <a style="font-weight: 600">{{ pagination.total }} 条</a>
           </span>
-          <span v-else>
-            <a class="show" @click="() => showData(record)">查看</a>
-            <a-divider type="vertical" />
-            <a class="edit" @click="() => edit(record)">修改</a>
-            <a-divider type="vertical" />
-            <a class="delete" @click="() => del(record)">删除</a>
-          </span>
-        </div>
-      </template>
-    </s-table>
-
+          <a style="margin-left: 24px" v-show="selectedRows.length > 0" @click="clearSelected">清空</a>
+        </template>
+      </a-alert>
+      <a-table
+        ref="table"
+        size="default"
+        rowKey="id"
+        :pagination="pagination"
+        :columns="columns"
+        :dataSource="presetSchemeData"
+        @showSizeChange="handlePaginationChange"
+        @change="handlePaginationChange"
+        :alert="{ show: true, clear: true }"
+        :rowSelection="{ selectedRowKeys: this.selectedRowKeys, onChange: this.onSelectChange }">
+        <template
+          v-for="(col, index) in columns"
+          v-show="col.scopedSlots"
+          :slot="col.dataIndex"
+          slot-scope="text, record">
+          <div :key="index">
+            <a-input
+              v-if="record.editable"
+              style="margin: -5px 0"
+              :value="text"
+              @change="e => handleChange(e.target.value, record.key, col, record)" />
+            <template v-else>{{ text }}</template>
+          </div>
+        </template>
+        <template slot="action" slot-scope="text, record">
+          <div class="editable-row-operations">
+            <span v-if="record.editable">
+              <a @click="() => save(record)">保存</a>
+              <a-divider type="vertical" />
+              <a-popconfirm title="真的放弃编辑吗?" @confirm="() => cancel(record)">
+                <a>取消</a>
+              </a-popconfirm>
+            </span>
+            <span v-else>
+              <a class="show" @click="() => showData(record)">查看</a>
+              <a-divider type="vertical" />
+              <a class="edit" @click="() => edit(record)">修改</a>
+              <a-divider type="vertical" />
+              <a class="delete" @click="() => handleRecodeDelete(record)">删除</a>
+            </span>
+          </div>
+        </template>
+      </a-table>
+    </div>
     <div>
       <a-drawer
         title="预设卡口方案坐标点数据集"
@@ -173,6 +190,11 @@ export default {
       map: null,
       // 高级搜索 展开/关闭
       advanced: false,
+      pagination: {
+        current: 1,
+        pageSize: 10,
+        total: 0
+      },
       // 查询参数
       queryParam: {},
       // 表头
@@ -218,19 +240,8 @@ export default {
           scopedSlots: { customRender: 'action' }
         }
       ],
-      // 加载数据方法 必须为 Promise 对象
-      loadData: parameter => {
-        return this.$http.get('/preset/list', {
-          params: Object.assign(parameter, this.queryParam)
-        }).then(res => {
-          return res.data
-        }).catch(err => {
-          this.$notification.error({
-            message: '失败',
-            description: '获取预设卡口方案列表失败：' + err.message
-          })
-        })
-      },
+      // 加载数据
+      presetSchemeData: [],
       selectedRowKeys: [],
       selectedRows: [],
       drawTableColumns: [{
@@ -244,6 +255,7 @@ export default {
   },
   mounted () {
     this.init()
+    this.loadPresetData()
   },
   methods: {
     init () {
@@ -261,6 +273,27 @@ export default {
         maxZoom: 19
       }).addTo(this.map)
     },
+    loadPresetData () {
+      // 构建分页查询参数
+      var pagination = {
+        current: this.pagination.current,
+        pageSize: this.pagination.pageSize
+      }
+
+      presetApi.listScheme(pagination).then(res => {
+        this.presetSchemeData = res.data.list
+        this.pagination.total = res.data.total
+      }).catch(err => {
+        this.$notification.error({
+          message: '失败',
+          description: '获取预设卡口方案列表失败：' + err.message
+        })
+      })
+    },
+    handlePaginationChange (pagination, filters, sorter) {
+      this.pagination.current = pagination.current
+      this.loadPresetData()
+    },
     handleChange (value, key, column, record) {
       console.log(value, key, column)
       record[column.dataIndex] = value
@@ -272,23 +305,26 @@ export default {
       // row = Object.assign({}, row)
     },
     // eslint-disable-next-line
-    del (row) {
+    handleRecodeDelete (row) {
+      var that = this
       this.$confirm({
         title: '警告',
-        content: `真的要删除 ${row.id} 吗?`,
+        content: `真的要删除 ${row.name} 吗?`,
         okText: '删除',
         okType: 'danger',
         cancelText: '取消',
         onOk () {
           presetApi.trash(row.id).then(res => {
             if (res.code === 0) {
-              this.$notification.success({
+              // 重新加载表格数据
+              that.loadPresetData()
+              that.$notification.success({
                 message: '成功提示',
                 description: '方案已放入回收站，可前往回收站恢复记录'
               })
             }
           }).catch(err => {
-            this.$notification.error({
+            that.$notification.error({
               message: '错误提示',
               description: '抱歉方案删除失败了，请稍后再试：' + err.message
             })
@@ -326,6 +362,11 @@ export default {
     onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
+    },
+    clearSelected () {
+      // 清空 table 已选中项
+      this.selectedRows = []
+      this.selectedRowKeys = []
     },
     toggleAdvanced () {
       this.advanced = !this.advanced
@@ -396,6 +437,7 @@ export default {
       this.drawerVisible = false
     },
     markerHashDataConvert () {
+      // 将hashTable中的坐标点字符串对象数据转换为对象数组
       var array = []
       var keys = this.markerHashTable.getKeys()
       keys.forEach((item) => {
@@ -417,7 +459,6 @@ export default {
       // 提交表单
       presetApi.saveScheme(this.presetSchemeForm).then(res => {
         // 更新表格数据
-        this.loadData.push(res.data)
         this.$notification.success({
           message: '成功',
           description: '方案保存成功'
