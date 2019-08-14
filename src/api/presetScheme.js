@@ -8,6 +8,7 @@ const api = {
   batchTrash: '/preset/batch-trash',
   update: '/preset/update',
   downloadScheme: '/preset/download',
+  uploadScheme: '/preset/upload',
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree'
 }
@@ -77,6 +78,17 @@ presetApi.downloadScheme = parameter => {
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
     }
+  })
+}
+
+presetApi.uploadScheme = (formDatas, uploadProgress, cancelToken) => {
+  return axios({
+    url: api.uploadScheme,
+    timeout: 600000, // 10 minutes
+    data: formDatas, // form data
+    onUploadProgress: uploadProgress,
+    cancelToken: cancelToken,
+    method: 'post'
   })
 }
 

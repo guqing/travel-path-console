@@ -8,7 +8,7 @@
         <a-menu slot="overlay">
           <a-menu-item key="1" @click="openMapMark">
             <a-icon type="delete"/>手动标注</a-menu-item>
-          <a-menu-item key="2">
+          <a-menu-item key="2" @click="uploadBtnHandle">
             <a-icon type="export" />批量上传</a-menu-item>
         </a-menu>
         <a-button type="primary" icon="plus">
@@ -152,12 +152,29 @@
           </a-button>
         </div>
       </a-drawer>
+      <a-modal
+        title="上传附件"
+        v-model="uploadVisible"
+        :footer="null"
+        :afterClose="onUploadClose"
+      >
+        <upload
+          name="file"
+          accept=".xls,.xlsx"
+          :uploadHandler="uploadExcelHandler"
+        >
+          <p class="ant-upload-drag-icon">
+            <a-icon type="inbox" />
+          </p>
+          <p class="ant-upload-text">点击选择文件或将文件拖拽到此处</p>
+          <p class="ant-upload-hint">支持单个或批量上传</p>
+        </upload>
+      </a-modal>
     </div>
   </a-card>
 </template>
 
 <script>
-import { STable } from '@/components'
 import * as L from 'leaflet'
 import '@/mystatic/js/loadTiles'
 import { HashTable } from '@/mystatic/js/HashTable'
@@ -165,14 +182,17 @@ import { tileUrl } from '@/api/tile'
 import presetApi from '@/api/presetScheme'
 import { presetMarkerOption } from '@/mystatic/js/common'
 import moment from 'moment'
+import Upload from '@/components/Upload/Upload'
 
 export default {
   name: 'PresetSchemeList',
   components: {
-    STable
+    Upload
   },
   data () {
     return {
+      uploadExcelHandler: presetApi.uploadScheme,
+      uploadVisible: false,
       loading: false,
       presetSchemeForm: {},
       drawerBtnVisible: false,
@@ -598,6 +618,13 @@ export default {
           description: '抱歉，数据导出失败，请刷新页面后重试:' + err.message
         })
       })
+    },
+    uploadBtnHandle () {
+      this.uploadVisible = true
+    },
+    onUploadClose () {
+      // 重新加载表格数据
+      this.loadPresetData()
     }
   },
   watch: {

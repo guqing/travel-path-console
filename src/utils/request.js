@@ -19,12 +19,6 @@ const err = (error) => {
   if (error.response) {
     const data = error.response.data
     const token = Vue.ls.get(ACCESS_TOKEN)
-    if (error.response.code === 503) {
-      notification.error({
-        message: '没有权限',
-        description: error.response.message
-      })
-    }
     if (error.response.status === 403) {
       notification.error({
         message: 'Forbidden',
@@ -63,7 +57,13 @@ service.interceptors.response.use((response) => {
   const token = response.headers['Authorization']
   if (token) {
     // 让每个请求携带自定义 token 请根据实际情况自行修改
-    console.log('捕获到token', token)
+    Vue.ls.set(ACCESS_TOKEN, response.data, 7 * 24 * 60 * 60 * 1000)
+  }
+  if (response.data.code === 506) {
+    notification.error({
+      message: '没有权限',
+      description: response.data.message
+    })
   }
   return response.data
 }, err)
