@@ -69,7 +69,11 @@ const user = {
           }
 
           commit('SET_NAME', { name: result.name, welcome: welcome() })
-          commit('SET_AVATAR', result.avatar)
+          if (result.avatar === '') {
+            commit('SET_AVATAR', 'https://avatars1.githubusercontent.com/u/38999863?s=400&u=54327ebabddbac34a51c7e53e61832bd10eee734&v=4')
+          } else {
+            commit('SET_AVATAR', result.avatar)
+          }
 
           resolve(result)
         }).catch(error => {

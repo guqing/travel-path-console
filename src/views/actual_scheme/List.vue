@@ -6,7 +6,7 @@
     <div class="table-operator operator-btn-group">
       <a-dropdown>
         <a-menu slot="overlay">
-          <a-menu-item key="1" @click="openMapMark">
+          <a-menu-item key="1" @click="handleQueryPresetPointList">
             <a-icon type="delete"/>手动标注</a-menu-item>
           <a-menu-item key="2" @click="uploadBtnHandle">
             <a-icon type="export" />批量上传</a-menu-item>
@@ -16,7 +16,7 @@
           <a-icon type="down" />
         </a-button>
       </a-dropdown>
-      <a-button type="dashed" v-if="drawerBtnVisible" @click="showPresetSchemeDrawer">查看已选数据</a-button>
+      <a-button type="dashed" v-if="drawerBtnVisible" @click="showSchemeDrawer">查看已选数据</a-button>
 
       <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
@@ -54,7 +54,7 @@
         :loading="loading"
         :pagination="pagination"
         :columns="columns"
-        :dataSource="presetSchemeData"
+        :dataSource="actualSchemeData"
         @showSizeChange="handlePaginationChange"
         @change="handlePaginationChange"
         :alert="{ show: true, clear: true }"
@@ -108,7 +108,7 @@
             <a-col :span="24">
               <a-form-item label="方案名称">
                 <a-input
-                  v-model="presetSchemeForm.name"
+                  v-model="actualSchemeForm.name"
                   placeholder="请输入方案名称"
                 />
               </a-form-item>
@@ -118,7 +118,7 @@
             <a-col :span="24">
               <a-form-item label="方案描述">
                 <a-input
-                  v-model="presetSchemeForm.description"
+                  v-model="actualSchemeForm.description"
                   placeholder="请输入方案描述"
                 />
               </a-form-item>
@@ -146,7 +146,7 @@
             取消
           </a-button>
           <a-button
-            @click="createOrUpdatePresetPointScheme"
+            @click="createOrUpdatePointScheme"
             type="primary">
             提交
           </a-button>
@@ -170,6 +170,19 @@
           <p class="ant-upload-hint">支持单个或批量上传</p>
         </upload>
       </a-modal>
+      <a-modal
+        title="预设卡口方案列表"
+        :footer="null"
+        @cancel="handlePresetListModalCancel"
+        :visible="presetListModalVisible"
+      >
+        <ListScheme
+          :columns="columns"
+          :queryHandle="presetQueryHandle"
+          @view="handleShowModalTableRecord"
+        >
+        </ListScheme>
+      </a-modal>
     </div>
   </a-card>
 </template>
@@ -180,64 +193,25 @@ import '@/mystatic/js/loadTiles'
 import { HashTable } from '@/mystatic/js/HashTable'
 import { tileUrl } from '@/api/tile'
 import presetApi from '@/api/presetScheme'
-import { presetMarkerOption } from '@/mystatic/js/common'
+import layoutBayonetApi from '@/api/actualScheme'
 import moment from 'moment'
 import Upload from '@/components/Upload/Upload'
-
-const presetSchemeTableColums = [
-  {
-    title: '编号',
-    dataIndex: 'id',
-    key: 'id',
-    customRender: function (text, record, index) {
-      // 行号
-      return index + 1
-    }
-  },
-  {
-    title: '方案名称',
-    dataIndex: 'name',
-    scopedSlots: { customRender: 'name' }
-  },
-  {
-    title: '方案备注',
-    dataIndex: 'description',
-    scopedSlots: { customRender: 'description' }
-  },
-  {
-    title: '数据量',
-    dataIndex: 'bayonetCount',
-    sorter: true,
-    scopedSlots: { customRender: 'modifyTime' }
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'modifyTime',
-    sorter: true,
-    scopedSlots: { customRender: 'modifyTime' },
-    customRender: function (text, record, index) {
-      return moment(text).format('YYYY-MM-DD')
-    }
-  },
-  {
-    table: '操作',
-    title: '操作',
-    dataIndex: 'action',
-    scopedSlots: { customRender: 'action' }
-  }
-]
+import ListScheme from '@/components/ListScheme/ListScheme'
 
 export default {
-  name: 'PresetSchemeList',
+  name: 'ActualSchemeList',
   components: {
-    Upload
+    Upload,
+    ListScheme
   },
   data () {
     return {
-      uploadExcelHandler: presetApi.uploadScheme,
+      presetQueryHandle: presetApi.listScheme,
+      presetListModalVisible: false,
+      uploadExcelHandler: layoutBayonetApi.uploadScheme,
       uploadVisible: false,
       loading: false,
-      presetSchemeForm: {},
+      actualSchemeForm: {},
       drawerBtnVisible: false,
       drawerVisible: false,
       featureGroup: new L.featureGroup(), // eslint-disable-line
@@ -256,9 +230,50 @@ export default {
       // 查询参数
       queryParam: {},
       // 表头
-      columns: presetSchemeTableColums,
+      columns: [
+        {
+          title: '编号',
+          dataIndex: 'id',
+          key: 'id',
+          customRender: function (text, record, index) {
+            // 行号
+            return index + 1
+          }
+        },
+        {
+          title: '方案名称',
+          dataIndex: 'name',
+          scopedSlots: { customRender: 'name' }
+        },
+        {
+          title: '方案备注',
+          dataIndex: 'description',
+          scopedSlots: { customRender: 'description' }
+        },
+        {
+          title: '数据量',
+          dataIndex: 'bayonetCount',
+          sorter: true,
+          scopedSlots: { customRender: 'modifyTime' }
+        },
+        {
+          title: '创建时间',
+          dataIndex: 'modifyTime',
+          sorter: true,
+          scopedSlots: { customRender: 'modifyTime' },
+          customRender: function (text, record, index) {
+            return moment(text).format('YYYY-MM-DD')
+          }
+        },
+        {
+          table: '操作',
+          title: '操作',
+          dataIndex: 'action',
+          scopedSlots: { customRender: 'action' }
+        }
+      ],
       // 加载数据
-      presetSchemeData: [],
+      actualSchemeData: [],
       selectedRowKeys: [],
       selectedRows: [],
       drawTableColumns: [{
@@ -272,7 +287,7 @@ export default {
   },
   mounted () {
     this.init()
-    this.loadPresetData()
+    this.loadActualBayonetData()
   },
   methods: {
     init () {
@@ -290,7 +305,7 @@ export default {
         maxZoom: 19
       }).addTo(this.map)
     },
-    loadPresetData () {
+    loadActualBayonetData () {
       this.loading = true
 
       // 构建分页查询参数
@@ -299,8 +314,8 @@ export default {
         pageSize: this.pagination.pageSize
       }
 
-      presetApi.listScheme(pagination).then(res => {
-        this.presetSchemeData = res.data.list
+      layoutBayonetApi.listScheme(pagination).then(res => {
+        this.actualSchemeData = res.data.list
         this.pagination.total = res.data.total
         this.loading = false
       }).catch(err => {
@@ -313,7 +328,7 @@ export default {
     },
     handlePaginationChange (pagination, filters, sorter) {
       this.pagination.current = pagination.current
-      this.loadPresetData()
+      this.loadActualBayonetData()
     },
     handleChange (value, key, column, record) {
       console.log(value, key, column)
@@ -324,10 +339,10 @@ export default {
       this.openMapMark()
 
       // 设置方案id的值,用于编辑时作为主键
-      this.presetSchemeForm.id = row.id
+      this.actualSchemeForm.id = row.id
 
       // 查询方案坐标点集合回显到地图
-      this.getPresetPointById(row.id, true)
+      this.getActualBayonetPointById(row.id, true)
     },
     // eslint-disable-next-line
     handleRecodeDelete (row) {
@@ -339,10 +354,10 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk () {
-          presetApi.trash(row.id).then(res => {
+          layoutBayonetApi.trash(row.id).then(res => {
             if (res.code === 0) {
               // 重新加载表格数据
-              that.loadPresetData()
+              that.loadActualBayonetData()
               that.$notification.success({
                 message: '成功提示',
                 description: '方案已放入回收站，可前往回收站恢复记录'
@@ -370,10 +385,10 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk () {
-          presetApi.batchTrash(that.selectedRowKeys).then(res => {
+          layoutBayonetApi.batchTrash(that.selectedRowKeys).then(res => {
             if (res.code === 0) {
               // 重新加载表格数据
-              that.loadPresetData()
+              that.loadActualBayonetData()
               that.$notification.success({
                 message: '提示',
                 description: '方案数据已批量丢进放入回收站'
@@ -392,10 +407,10 @@ export default {
       })
     },
     showData (row) {
-      this.getPresetPointById(row.id, false)
+      this.getActualBayonetPointById(row.id, false)
     },
-    getPresetPointById (id, eventFlag) {
-      presetApi.getScheme(id).then(res => {
+    getActualBayonetPointById (id, eventFlag) {
+      layoutBayonetApi.getScheme(id).then(res => {
         if (res.code === 0) {
           var pointList = res.data.list
 
@@ -421,61 +436,48 @@ export default {
     toggleAdvanced () {
       this.advanced = !this.advanced
     },
-    openMapMark () {
-      // 为地图注册点击事件，为了防止事件重复绑定，绑定前先解除先前的事件绑定
-      // 但是注意，一定要指明解除什么事件的绑定，否则会解除所有绑定事件
-      this.map.off('click').on('click', e => this.handleMapClick(e))
-
-      this.$notification.info({
-        message: '提示',
-        description: '已开启地图标注功能，请手动点击地图标记卡口位置'
-      })
+    handleQueryPresetPointList () {
+      // 查询预设卡口方案信息而后弹出列表
+      this.presetListModalVisible = true
+    },
+    handlePresetListModalCancel () {
+      this.presetListModalVisible = false
     },
     handleMapClick (e) {
       var point = e.latlng
       // 返回的实际是markerLayer层
-      var marker = L.marker([point.lat, point.lng], presetMarkerOption).addTo(this.map)
+      var marker = L.marker([point.lat, point.lng]).addTo(this.map)
 
       // 将markerLayer添加到marker结合中
       this.handleAddMarkerToColections(marker)
 
       // 为marker添加相应事件
       marker.on('click', e => this.handleOnMarkerClick(e))
-      marker.on('dragstart', e => this.handleOnMarkerDragstart(e))
-      marker.on('moveend', e => this.handlerOnMarkerMoveEnd(e))
     },
     handleOnMarkerClick (e) {
-      // 标记物点击事件
-      var point = JSON.stringify(e.target.getLatLng())
-      // 保存this对象
-      var that = this
-      this.$confirm({
-        title: '你确定要删除该预设卡口点吗?',
-        onOk () {
-          // 从集合中删除marker
-          that.handleRemoveMarkerFromColections(point)
-        },
-        onCancel () { }
-      })
-    },
-    handleOnMarkerDragstart (e) {
-      // 标记点开始被拖拽时记录下被拖拽的标记，用于修改hash中的记录
-      var tempPoint = e.target.getLatLng()
-      this.tempPointString = JSON.stringify(tempPoint)
-    },
-    handlerOnMarkerMoveEnd (e) {
+      // 标记物点击事件，获取被点击的marker的坐标
       var point = e.target.getLatLng()
+      // 转为字符串作为hash表的键防止坐标精度失真
       var pointJSONString = JSON.stringify(point)
-      if (this.tempPointString) {
-        // 删除原来的marker
-        this.markerHashTable.remove(this.tempPointString)
-        // 插入移动后的新marker
-        this.markerHashTable.add(pointJSONString, e.target)
+      // 根据坐标查询原型覆盖物对象circle
+      var circle = this.markerHashTable.getValue(pointJSONString)
+      if (circle) {
+        // 将marker从HashTable中删除
+        this.handleRemoveMarkerFromColections(pointJSONString)
+      } else {
+        var circleMarker = L.circle([point.lat, point.lng], {
+          color: 'red',
+          fillColor: '#f03',
+          fillOpacity: 0.5,
+          radius: 5
+        }).addTo(this.map)
+
+        // 以坐标点为key,原型覆盖物为value存储到HashTable中
+        this.handleAddMarkerToColections(circleMarker)
+        // 以坐标点为key,原型覆盖物为value存储到HashTable中
       }
-      // 置空，防止产生脏数据
-      this.tempPointString = ''
     },
-    showPresetSchemeDrawer () {
+    showSchemeDrawer () {
       // 打开抽屉
       this.drawerVisible = true
     },
@@ -493,9 +495,9 @@ export default {
       })
       return array
     },
-    createOrUpdatePresetPointScheme () {
+    createOrUpdatePointScheme () {
       // 填充表单
-      const name = this.presetSchemeForm.name
+      const name = this.actualSchemeForm.name
       if (name === '' || name === undefined) {
         this.$notification.error({
           message: '表单校验错误提示',
@@ -503,15 +505,15 @@ export default {
         })
         return
       }
-      this.presetSchemeForm.presetpoints = this.markerDataArray
+      this.actualSchemeForm.bayonetPoints = this.markerDataArray
 
       // 获取id判断是修改还是保存
-      var preId = this.presetSchemeForm.id
+      var preId = this.actualSchemeForm.id
       if (preId !== null && preId !== undefined && preId !== '') {
         // 如果predi不为空则编辑方案数据
-        presetApi.updateScheme(this.presetSchemeForm).then(res => {
+        layoutBayonetApi.updateScheme(this.actualSchemeForm).then(res => {
           // 重新加载表格数据
-          this.loadPresetData()
+          this.loadActualBayonetData()
           // 更新表格数据
           this.$notification.success({
             message: '更新成功',
@@ -527,9 +529,9 @@ export default {
         })
       } else {
         // 保存方案数据
-        presetApi.saveScheme(this.presetSchemeForm).then(res => {
+        layoutBayonetApi.saveScheme(this.actualSchemeForm).then(res => {
           // 重新加载表格数据
-          this.loadPresetData()
+          this.loadActualBayonetData()
           // 更新表格数据
           this.$notification.success({
             message: '保存成功',
@@ -559,15 +561,12 @@ export default {
       // 批量绘制之前先清空地图
       this.batchRemoveLayers()
       pointList.forEach(point => {
-        var markerLayer = L.marker([point.lat, point.lng], presetMarkerOption).addTo(this.map)
+        var markerLayer = L.marker([point.lat, point.lng]).addTo(this.map)
         if (eventFlag) {
           markerLayer.on('click', this.handleOnMarkerClick)
         }
         // 纳入到featureGroup组管理
         this.featureGroup.addLayer(markerLayer)
-
-        // 将markerLayer添加到markerHashTable中
-        this.handleAddMarkerToColections(markerLayer)
 
         // 自适应地图缩放级别
         this.map.fitBounds(this.featureGroup.getBounds())
@@ -583,6 +582,7 @@ export default {
       // 将marker添加到hashTable中,先转换为字符串在添加到hash否则会出现精度失真
       var pointJSONString = JSON.stringify(markerLayer.getLatLng())
       this.markerHashTable.add(pointJSONString, markerLayer)
+      console.log(this.markerHashTable.getValues())
       // marker标记点数量+1
       this.markerCount++
     },
@@ -594,7 +594,7 @@ export default {
       this.markerCount--
     },
     downloadSchemeToExcel () {
-      presetApi.downloadScheme(this.selectedRowKeys).then(res => {
+      layoutBayonetApi.downloadScheme(this.selectedRowKeys).then(res => {
         // 这里res是返回的blob对象
         // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet这里表示xlsx类型
         var blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8' })
@@ -626,7 +626,23 @@ export default {
     },
     onUploadClose () {
       // 重新加载表格数据
-      this.loadPresetData()
+      this.loadActualBayonetData()
+    },
+    handleShowModalTableRecord (record) {
+      // 点击查看预选卡口方案数据，将其坐标点集合绘制到地图上
+      presetApi.getScheme(record.id).then(res => {
+        if (res.code === 0) {
+          var presetList = res.data.list
+          this.batchDrawMarkers(presetList, true)
+          // 关闭预选卡口方案数据列表弹窗
+          this.handlePresetListModalCancel()
+        }
+      }).catch(err => {
+        this.$notification.error({
+          message: '错误提示',
+          description: '抱歉，查看预设方案数据失败，请稍后重试:' + err.message
+        })
+      })
     }
   },
   watch: {
@@ -639,18 +655,6 @@ export default {
         this.drawerBtnVisible = false
       }
     }
-    /*
-      'selectedRows': function (selectedRows) {
-        this.needTotalList = this.needTotalList.map(item => {
-          return {
-            ...item,
-            total: selectedRows.reduce( (sum, val) => {
-              return sum + val[item.dataIndex]
-            }, 0)
-          }
-        })
-      }
-      */
   }
 }
 </script>

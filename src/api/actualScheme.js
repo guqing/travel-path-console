@@ -1,19 +1,19 @@
 import { axios } from '@/utils/request'
 
 const api = {
-  list: '/preset/list',
-  save: '/preset/save',
-  getScheme: '/preset/getScheme',
-  trash: '/preset/trash',
-  batchTrash: '/preset/batch-trash',
-  update: '/preset/update',
-  downloadScheme: '/preset/download',
-  uploadScheme: '/preset/upload'
+  list: '/actual/list',
+  save: '/actual/save',
+  getScheme: '/actual/get',
+  trash: '/actual/trash',
+  batchTrash: '/actual/batch-trash',
+  update: '/actual/update',
+  downloadScheme: '/actual/download',
+  uploadScheme: '/actual/upload'
 }
 
-const presetApi = {}
+const layoutBayonetApi = {}
 
-presetApi.listScheme = parameter => {
+layoutBayonetApi.listScheme = parameter => {
   return axios({
     url: api.list,
     method: 'get',
@@ -21,7 +21,7 @@ presetApi.listScheme = parameter => {
   })
 }
 
-presetApi.saveScheme = parameter => {
+layoutBayonetApi.saveScheme = parameter => {
   return axios({
     url: api.save,
     method: 'post',
@@ -32,21 +32,21 @@ presetApi.saveScheme = parameter => {
   })
 }
 
-presetApi.getScheme = id => {
+layoutBayonetApi.getScheme = id => {
   return axios({
     url: api.getScheme + '/' + id,
     method: 'get'
   })
 }
 
-presetApi.trash = id => {
+layoutBayonetApi.trash = id => {
   return axios({
     url: api.trash + '/' + id,
     method: 'post'
   })
 }
 
-presetApi.batchTrash = ids => {
+layoutBayonetApi.batchTrash = ids => {
   return axios({
     url: api.batchTrash,
     method: 'post',
@@ -57,7 +57,7 @@ presetApi.batchTrash = ids => {
   })
 }
 
-presetApi.updateScheme = parameter => {
+layoutBayonetApi.updateScheme = parameter => {
   return axios({
     url: api.update,
     method: 'put',
@@ -68,7 +68,7 @@ presetApi.updateScheme = parameter => {
   })
 }
 
-presetApi.downloadScheme = parameter => {
+layoutBayonetApi.downloadScheme = parameter => {
   return axios({
     url: api.downloadScheme,
     method: 'post',
@@ -80,7 +80,7 @@ presetApi.downloadScheme = parameter => {
   })
 }
 
-presetApi.uploadScheme = (formDatas, uploadProgress, cancelToken) => {
+layoutBayonetApi.uploadScheme = (formDatas, uploadProgress, cancelToken) => {
   return axios({
     url: api.uploadScheme,
     timeout: 600000, // 10 minutes
@@ -91,4 +91,4 @@ presetApi.uploadScheme = (formDatas, uploadProgress, cancelToken) => {
   })
 }
 
-export default presetApi
+export default layoutBayonetApi

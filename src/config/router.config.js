@@ -15,7 +15,7 @@ export const asyncRouterMap = [
         path: '/dashboard/workplace',
         name: 'dashboard',
         component: () => import('@/views/dashboard/Workplace'),
-        meta: { title: '仪表盘', keepAlive: true }
+        meta: { title: '仪表盘', keepAlive: true, icon: 'dashboard' }
       },
       // presetScheme
       {
@@ -23,9 +23,15 @@ export const asyncRouterMap = [
         name: 'PresetSchemeList',
         // redirect: '/preset/list',
         component: () => import('@/views/preset/List'),
-        meta: { title: '预设卡口方案管理', keepAlive: true, icon: 'form' }
+        meta: { title: '预设卡口管理', keepAlive: true, icon: 'flag' }
       },
-
+      // actualScheme 实际布设卡口方案
+      {
+        path: '/actual/list',
+        name: 'ActualSchemeList',
+        component: () => import('@/views/actual_scheme/List'),
+        meta: { title: '布设卡口管理', keepAlive: true, icon: 'rocket' }
+      },
       // permissions
       {
         path: '/permissions',
