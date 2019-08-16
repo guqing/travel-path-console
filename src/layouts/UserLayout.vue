@@ -9,7 +9,7 @@
           </a>
         </div>
         <div class="desc">
-          TP Analysis 车辆行驶轨迹分析平台
+          TP Analysis 车辆行驶轨迹分析管理平台
         </div>
       </div>
 

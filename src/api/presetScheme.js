@@ -73,9 +73,8 @@ presetApi.downloadScheme = parameter => {
     url: api.downloadScheme,
     method: 'post',
     data: parameter,
-    responseType: 'blob', // arraybuffer,blob
+    responseType: 'arraybuffer', // arraybuffer,blob
     headers: {
-      'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Type': 'application/json;charset=UTF-8'
     }
   })
