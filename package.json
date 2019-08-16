@@ -19,6 +19,7 @@
     "enquire.js": "^2.1.6",
     "identicon.js": "^2.3.3",
     "js-cookie": "^2.2.0",
+    "js-file-download": "^0.4.7",
     "leaflet": "^1.5.1",
     "lodash.get": "^4.4.2",
     "lodash.pick": "^4.4.0",

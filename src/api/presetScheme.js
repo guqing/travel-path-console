@@ -72,9 +72,10 @@ presetApi.downloadScheme = parameter => {
   return axios({
     url: api.downloadScheme,
     method: 'post',
-    responseType: 'arraybuffer',
     data: parameter,
+    responseType: 'blob', // arraybuffer,blob
     headers: {
+      'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Type': 'application/json;charset=UTF-8'
     }
   })

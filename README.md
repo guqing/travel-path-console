@@ -5,9 +5,6 @@
 An Vehicle travel trajectory analysis platform  <a href="https://github.com/guqing/travel-path-console" target="_blank">Travel Path Console</a>
 </div>
 
-<div align="center">
-Overview
-----
 
 - Built on ant design pro vue
 

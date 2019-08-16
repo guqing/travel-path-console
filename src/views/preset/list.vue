@@ -182,6 +182,7 @@ import { tileUrl } from '@/api/tile'
 import presetApi from '@/api/presetScheme'
 import { presetMarkerOption, tableColums } from '@/mystatic/js/common'
 import Upload from '@/components/Upload/Upload'
+import fileDownload from 'js-file-download'
 
 export default {
   name: 'PresetSchemeList',
@@ -551,25 +552,25 @@ export default {
     },
     downloadSchemeToExcel () {
       presetApi.downloadScheme(this.selectedRowKeys).then(res => {
-        // 这里res是返回的blob对象
-        // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet这里表示xlsx类型
-        var blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8' })
-        var downloadElement = document.createElement('a')
-        // 创建下载的链接
-        var href = window.URL.createObjectURL(blob)
-        downloadElement.href = href
-        // 下载后文件名
-        downloadElement.download = '预设卡口方案.xlsx'
-        document.body.appendChild(downloadElement)
-        // 模拟点击下载
-        downloadElement.click()
-        // 下载完成移除元素
-        document.body.removeChild(downloadElement)
-        // 释放掉blob对象
-        window.URL.revokeObjectURL(href)
+        // 这里res是返回的blob对象{ type: 'application/vnd.ms-excel;chartset=UTF-8' }
+        var blob = new Blob([res])
+        fileDownload(blob, '预设卡口方案.xlsx')
+        // var downloadElement = document.createElement('a')
+        // // 创建下载的链接
+        // var href = window.URL.createObjectURL(blob)
+        // downloadElement.href = href
+        // // 下载后文件名
+        // downloadElement.download = '预设卡口方案.xlsx'
+        // document.body.appendChild(downloadElement)
+        // // 模拟点击下载
+        // downloadElement.click()
+        // // 下载完成移除元素
+        // document.body.removeChild(downloadElement)
+        // // 释放掉blob对象
+        // window.URL.revokeObjectURL(href)
 
-        // 清空表格选择项
-        this.clearSelected()
+        // // 清空表格选择项
+        // this.clearSelected()
       }).catch(err => {
         this.$notification.error({
           message: '错误提示',
