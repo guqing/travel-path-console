@@ -1,3 +1,5 @@
+import * as L from 'leaflet'
+
 L.TileLayer.loadTileLayer = L.TileLayer.extend({ // eslint-disable-line
   getTileUrl: function (coords) {
     var data = {

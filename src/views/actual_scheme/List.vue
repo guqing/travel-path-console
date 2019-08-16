@@ -194,7 +194,7 @@ import { HashTable } from '@/mystatic/js/HashTable'
 import { tileUrl } from '@/api/tile'
 import presetApi from '@/api/presetScheme'
 import layoutBayonetApi from '@/api/actualScheme'
-import moment from 'moment'
+import { tableColums } from '@/mystatic/js/common'
 import Upload from '@/components/Upload/Upload'
 import ListScheme from '@/components/ListScheme/ListScheme'
 
@@ -206,6 +206,7 @@ export default {
   },
   data () {
     return {
+      presetId: null,
       presetQueryHandle: presetApi.listScheme,
       presetListModalVisible: false,
       uploadExcelHandler: layoutBayonetApi.uploadScheme,
@@ -230,48 +231,7 @@ export default {
       // 查询参数
       queryParam: {},
       // 表头
-      columns: [
-        {
-          title: '编号',
-          dataIndex: 'id',
-          key: 'id',
-          customRender: function (text, record, index) {
-            // 行号
-            return index + 1
-          }
-        },
-        {
-          title: '方案名称',
-          dataIndex: 'name',
-          scopedSlots: { customRender: 'name' }
-        },
-        {
-          title: '方案备注',
-          dataIndex: 'description',
-          scopedSlots: { customRender: 'description' }
-        },
-        {
-          title: '数据量',
-          dataIndex: 'bayonetCount',
-          sorter: true,
-          scopedSlots: { customRender: 'modifyTime' }
-        },
-        {
-          title: '创建时间',
-          dataIndex: 'modifyTime',
-          sorter: true,
-          scopedSlots: { customRender: 'modifyTime' },
-          customRender: function (text, record, index) {
-            return moment(text).format('YYYY-MM-DD')
-          }
-        },
-        {
-          table: '操作',
-          title: '操作',
-          dataIndex: 'action',
-          scopedSlots: { customRender: 'action' }
-        }
-      ],
+      columns: tableColums,
       // 加载数据
       actualSchemeData: [],
       selectedRowKeys: [],
@@ -508,8 +468,8 @@ export default {
       this.actualSchemeForm.bayonetPoints = this.markerDataArray
 
       // 获取id判断是修改还是保存
-      var preId = this.actualSchemeForm.id
-      if (preId !== null && preId !== undefined && preId !== '') {
+      var actualId = this.actualSchemeForm.id
+      if (actualId !== null && actualId !== undefined && actualId !== '') {
         // 如果predi不为空则编辑方案数据
         layoutBayonetApi.updateScheme(this.actualSchemeForm).then(res => {
           // 重新加载表格数据
@@ -528,17 +488,26 @@ export default {
           })
         })
       } else {
+        // 保存方案需要设置预设卡口方案id
+        this.actualSchemeForm.presetId = this.presetId
         // 保存方案数据
         layoutBayonetApi.saveScheme(this.actualSchemeForm).then(res => {
-          // 重新加载表格数据
-          this.loadActualBayonetData()
-          // 更新表格数据
-          this.$notification.success({
-            message: '保存成功',
-            description: '方案保存成功'
-          })
-          // 清除标记物
-          this.resetSchemeForm()
+          if (res.code === 0) {
+            // 重新加载表格数据
+            this.loadActualBayonetData()
+            // 更新表格数据
+            this.$notification.success({
+              message: '保存成功',
+              description: '方案保存成功'
+            })
+            // 清除标记物
+            this.resetSchemeForm()
+          } else {
+            this.$notification.warning({
+              message: '警告',
+              description: '抱歉，方案保存失败了，error:' + res.message
+            })
+          }
         }).catch(err => {
           this.$notification.error({
             message: '失败',
@@ -556,6 +525,10 @@ export default {
       })
       this.markerDataArray = []
       this.markerHashTable.clear()
+      // 关闭抽屉
+      this.onDrawerClose()
+      // 清除预设卡口方案
+      this.batchRemoveLayers()
     },
     batchDrawMarkers (pointList, eventFlag) {
       // 批量绘制之前先清空地图
@@ -633,6 +606,9 @@ export default {
       presetApi.getScheme(record.id).then(res => {
         if (res.code === 0) {
           var presetList = res.data.list
+          // 保存预选卡口方案的id, 添加布设方案需要此参数
+          this.presetId = record.id
+
           this.batchDrawMarkers(presetList, true)
           // 关闭预选卡口方案数据列表弹窗
           this.handlePresetListModalCancel()

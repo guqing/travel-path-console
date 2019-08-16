@@ -180,52 +180,8 @@ import '@/mystatic/js/loadTiles'
 import { HashTable } from '@/mystatic/js/HashTable'
 import { tileUrl } from '@/api/tile'
 import presetApi from '@/api/presetScheme'
-import { presetMarkerOption } from '@/mystatic/js/common'
-import moment from 'moment'
+import { presetMarkerOption, tableColums } from '@/mystatic/js/common'
 import Upload from '@/components/Upload/Upload'
-
-const presetSchemeTableColums = [
-  {
-    title: '编号',
-    dataIndex: 'id',
-    key: 'id',
-    customRender: function (text, record, index) {
-      // 行号
-      return index + 1
-    }
-  },
-  {
-    title: '方案名称',
-    dataIndex: 'name',
-    scopedSlots: { customRender: 'name' }
-  },
-  {
-    title: '方案备注',
-    dataIndex: 'description',
-    scopedSlots: { customRender: 'description' }
-  },
-  {
-    title: '数据量',
-    dataIndex: 'bayonetCount',
-    sorter: true,
-    scopedSlots: { customRender: 'modifyTime' }
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'modifyTime',
-    sorter: true,
-    scopedSlots: { customRender: 'modifyTime' },
-    customRender: function (text, record, index) {
-      return moment(text).format('YYYY-MM-DD')
-    }
-  },
-  {
-    table: '操作',
-    title: '操作',
-    dataIndex: 'action',
-    scopedSlots: { customRender: 'action' }
-  }
-]
 
 export default {
   name: 'PresetSchemeList',
@@ -256,7 +212,7 @@ export default {
       // 查询参数
       queryParam: {},
       // 表头
-      columns: presetSchemeTableColums,
+      columns: tableColums,
       // 加载数据
       presetSchemeData: [],
       selectedRowKeys: [],
