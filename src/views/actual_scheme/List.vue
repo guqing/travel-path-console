@@ -197,6 +197,7 @@ import layoutBayonetApi from '@/api/actualScheme'
 import { tableColums } from '@/mystatic/js/common'
 import Upload from '@/components/Upload/Upload'
 import ListScheme from '@/components/ListScheme/ListScheme'
+import fileDownload from 'js-file-download'
 
 export default {
   name: 'ActualSchemeList',
@@ -604,22 +605,8 @@ export default {
     },
     downloadSchemeToExcel () {
       layoutBayonetApi.downloadScheme(this.selectedRowKeys).then(res => {
-        // 这里res是返回的blob对象
-        // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet这里表示xlsx类型
-        var blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8' })
-        var downloadElement = document.createElement('a')
-        // 创建下载的链接
-        var href = window.URL.createObjectURL(blob)
-        downloadElement.href = href
-        // 下载后文件名
-        downloadElement.download = '预设卡口方案.xlsx'
-        document.body.appendChild(downloadElement)
-        // 模拟点击下载
-        downloadElement.click()
-        // 下载完成移除元素
-        document.body.removeChild(downloadElement)
-        // 释放掉blob对象
-        window.URL.revokeObjectURL(href)
+        // 下载excel数据
+        fileDownload(res, '布设卡口方案.xlsx')
 
         // 清空表格选择项
         this.clearSelected()
