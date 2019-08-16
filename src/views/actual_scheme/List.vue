@@ -295,13 +295,14 @@ export default {
       record[column.dataIndex] = value
     },
     handleRecodeEdit (row) {
-      // 开启地图点击监听事件
-      this.openMapMark()
-
       // 设置方案id的值,用于编辑时作为主键
       this.actualSchemeForm.id = row.id
+      this.$set(this.actualSchemeForm, 'name', row.name)
+      this.$set(this.actualSchemeForm, 'description', row.description)
 
-      // 查询方案坐标点集合回显到地图
+      // 根据方案中存储的预设卡口方案id即presetId查询预设卡口方案信息
+      this.getPresetPointById(row.presetId, true)
+      // 查询方案坐标点集合回显到地图，此处第二个参数为true绘制圆形标记物
       this.getActualBayonetPointById(row.id, true)
     },
     // eslint-disable-next-line
@@ -369,13 +370,34 @@ export default {
     showData (row) {
       this.getActualBayonetPointById(row.id, false)
     },
+    getPresetPointById (id, eventFlag) {
+      // 根据方案预设卡口方案id查询卡口方案信息
+      presetApi.getScheme(id).then(res => {
+        if (res.code === 0) {
+          var pointList = res.data.list
+
+          // 批量将标记点绘制到地图上
+          this.batchDrawMarkers(pointList, eventFlag)
+        }
+      }).catch(err => {
+        this.$notification.error({
+          message: '错误提示',
+          description: '抱歉，查看方案信息失败，请稍后重试：' + err.message
+        })
+      })
+    },
     getActualBayonetPointById (id, eventFlag) {
       layoutBayonetApi.getScheme(id).then(res => {
         if (res.code === 0) {
           var pointList = res.data.list
 
           // 批量将标记点绘制到地图上
-          this.batchDrawMarkers(pointList, eventFlag)
+          if (eventFlag) {
+            this.batchDrawCicleMarkers(pointList)
+          } else {
+            // 标记物事件开启标志为false，则使用下面的方法绘制
+            this.batchDrawMarkers(pointList, eventFlag)
+          }
         }
       }).catch(err => {
         this.$notification.error({
@@ -425,17 +447,23 @@ export default {
         // 将marker从HashTable中删除
         this.handleRemoveMarkerFromColections(pointJSONString)
       } else {
-        var circleMarker = L.circle([point.lat, point.lng], {
-          color: 'red',
-          fillColor: '#f03',
-          fillOpacity: 0.5,
-          radius: 5
-        }).addTo(this.map)
+        // 绘制圆形标记物
+        var circleMarker = this.addCicleMarkerToMap(point)
 
         // 以坐标点为key,原型覆盖物为value存储到HashTable中
         this.handleAddMarkerToColections(circleMarker)
         // 以坐标点为key,原型覆盖物为value存储到HashTable中
       }
+    },
+    addCicleMarkerToMap (point) {
+      var circleMarker = L.circle([point.lat, point.lng], {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.5,
+        radius: 5
+      }).addTo(this.map)
+
+      return circleMarker
     },
     showSchemeDrawer () {
       // 打开抽屉
@@ -530,9 +558,17 @@ export default {
       // 清除预设卡口方案
       this.batchRemoveLayers()
     },
+    batchDrawCicleMarkers (pointList) {
+      console.log('绘制圆形标记物')
+      pointList.forEach(point => {
+        var cicleMarkerLayer = this.addCicleMarkerToMap(point)
+        this.handleAddMarkerToColections(cicleMarkerLayer)
+      })
+    },
     batchDrawMarkers (pointList, eventFlag) {
       // 批量绘制之前先清空地图
       this.batchRemoveLayers()
+      console.log('清空地图图层')
       pointList.forEach(point => {
         var markerLayer = L.marker([point.lat, point.lng]).addTo(this.map)
         if (eventFlag) {
