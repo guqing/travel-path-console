@@ -30,7 +30,14 @@ export const asyncRouterMap = [
         path: '/actual/list',
         name: 'ActualSchemeList',
         component: () => import('@/views/actual_scheme/List'),
-        meta: { title: '布设卡口管理', keepAlive: true, icon: 'rocket' }
+        meta: { title: '布设卡口管理', keepAlive: true, icon: 'bg-colors' }
+      },
+      // RouteBayone 车辆途径卡口方案
+      {
+        path: '/route-bayonet/list',
+        name: 'RouteBayoneList',
+        component: () => import('@/views/route_bayonet/List'),
+        meta: { title: '途径卡口管理', keepAlive: true, icon: 'deployment-unit' }
       },
       // permissions
       {
