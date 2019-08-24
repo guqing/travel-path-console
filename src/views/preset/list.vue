@@ -106,7 +106,7 @@
           layout="vertical">
           <a-row :gutter="16">
             <a-col :span="24">
-              <a-form-item label="方案名称">
+              <a-form-item label="方案名称" required>
                 <a-input
                   v-model="presetSchemeForm.name"
                   placeholder="请输入方案名称"
@@ -117,10 +117,12 @@
           <a-row :gutter="16">
             <a-col :span="24">
               <a-form-item label="方案描述">
-                <a-input
+                <a-textarea
                   v-model="presetSchemeForm.description"
-                  placeholder="请输入方案描述"
-                />
+                  placeholder="请输入方案描述,240字以内"
+                  :rows="4"
+                >
+                </a-textarea>
               </a-form-item>
             </a-col>
           </a-row>
@@ -450,16 +452,39 @@ export default {
       })
       return array
     },
-    createOrUpdatePresetPointScheme () {
-      // 填充表单
+    validateBayonetForm () {
       const name = this.presetSchemeForm.name
       if (name === '' || name === undefined) {
         this.$notification.error({
           message: '表单校验错误提示',
           description: '方案名称不能为空'
         })
+        return false
+      }
+      if (name.length > 140) {
+        this.$notification.error({
+          message: '表单校验错误提示',
+          description: '方案名称长度不能超过140字'
+        })
+        return false
+      }
+
+      const description = this.presetSchemeForm.description
+      if (description.length > 240) {
+        this.$notification.error({
+          message: '表单校验错误提示',
+          description: '方案描述不能超过240字'
+        })
+        return false
+      }
+    },
+    createOrUpdatePresetPointScheme () {
+      // 表单校验
+      if (!this.validateBayonetForm()) {
         return
       }
+
+      // 填充表单
       this.presetSchemeForm.presetpoints = this.markerDataArray
 
       // 获取id判断是修改还是保存

@@ -106,7 +106,17 @@
           layout="vertical">
           <a-row :gutter="16">
             <a-col :span="24">
-              <a-form-item label="方案名称">
+              <a-form-item label="车牌号" required>
+                <a-input
+                  v-model="routeBayonetForm.carNumber"
+                  placeholder="请输入车牌号码"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <a-row :gutter="16">
+            <a-col :span="24">
+              <a-form-item label="方案名称" required>
                 <a-input
                   v-model="routeBayonetForm.name"
                   placeholder="请输入方案名称"
@@ -117,10 +127,12 @@
           <a-row :gutter="16">
             <a-col :span="24">
               <a-form-item label="方案描述">
-                <a-input
+                <a-textarea
                   v-model="routeBayonetForm.description"
-                  placeholder="请输入方案描述"
-                />
+                  placeholder="请输入方案描述，240字以内"
+                  :rows="4"
+                >
+                </a-textarea>
               </a-form-item>
             </a-col>
           </a-row>
@@ -469,6 +481,8 @@ export default {
     showSchemeDrawer () {
       // 打开抽屉
       this.drawerVisible = true
+      // 生成车牌号
+      this.setCarNumber()
     },
     onDrawerClose () {
       // 关闭抽屉
@@ -484,20 +498,53 @@ export default {
       })
       return array
     },
-    createOrUpdatePointScheme () {
-      // 填充表单
+    setCarNumber () {
+      // 生成车牌号
+      this.$set(this.routeBayonetForm, 'carNumber', generateCarNumber())
+    },
+    validateBayonetForm () {
+      const carNumber = this.routeBayonetForm.carNumber
+      if (carNumber === '') {
+        this.$notification.error({
+          message: '表单校验错误提示',
+          description: '车牌号码不能为空'
+        })
+        return false
+      }
+
       const name = this.routeBayonetForm.name
       if (name === '' || name === undefined) {
         this.$notification.error({
           message: '表单校验错误提示',
           description: '方案名称不能为空'
         })
+        return false
+      }
+      if (name.length > 140) {
+        this.$notification.error({
+          message: '表单校验错误提示',
+          description: '方案名称长度不能超过140字'
+        })
+        return false
+      }
+
+      const description = this.routeBayonetForm.description
+      if (description.length > 240) {
+        this.$notification.error({
+          message: '表单校验错误提示',
+          description: '方案描述不能超过240字'
+        })
+        return false
+      }
+    },
+    createOrUpdatePointScheme () {
+      if (!this.validateBayonetForm()) {
         return
       }
+
+      // 填充表单
       this.routeBayonetForm.bayonetPoints = this.markerDataArray
-      // 生成车牌号
-      this.routeBayonetForm.carNumber = generateCarNumber()
-      console.log(this.routeBayonetForm.carNumber)
+
       // 获取id判断是修改还是保存
       var actualId = this.routeBayonetForm.id
       if (actualId !== null && actualId !== undefined && actualId !== '') {
@@ -521,8 +568,6 @@ export default {
       } else {
         // 保存方案需要设置布设卡口方案id
         this.routeBayonetForm.actualId = this.actualId
-        // 生成车牌号
-        this.routeBayonetForm.carNumber = generateCarNumber()
 
         // 保存方案数据
         routeBayonetApi.saveScheme(this.routeBayonetForm).then(res => {
