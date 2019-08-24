@@ -37,7 +37,7 @@ export const asyncRouterMap = [
         path: '/route-bayonet/list',
         name: 'RouteBayoneList',
         component: () => import('@/views/route_bayonet/List'),
-        meta: { title: '途径卡口管理', keepAlive: true, icon: 'deployment-unit' }
+        meta: { title: '途经卡口管理', keepAlive: true, icon: 'deployment-unit' }
       },
       // permissions
       {

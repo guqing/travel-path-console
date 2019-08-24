@@ -6,7 +6,7 @@
     <div class="table-operator operator-btn-group">
       <a-dropdown>
         <a-menu slot="overlay">
-          <a-menu-item key="1" @click="handleQueryPresetPointList">
+          <a-menu-item key="1" @click="handleQueryActualPointList">
             <a-icon type="delete"/>手动标注</a-menu-item>
           <a-menu-item key="2" @click="uploadBtnHandle">
             <a-icon type="export" />批量上传</a-menu-item>
@@ -41,7 +41,7 @@
         <template slot="message">
           <span style="margin-right: 12px">已选择: <a style="font-weight: 600">{{ this.selectedRows.length }}</a></span>
           <span style="margin-right: 12px">
-            预设卡口方案数据总计
+            布设卡口方案数据总计
             <a style="font-weight: 600">{{ pagination.total }} 条</a>
           </span>
           <a style="margin-left: 24px" v-show="selectedRows.length > 0" @click="clearSelected">清空</a>
@@ -54,7 +54,7 @@
         :loading="loading"
         :pagination="pagination"
         :columns="columns"
-        :dataSource="actualSchemeData"
+        :dataSource="routeBayonetData"
         @showSizeChange="handlePaginationChange"
         @change="handlePaginationChange"
         :alert="{ show: true, clear: true }"
@@ -88,7 +88,7 @@
     </div>
     <div>
       <a-drawer
-        title="预设卡口方案坐标点数据集"
+        title="布设卡口方案坐标点数据集"
         width="420"
         placement="right"
         :closable="false"
@@ -108,7 +108,7 @@
             <a-col :span="24">
               <a-form-item label="方案名称">
                 <a-input
-                  v-model="actualSchemeForm.name"
+                  v-model="routeBayonetForm.name"
                   placeholder="请输入方案名称"
                 />
               </a-form-item>
@@ -118,7 +118,7 @@
             <a-col :span="24">
               <a-form-item label="方案描述">
                 <a-input
-                  v-model="actualSchemeForm.description"
+                  v-model="routeBayonetForm.description"
                   placeholder="请输入方案描述"
                 />
               </a-form-item>
@@ -171,14 +171,14 @@
         </upload>
       </a-modal>
       <a-modal
-        title="预设卡口方案列表"
+        title="布设卡口方案列表"
         :footer="null"
-        @cancel="handlePresetListModalCancel"
-        :visible="presetListModalVisible"
+        @cancel="handleLayoutListModalCancel"
+        :visible="layoutBayonetListModalVisible"
       >
         <ListScheme
           :columns="columns"
-          :queryHandle="presetQueryHandle"
+          :queryHandle="actualQueryHandle"
           @view="handleShowModalTableRecord"
         >
         </ListScheme>
@@ -192,9 +192,9 @@ import * as L from 'leaflet'
 import '@/mystatic/js/loadTiles'
 import { HashTable } from '@/mystatic/js/HashTable'
 import { tileUrl } from '@/api/tile'
-import presetApi from '@/api/presetScheme'
-import layoutBayonetApi from '@/api/actualScheme'
-import { tableColums } from '@/mystatic/js/common'
+import actualApi from '@/api/actualScheme'
+import routeBayonetApi from '@/api/routeBayonet'
+import { tableColums, generateCarNumber } from '@/mystatic/js/common'
 import Upload from '@/components/Upload/Upload'
 import ListScheme from '@/components/ListScheme/ListScheme'
 import fileDownload from 'js-file-download'
@@ -207,13 +207,13 @@ export default {
   },
   data () {
     return {
-      presetId: null,
-      presetQueryHandle: presetApi.listScheme,
-      presetListModalVisible: false,
-      uploadExcelHandler: layoutBayonetApi.uploadScheme,
+      actualId: null,
+      actualQueryHandle: actualApi.listScheme,
+      layoutBayonetListModalVisible: false,
+      uploadExcelHandler: routeBayonetApi.uploadScheme,
       uploadVisible: false,
       loading: false,
-      actualSchemeForm: {},
+      routeBayonetForm: {},
       drawerBtnVisible: false,
       drawerVisible: false,
       featureGroup: new L.featureGroup(), // eslint-disable-line
@@ -234,7 +234,7 @@ export default {
       // 表头
       columns: tableColums,
       // 加载数据
-      actualSchemeData: [],
+      routeBayonetData: [],
       selectedRowKeys: [],
       selectedRows: [],
       drawTableColumns: [{
@@ -248,7 +248,7 @@ export default {
   },
   mounted () {
     this.init()
-    this.loadActualBayonetData()
+    this.loadRouteBayonetData()
   },
   methods: {
     init () {
@@ -266,7 +266,7 @@ export default {
         maxZoom: 19
       }).addTo(this.map)
     },
-    loadActualBayonetData () {
+    loadRouteBayonetData () {
       this.loading = true
 
       // 构建分页查询参数
@@ -275,21 +275,21 @@ export default {
         pageSize: this.pagination.pageSize
       }
 
-      layoutBayonetApi.listScheme(pagination).then(res => {
-        this.actualSchemeData = res.data.list
+      routeBayonetApi.listScheme(pagination).then(res => {
+        this.routeBayonetData = res.data.list
         this.pagination.total = res.data.total
         this.loading = false
       }).catch(err => {
         this.loading = false
         this.$notification.error({
           message: '失败',
-          description: '获取预设卡口方案列表失败：' + err.message
+          description: '获取布设卡口方案列表失败：' + err.message
         })
       })
     },
     handlePaginationChange (pagination, filters, sorter) {
       this.pagination.current = pagination.current
-      this.loadActualBayonetData()
+      this.loadRouteBayonetData()
     },
     handleChange (value, key, column, record) {
       console.log(value, key, column)
@@ -297,14 +297,14 @@ export default {
     },
     handleRecodeEdit (row) {
       // 设置方案id的值,用于编辑时作为主键
-      this.actualSchemeForm.id = row.id
-      this.$set(this.actualSchemeForm, 'name', row.name)
-      this.$set(this.actualSchemeForm, 'description', row.description)
+      this.routeBayonetForm.id = row.id
+      this.$set(this.routeBayonetForm, 'name', row.name)
+      this.$set(this.routeBayonetForm, 'description', row.description)
 
-      // 根据方案中存储的预设卡口方案id即presetId查询预设卡口方案信息
-      this.getPresetPointById(row.presetId, true)
+      // 根据方案中存储的布设卡口方案id即actualId查询布设卡口方案信息
+      this.getActualPointById(row.actualId, true)
       // 查询方案坐标点集合回显到地图，此处第二个参数为true绘制圆形标记物
-      this.getActualBayonetPointById(row.id, true)
+      this.getRouteBayonetPointById(row.id, true)
     },
     // eslint-disable-next-line
     handleRecodeDelete (row) {
@@ -316,10 +316,10 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk () {
-          layoutBayonetApi.trash(row.id).then(res => {
+          routeBayonetApi.trash(row.id).then(res => {
             if (res.code === 0) {
               // 重新加载表格数据
-              that.loadActualBayonetData()
+              that.loadRouteBayonetData()
               that.$notification.success({
                 message: '成功提示',
                 description: '方案已放入回收站，可前往回收站恢复记录'
@@ -347,10 +347,10 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk () {
-          layoutBayonetApi.batchTrash(that.selectedRowKeys).then(res => {
+          routeBayonetApi.batchTrash(that.selectedRowKeys).then(res => {
             if (res.code === 0) {
               // 重新加载表格数据
-              that.loadActualBayonetData()
+              that.loadRouteBayonetData()
               that.$notification.success({
                 message: '提示',
                 description: '方案数据已批量丢进放入回收站'
@@ -369,11 +369,11 @@ export default {
       })
     },
     showData (row) {
-      this.getActualBayonetPointById(row.id, false)
+      this.getRouteBayonetPointById(row.id, false)
     },
-    getPresetPointById (id, eventFlag) {
-      // 根据方案预设卡口方案id查询卡口方案信息
-      presetApi.getScheme(id).then(res => {
+    getActualPointById (id, eventFlag) {
+      // 根据方案布设卡口方案id查询卡口方案信息
+      actualApi.getScheme(id).then(res => {
         if (res.code === 0) {
           var pointList = res.data.list
 
@@ -387,8 +387,8 @@ export default {
         })
       })
     },
-    getActualBayonetPointById (id, eventFlag) {
-      layoutBayonetApi.getScheme(id).then(res => {
+    getRouteBayonetPointById (id, eventFlag) {
+      routeBayonetApi.getScheme(id).then(res => {
         if (res.code === 0) {
           var pointList = res.data.list
 
@@ -419,12 +419,12 @@ export default {
     toggleAdvanced () {
       this.advanced = !this.advanced
     },
-    handleQueryPresetPointList () {
-      // 查询预设卡口方案信息而后弹出列表
-      this.presetListModalVisible = true
+    handleQueryActualPointList () {
+      // 查询布设卡口方案信息而后弹出列表
+      this.layoutBayonetListModalVisible = true
     },
-    handlePresetListModalCancel () {
-      this.presetListModalVisible = false
+    handleLayoutListModalCancel () {
+      this.layoutBayonetListModalVisible = false
     },
     handleMapClick (e) {
       var point = e.latlng
@@ -486,7 +486,7 @@ export default {
     },
     createOrUpdatePointScheme () {
       // 填充表单
-      const name = this.actualSchemeForm.name
+      const name = this.routeBayonetForm.name
       if (name === '' || name === undefined) {
         this.$notification.error({
           message: '表单校验错误提示',
@@ -494,15 +494,17 @@ export default {
         })
         return
       }
-      this.actualSchemeForm.bayonetPoints = this.markerDataArray
-
+      this.routeBayonetForm.bayonetPoints = this.markerDataArray
+      // 生成车牌号
+      this.routeBayonetForm.carNumber = generateCarNumber()
+      console.log(this.routeBayonetForm.carNumber)
       // 获取id判断是修改还是保存
-      var actualId = this.actualSchemeForm.id
+      var actualId = this.routeBayonetForm.id
       if (actualId !== null && actualId !== undefined && actualId !== '') {
         // 如果predi不为空则编辑方案数据
-        layoutBayonetApi.updateScheme(this.actualSchemeForm).then(res => {
+        routeBayonetApi.updateScheme(this.routeBayonetForm).then(res => {
           // 重新加载表格数据
-          this.loadActualBayonetData()
+          this.loadRouteBayonetData()
           // 更新表格数据
           this.$notification.success({
             message: '更新成功',
@@ -517,13 +519,16 @@ export default {
           })
         })
       } else {
-        // 保存方案需要设置预设卡口方案id
-        this.actualSchemeForm.presetId = this.presetId
+        // 保存方案需要设置布设卡口方案id
+        this.routeBayonetForm.actualId = this.actualId
+        // 生成车牌号
+        this.routeBayonetForm.carNumber = generateCarNumber()
+
         // 保存方案数据
-        layoutBayonetApi.saveScheme(this.actualSchemeForm).then(res => {
+        routeBayonetApi.saveScheme(this.routeBayonetForm).then(res => {
           if (res.code === 0) {
             // 重新加载表格数据
-            this.loadActualBayonetData()
+            this.loadRouteBayonetData()
             // 更新表格数据
             this.$notification.success({
               message: '保存成功',
@@ -556,7 +561,7 @@ export default {
       this.markerHashTable.clear()
       // 关闭抽屉
       this.onDrawerClose()
-      // 清除预设卡口方案
+      // 清除布设卡口方案
       this.batchRemoveLayers()
     },
     batchDrawCicleMarkers (pointList) {
@@ -604,7 +609,7 @@ export default {
       this.markerCount--
     },
     downloadSchemeToExcel () {
-      layoutBayonetApi.downloadScheme(this.selectedRowKeys).then(res => {
+      routeBayonetApi.downloadScheme(this.selectedRowKeys).then(res => {
         // 下载excel数据
         fileDownload(res, '布设卡口方案.xlsx')
 
@@ -622,24 +627,24 @@ export default {
     },
     onUploadClose () {
       // 重新加载表格数据
-      this.loadActualBayonetData()
+      this.loadRouteBayonetData()
     },
     handleShowModalTableRecord (record) {
       // 点击查看预选卡口方案数据，将其坐标点集合绘制到地图上
-      presetApi.getScheme(record.id).then(res => {
+      actualApi.getScheme(record.id).then(res => {
         if (res.code === 0) {
-          var presetList = res.data.list
+          var actualList = res.data.list
           // 保存预选卡口方案的id, 添加布设方案需要此参数
-          this.presetId = record.id
+          this.actualId = record.id
 
-          this.batchDrawMarkers(presetList, true)
+          this.batchDrawMarkers(actualList, true)
           // 关闭预选卡口方案数据列表弹窗
-          this.handlePresetListModalCancel()
+          this.handleLayoutListModalCancel()
         }
       }).catch(err => {
         this.$notification.error({
           message: '错误提示',
-          description: '抱歉，查看预设方案数据失败，请稍后重试:' + err.message
+          description: '抱歉，查看布设方案数据失败，请稍后重试:' + err.message
         })
       })
     }
