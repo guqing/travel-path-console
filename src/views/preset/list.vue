@@ -477,6 +477,7 @@ export default {
         })
         return false
       }
+      return true
     },
     createOrUpdatePresetPointScheme () {
       // 表单校验

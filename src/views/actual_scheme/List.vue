@@ -510,6 +510,7 @@ export default {
         })
         return false
       }
+      return true
     },
     createOrUpdatePointScheme () {
       // 表单校验

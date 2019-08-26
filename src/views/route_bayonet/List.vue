@@ -536,6 +536,7 @@ export default {
         })
         return false
       }
+      return true
     },
     createOrUpdatePointScheme () {
       if (!this.validateBayonetForm()) {
