@@ -235,18 +235,24 @@ export default {
   },
   methods: {
     init () {
+      // 设置左上角经纬度
+      var corner1 =  L.latLng(34.041276143397731, 108.4084198740709)
+      // 设置右下点经纬度
+      var corner2 = L.latLng(34.652635225618667, 109.56107192878135)
+      // 构建视图限制范围
+			var bounds = L.latLngBounds(corner1, corner2)
       this.map = new L.Map('mapContainer', {
-        center: [40.030401, 116.225003],
+        maxBounds: bounds,
+        center: [34.2332,108.9312],
         zoom: 14,
-        minZoom: 11,
-        maxZoom: 19,
         attributionControl: false,
         zoomControl: true
       })
-      this.L.tileLayer.loadTileLayer(tileUrl, {
+      // this.L.tileLayer.loadTileLayer
+      this.L.tileLayer(tileUrl, {
         attribution: 'Map data &copy;<a href="https://github.com/guqing">guqing</a>',
-        minZoom: 11,
-        maxZoom: 19
+        minZoom: 10,
+        maxZoom: 18
       }).addTo(this.map)
     },
     loadPresetData () {

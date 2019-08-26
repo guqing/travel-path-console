@@ -443,7 +443,7 @@ export default {
       // 返回的实际是markerLayer层
       var marker = L.marker([point.lat, point.lng]).addTo(this.map)
 
-      // 将markerLayer添加到marker结合中
+      // 将markerLayer添加到marker集合中
       this.handleAddMarkerToColections(marker)
 
       // 为marker添加相应事件
