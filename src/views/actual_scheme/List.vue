@@ -1,8 +1,6 @@
 <template>
   <a-card :bordered="false">
-    <div class="map-wrapper">
-      <div id="mapContainer"></div>
-    </div>
+    <LeafletMap @onMapInit="initMap"></LeafletMap>
     <div class="table-operator operator-btn-group">
       <a-dropdown>
         <a-menu slot="overlay">
@@ -190,9 +188,8 @@
 
 <script>
 import * as L from 'leaflet'
-import '@/mystatic/js/loadTiles'
+import LeafletMap from '@/components/LeafletMap/LeafletMap'
 import { HashTable } from '@/mystatic/js/HashTable'
-import { tileUrl } from '@/api/tile'
 import presetApi from '@/api/presetScheme'
 import layoutBayonetApi from '@/api/actualScheme'
 import { tableColums } from '@/mystatic/js/common'
@@ -204,7 +201,8 @@ export default {
   name: 'ActualSchemeList',
   components: {
     Upload,
-    ListScheme
+    ListScheme,
+    LeafletMap
   },
   data () {
     return {
@@ -248,24 +246,11 @@ export default {
     }
   },
   mounted () {
-    this.init()
     this.loadActualBayonetData()
   },
   methods: {
-    init () {
-      this.map = new L.Map('mapContainer', {
-        center: [40.030401, 116.225003],
-        zoom: 14,
-        minZoom: 11,
-        maxZoom: 19,
-        attributionControl: false,
-        zoomControl: true
-      })
-      this.L.tileLayer.loadTileLayer(tileUrl, {
-        attribution: 'Map data &copy;<a href="https://github.com/guqing">guqing</a>',
-        minZoom: 11,
-        maxZoom: 19
-      }).addTo(this.map)
+    initMap (map) {
+      this.map = map
     },
     loadActualBayonetData () {
       this.loading = true
@@ -700,14 +685,6 @@ export default {
   .fold {
     width: 100%;
   }
-}
-
-.map-wrapper {
-  margin-bottom: 24px;
-}
-
-#mapContainer {
-  height: 500px;
 }
 
 .operator-btn-group {

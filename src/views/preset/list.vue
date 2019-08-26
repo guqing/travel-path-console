@@ -1,8 +1,6 @@
 <template>
   <a-card :bordered="false">
-    <div class="map-wrapper">
-      <div id="mapContainer"></div>
-    </div>
+    <LeafletMap @onMapInit="initMap"></LeafletMap>
     <div class="table-operator operator-btn-group">
       <a-dropdown>
         <a-menu slot="overlay">
@@ -178,9 +176,9 @@
 
 <script>
 import * as L from 'leaflet'
+import LeafletMap from '@/components/LeafletMap/LeafletMap'
 import '@/mystatic/js/loadTiles'
 import { HashTable } from '@/mystatic/js/HashTable'
-import { tileUrl } from '@/api/tile'
 import presetApi from '@/api/presetScheme'
 import { presetMarkerOption, tableColums } from '@/mystatic/js/common'
 import Upload from '@/components/Upload/Upload'
@@ -189,7 +187,8 @@ import fileDownload from 'js-file-download'
 export default {
   name: 'PresetSchemeList',
   components: {
-    Upload
+    Upload,
+    LeafletMap
   },
   data () {
     return {
@@ -230,30 +229,11 @@ export default {
     }
   },
   mounted () {
-    this.init()
     this.loadPresetData()
   },
   methods: {
-    init () {
-      // 设置左上角经纬度
-      var corner1 = L.latLng(34.041276143397731, 108.4084198740709)
-      // 设置右下点经纬度
-      var corner2 = L.latLng(34.652635225618667, 109.56107192878135)
-      // 构建视图限制范围
-      var bounds = L.latLngBounds(corner1, corner2)
-      this.map = new L.Map('mapContainer', {
-        maxBounds: bounds,
-        center: [34.2332, 108.9312],
-        zoom: 14,
-        attributionControl: false,
-        zoomControl: true
-      })
-      // this.L.tileLayer.loadTileLayer
-      this.L.tileLayer(tileUrl, {
-        attribution: 'Map data &copy;<a href="https://github.com/guqing">guqing</a>',
-        minZoom: 10,
-        maxZoom: 18
-      }).addTo(this.map)
+    initMap (map) {
+      this.map = map
     },
     loadPresetData () {
       this.loading = true
@@ -642,19 +622,10 @@ export default {
   }
 }
 
-.map-wrapper {
-  margin-bottom: 24px;
-}
-
-#mapContainer {
-  height: 500px;
-}
-
 .operator-btn-group {
   margin-bottom: 16px;
   button {
     margin-right: 8px;
   }
 }
-
 </style>
