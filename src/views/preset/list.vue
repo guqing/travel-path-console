@@ -236,14 +236,14 @@ export default {
   methods: {
     init () {
       // 设置左上角经纬度
-      var corner1 =  L.latLng(34.041276143397731, 108.4084198740709)
+      var corner1 = L.latLng(34.041276143397731, 108.4084198740709)
       // 设置右下点经纬度
       var corner2 = L.latLng(34.652635225618667, 109.56107192878135)
       // 构建视图限制范围
-			var bounds = L.latLngBounds(corner1, corner2)
+      var bounds = L.latLngBounds(corner1, corner2)
       this.map = new L.Map('mapContainer', {
         maxBounds: bounds,
-        center: [34.2332,108.9312],
+        center: [34.2332, 108.9312],
         zoom: 14,
         attributionControl: false,
         zoomControl: true
@@ -543,6 +543,11 @@ export default {
       })
       this.markerDataArray = []
       this.markerHashTable.clear()
+
+      // 关闭抽屉
+      this.onDrawerClose()
+      // 清除布设卡口方案
+      this.batchRemoveLayers()
     },
     batchDrawMarkers (pointList, eventFlag) {
       // 批量绘制之前先清空地图
