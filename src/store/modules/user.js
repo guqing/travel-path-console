@@ -70,8 +70,11 @@ const user = {
 
           commit('SET_NAME', { name: result.name, welcome: welcome() })
           if (result.avatar === '') {
-            commit('SET_AVATAR', 'https://avatars1.githubusercontent.com/u/38999863?s=400&u=54327ebabddbac34a51c7e53e61832bd10eee734&v=4')
+            var avatar = 'https://avatars1.githubusercontent.com/u/38999863?s=400&u=54327ebabddbac34a51c7e53e61832bd10eee734&v=4'
+            commit('SET_AVATAR', avatar)
+            result.avatar = avatar
           } else {
+            console.log('头像else')
             commit('SET_AVATAR', result.avatar)
           }
 

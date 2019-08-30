@@ -9,7 +9,7 @@
         {{ timeFix }}，{{ user.name }}
         <span class="welcome-text">，{{ welcome() }}</span>
       </div>
-      <div>前端工程师 | 蚂蚁金服 - 某某某事业群 - VUE平台</div>
+      <div><img src="http://v2.jinrishici.com/one.svg"/></div>
     </div>
     <!-- <div slot="extra">
       <a-row class="more-info">
@@ -23,7 +23,7 @@
           <head-info title="项目访问" content="2,223" :center="false" />
         </a-col>
       </a-row>
-    </div>-->
+    </div> -->
 
     <div>
       <a-row :gutter="24">
@@ -39,7 +39,7 @@
             :loading="loading"
             style="margin-bottom: 24px;"
             :bordered="false"
-            title="我的账户"
+            title="数据概览"
             :body-style="{ padding: 0 }"
           >
             <!-- <a slot="extra">全部项目</a> -->
@@ -47,7 +47,44 @@
               <a-card-grid
                 class="project-card-grid"
                 :key="i"
-                v-for="(item, i) in myCountDashboard"
+                v-for="(item, i) in dataOverview"
+              >
+                <a-card
+                  :bordered="false"
+                  :body-style="{ padding: 0 }"
+                >
+                  <a-card-meta>
+                    <div slot="title" class="card-description">
+                      {{ item.count }}
+                    </div>
+                    <div
+                      slot="title"
+                      class="card-title"
+                    >
+                      <a>
+                        <img :src="item.icon" class="card-title-icon"/>
+                        {{ item.title }}
+                      </a>
+                    </div>
+                  </a-card-meta>
+                </a-card>
+              </a-card-grid>
+            </div>
+          </a-card>
+
+          <a-card
+            class="project-list"
+            :loading="loading"
+            style="margin-bottom: 24px;"
+            :bordered="false"
+            title="我的账户"
+            :body-style="{ padding: 0 }"
+          >
+            <div>
+              <a-card-grid
+                class="project-card-grid"
+                :key="i"
+                v-for="(item, i) in ramOverView"
               >
                 <a-card
                   :bordered="false"
@@ -111,70 +148,27 @@ import { mapGetters } from 'vuex'
 
 import { PageView } from '@/layouts'
 import HeadInfo from '@/components/tools/HeadInfo'
-import { Radar } from '@/components'
 
-import { getRoleList, getServiceList } from '@/api/manage'
-
-const DataSet = require('@antv/data-set')
+import { getSchemeOverviewData, getRAMOverView } from '@/api/manage'
 
 export default {
   name: 'Workplace',
   components: {
     PageView,
-    HeadInfo,
-    Radar
+    HeadInfo
   },
   data () {
     return {
       timeFix: timeFix(),
       avatar: '',
       user: {},
+      schemeOverView: {},
+      myProjects: {},
 
-      myCountDashboard: [],
+      ramOverView: [],
+      dataOverview: [],
       loading: true,
-      radarLoading: true,
-      activities: [],
-      teams: [],
-
-      // data
-      axis1Opts: {
-        dataKey: 'item',
-        line: null,
-        tickLine: null,
-        grid: {
-          lineStyle: {
-            lineDash: null
-          },
-          hideFirstLine: false
-        }
-      },
-      axis2Opts: {
-        dataKey: 'score',
-        line: null,
-        tickLine: null,
-        grid: {
-          type: 'polygon',
-          lineStyle: {
-            lineDash: null
-          }
-        }
-      },
-      scale: [
-        {
-          dataKey: 'score',
-          min: 0,
-          max: 80
-        }
-      ],
-      axisData: [
-        { item: '引用', a: 70, b: 30, c: 40 },
-        { item: '口碑', a: 60, b: 70, c: 40 },
-        { item: '产量', a: 50, b: 60, c: 40 },
-        { item: '贡献', a: 40, b: 50, c: 40 },
-        { item: '热度', a: 60, b: 70, c: 40 },
-        { item: '引用', a: 70, b: 50, c: 40 }
-      ],
-      radarData: []
+      activities: [] // 日志
     }
   },
   computed: {
@@ -185,30 +179,43 @@ export default {
   created () {
     this.user = this.userInfo
     this.avatar = this.userInfo.avatar
-
-    getRoleList().then(res => {
-      console.log('workplace -> call getRoleList()', res)
-    })
-
-    getServiceList().then(res => {
-      console.log('workplace -> call getServiceList()', res)
-    })
   },
   mounted () {
-    this.getProjects()
-    this.getActivity()
-    this.getTeams()
-    this.initRadar()
+    this.getSchemeOverViewData()
+    this.getRamData()
   },
   methods: {
     ...mapGetters(['nickname', 'welcome']),
+    getSchemeOverviewList () {
+      this.dataOverview = [
+        {
+          id: 1,
+          title: '预设卡口方案',
+          icon: '/dashboard/presetpoint.png',
+          count: this.schemeOverView.presetCount
+        },
+        {
+          id: 2,
+          title: '布设卡口方案',
+          icon: '/dashboard/bayonet.png',
+          count: this.schemeOverView.actualCount
+        },
+        {
+          id: 3,
+          title: '途经卡口方案',
+          icon: '/dashboard/via.png',
+          count: this.schemeOverView.viaCount
+        },
+        {
+          id: 4,
+          title: '轨迹',
+          icon: '/dashboard/route.png',
+          count: this.schemeOverView.routeCount
+        }
+      ]
+    },
     getProjects () {
-      // this.$http.get('/list/search/projects')
-      //   .then(res => {
-      //     this.projects = res.result && res.result.data
-      //     this.loading = false
-      //   })
-      this.myCountDashboard = [
+      this.ramOverView = [
         {
           id: 1,
           title: '用户',
@@ -217,44 +224,51 @@ export default {
         },
         {
           id: 2,
-          title: '用户组',
-          icon: '/dashboard/usergroup.png',
-          count: 1
+          title: 'RAM角色',
+          icon: '/dashboard/RAM.png',
+          count: this.myProjects.roleCount
         },
         {
           id: 3,
-          title: 'RAM角色',
-          icon: '/dashboard/RAM.png',
-          count: 2
+          title: '权限',
+          icon: '/dashboard/usergroup.png',
+          count: 1
         }
       ]
       this.loading = false
     },
-    getActivity () {
-      this.$http.get('/workplace/activity').then(res => {
-        this.activities = res.result
+    getRamData () {
+      var myProjects = {}
+      // getRAMOverView().then(res => {
+      //   this.$set(myProjects, 'roleCount', res.data.total)
+      //   console.log('workplace -> call getRamData()', res)
+      // })
+      this.myProjects = myProjects
+    },
+    getSchemeOverViewData () {
+      var schemeOverView = {}
+      getSchemeOverviewData().then(res => {
+        console.log(res)
+        this.$set(schemeOverView, 'presetCount', res.data.presetCount)
+        this.$set(schemeOverView, 'actualCount', res.data.actualCount)
+        this.$set(schemeOverView, 'viaCount', res.data.viaCount)
+        this.$set(schemeOverView, 'routeCount', res.data.routeCount)
+        console.log('workplace -> call getSchemeOverViewData()', res)
       })
+      this.schemeOverView = schemeOverView
     },
     getTeams () {
-      this.$http.get('/workplace/teams').then(res => {
-        this.teams = res.result
-      })
+      // this.$http.get('/workplace/teams').then(res => {
+      //   this.teams = res.result
+      // })
+    }
+  },
+  watch: {
+    myProjects (val) {
+      this.getProjects()
     },
-    initRadar () {
-      this.radarLoading = true
-
-      this.$http.get('/workplace/radar').then(res => {
-        const dv = new DataSet.View().source(res.result)
-        dv.transform({
-          type: 'fold',
-          fields: ['个人', '团队', '部门'],
-          key: 'user',
-          value: 'score'
-        })
-
-        this.radarData = dv.rows
-        this.radarLoading = false
-      })
+    schemeOverView (val) {
+      this.getSchemeOverviewList()
     }
   }
 }

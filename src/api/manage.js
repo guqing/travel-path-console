@@ -2,8 +2,8 @@ import { axios } from '@/utils/request'
 
 const api = {
   user: '/user',
-  role: '/role',
-  service: '/service',
+  schemeOverview: '/dashboard/scheme-overview',
+  ramOverview: '/dashboard/ram-overview',
   permission: '/permission',
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree'
@@ -19,19 +19,17 @@ export function getUserList (parameter) {
   })
 }
 
-export function getRoleList (parameter) {
+export function getSchemeOverviewData () {
   return axios({
-    url: api.role,
-    method: 'get',
-    params: parameter
+    url: api.schemeOverview,
+    method: 'get'
   })
 }
 
-export function getServiceList (parameter) {
+export function getRAMOverView () {
   return axios({
-    url: api.service,
-    method: 'get',
-    params: parameter
+    url: api.ramOverview,
+    method: 'get'
   })
 }
 
