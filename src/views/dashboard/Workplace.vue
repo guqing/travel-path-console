@@ -122,19 +122,17 @@
                 <a-list-item-meta>
                   <a-avatar
                     slot="avatar"
-                    :src="item.user.avatar"
+                    :src="avatar"
                   />
                   <div slot="title">
-                    <span>{{ item.user.nickname }}</span>&nbsp;
-                    在&nbsp;
-                    <a href="#">{{ item.project.name }}</a>&nbsp;
-                    <span>{{ item.project.action }}</span>&nbsp;
-                    <a href="#">{{ item.project.event }}</a>
+                    <span>{{ item.username }}</span>&nbsp;
+                    <a href="#">{{ item.content }}</a>
                   </div>
-                  <div slot="description">{{ item.time }}</div>
+                  <div slot="description">{{ item.createTime | timeAgo }}</div>
                 </a-list-item-meta>
               </a-list-item>
             </a-list>
+            <a-pagination v-model="pagination.current" :total="pagination.total" style="text-align:right;"/>
           </a-card>
         </a-col>
       </a-row>
@@ -145,11 +143,11 @@
 <script>
 import { timeFix } from '@/utils/util'
 import { mapGetters } from 'vuex'
-
 import { PageView } from '@/layouts'
 import HeadInfo from '@/components/tools/HeadInfo'
+import { timeAgo } from '@/mystatic/js/common'
 
-import { getSchemeOverviewData, getRAMOverView } from '@/api/manage'
+import { getSchemeOverviewData, getRAMOverView, getLog } from '@/api/manage'
 
 export default {
   name: 'Workplace',
@@ -164,6 +162,11 @@ export default {
       user: {},
       schemeOverView: {},
       myProjects: {},
+      pagination: {
+        current: 1,
+        pageSize: 10,
+        total: 0
+      },
 
       ramOverView: [],
       dataOverview: [],
@@ -183,6 +186,7 @@ export default {
   mounted () {
     this.getSchemeOverViewData()
     this.getRamData()
+    this.getLog()
   },
   methods: {
     ...mapGetters(['nickname', 'welcome']),
@@ -258,6 +262,17 @@ export default {
         console.log('workplace -> call getSchemeOverViewData()', res)
       })
       this.schemeOverView = schemeOverView
+    },
+    getLog () {
+      getLog(this.pagination).then(res => {
+        this.activities = res.data.list
+        this.pagination.total = res.data.total
+      }).catch(err => {
+        this.$notification.error({
+          message: 'error',
+          description: '查询日志列表失败：' + err.message
+        })
+      })
     }
   },
   watch: {
@@ -267,6 +282,9 @@ export default {
     schemeOverView (val) {
       this.getSchemeOverviewList()
     }
+  },
+  filters: {
+    timeAgo
   }
 }
 </script>

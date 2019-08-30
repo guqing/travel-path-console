@@ -4,6 +4,7 @@ const api = {
   user: '/user',
   schemeOverview: '/dashboard/scheme-overview',
   ramOverview: '/dashboard/ram-overview',
+  listLog: '/log/list',
   permission: '/permission',
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree'
@@ -30,6 +31,14 @@ export function getRAMOverView () {
   return axios({
     url: api.ramOverview,
     method: 'get'
+  })
+}
+
+export function getLog (parameter) {
+  return axios({
+    url: api.listLog,
+    method: 'get',
+    params: parameter
   })
 }
 
