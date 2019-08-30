@@ -220,7 +220,7 @@ export default {
           id: 1,
           title: '用户',
           icon: '/dashboard/user.png',
-          count: 1
+          count: this.myProjects.userCount
         },
         {
           id: 2,
@@ -232,17 +232,19 @@ export default {
           id: 3,
           title: '权限',
           icon: '/dashboard/usergroup.png',
-          count: 1
+          count: this.myProjects.permissionCount
         }
       ]
       this.loading = false
     },
     getRamData () {
       var myProjects = {}
-      // getRAMOverView().then(res => {
-      //   this.$set(myProjects, 'roleCount', res.data.total)
-      //   console.log('workplace -> call getRamData()', res)
-      // })
+      getRAMOverView().then(res => {
+        this.$set(myProjects, 'userCount', res.data.userCount)
+        this.$set(myProjects, 'roleCount', res.data.roleCount)
+        this.$set(myProjects, 'permissionCount', res.data.permissionCount)
+        console.log('workplace -> call getRamData()', res)
+      })
       this.myProjects = myProjects
     },
     getSchemeOverViewData () {
@@ -256,11 +258,6 @@ export default {
         console.log('workplace -> call getSchemeOverViewData()', res)
       })
       this.schemeOverView = schemeOverView
-    },
-    getTeams () {
-      // this.$http.get('/workplace/teams').then(res => {
-      //   this.teams = res.result
-      // })
     }
   },
   watch: {
