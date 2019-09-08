@@ -47,6 +47,13 @@ service.interceptors.request.use(config => {
   const token = Vue.ls.get(ACCESS_TOKEN)
   if (token) {
     config.headers['Authorization'] = token // 让每个请求携带自定义 token 请根据实际情况自行修改
+  } else {
+    // 获取不到token则重新登录
+    store.dispatch('Logout').then(() => {
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
+    })
   }
   return config
 }, err)
@@ -54,14 +61,16 @@ service.interceptors.request.use(config => {
 // response interceptor
 service.interceptors.response.use((response) => {
   // 在这里检查后端是否有携带token在response中，如果有设置给token
-  const token = response.headers['Authorization']
+  const token = response.headers['authorization']
   if (token) {
     // 让每个请求携带自定义 token 请根据实际情况自行修改
-    Vue.ls.set(ACCESS_TOKEN, response.data, 7 * 24 * 60 * 60 * 1000)
+    Vue.ls.set(ACCESS_TOKEN, token, 7 * 24 * 60 * 60 * 1000)
+    store.commit('SET_TOKEN', token)
   }
+
   if (response.data.code === 506) {
     notification.error({
-      message: '没有权限',
+      message: '没有权限,请刷新页面后重试',
       description: response.data.message
     })
   }
