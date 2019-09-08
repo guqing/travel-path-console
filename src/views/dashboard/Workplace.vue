@@ -132,7 +132,7 @@
                 </a-list-item-meta>
               </a-list-item>
             </a-list>
-            <a-pagination v-model="pagination.current" :total="pagination.total" style="text-align:right;"/>
+            <a-pagination @change="onPageChange" v-model="pagination.current" :total="pagination.total" style="text-align:right;"/>
           </a-card>
         </a-col>
       </a-row>
@@ -164,7 +164,7 @@ export default {
       myProjects: {},
       pagination: {
         current: 1,
-        pageSize: 10,
+        pageSize: 5,
         total: 0
       },
 
@@ -273,6 +273,9 @@ export default {
           description: '查询日志列表失败：' + err.message
         })
       })
+    },
+    onPageChange () {
+      this.getLog()
     }
   },
   watch: {
