@@ -39,42 +39,32 @@ export const asyncRouterMap = [
         component: () => import('@/views/route_bayonet/List'),
         meta: { title: '途经卡口管理', keepAlive: true, icon: 'deployment-unit' }
       },
-      // permissions
+      // ram访问控制
       {
-        path: '/permissions',
-        name: 'permissions',
+        path: '/ram',
+        name: 'ram',
         component: PageView,
-        redirect: '/permissions/permission-list',
-        meta: { title: '权限管理', icon: 'table' },
+        redirect: '/ram/list/user',
+        meta: { title: '访问控制', icon: 'table' },
         children: [
           {
-            path: '/permissions/permission-list/:pageNo([1-9]\\d*)?',
-            name: 'permissionList',
+            path: '/ram/list/user',
+            name: 'UserList',
             hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
-            component: () => import('@/views/permissions/PermissionList'),
-            meta: { title: '权限列表', keepAlive: true, permission: [ 'permissions' ] }
-          }
-        ]
-      },
-      // roles
-      {
-        path: '/roles',
-        name: 'rolesPage',
-        component: PageView,
-        meta: { title: '角色管理', icon: 'slack', permission: [ 'dashboard' ] },
-        redirect: '/roles/icon-selector',
-        children: [
-          {
-            path: '/roles/icon-selector',
-            name: 'TestIconSelect',
-            component: () => import('@/views/roles/IconSelectorView'),
-            meta: { title: 'IconSelector', icon: 'tool', keepAlive: true, permission: [ 'dashboard' ] }
+            component: () => import('@/views/ram/UserList'),
+            meta: { title: '用户管理', keepAlive: true, permission: [ 'ram' ] }
           },
           {
-            path: '/roles/list/role-list',
+            path: '/ram/list/role',
             name: 'RoleList',
-            component: () => import('@/views/roles/RoleList'),
-            meta: { title: '角色列表', keepAlive: true, permission: [ 'roles' ] }
+            component: () => import('@/views/ram/RoleList'),
+            meta: { title: '角色列表', keepAlive: true, permission: [ 'ram' ] }
+          },
+          {
+            path: '/ram/icon-selector',
+            name: 'TestIconSelect',
+            component: () => import('@/views/ram/IconSelectorView'),
+            meta: { title: 'IconSelector', icon: 'tool', keepAlive: true, permission: [ 'ram' ] }
           }
         ]
       },

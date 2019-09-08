@@ -1,11 +1,12 @@
 import { axios } from '@/utils/request'
 
 const api = {
-  user: '/user',
+  user: '/user/list',
   schemeOverview: '/dashboard/scheme-overview',
   ramOverview: '/dashboard/ram-overview',
   listLog: '/log/list',
   permission: '/permission',
+  role: '/role/list',
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree'
 }
@@ -45,6 +46,22 @@ export function getLog (parameter) {
 export function getPermissions (parameter) {
   return axios({
     url: api.permissionNoPager,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function getRoleList (parameter) {
+  return axios({
+    url: api.role,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function getServiceList (parameter) {
+  return axios({
+    url: api.role,
     method: 'get',
     params: parameter
   })

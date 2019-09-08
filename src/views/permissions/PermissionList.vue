@@ -72,7 +72,6 @@
 <script>
 import { STable } from '@/components'
 import STree from '@/components/Tree/Tree'
-import { getOrgTree, getServiceList } from '@/api/manage'
 
 export default {
   name: 'TreeList',
