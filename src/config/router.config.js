@@ -15,7 +15,7 @@ export const asyncRouterMap = [
         path: '/dashboard/workplace',
         name: 'dashboard',
         component: () => import('@/views/dashboard/Workplace'),
-        meta: { title: '仪表盘', keepAlive: true, icon: 'dashboard' }
+        meta: { title: '仪表盘', keepAlive: true, icon: 'dashboard', permission: [ 'dashboard' ] }
       },
       // presetScheme
       {
@@ -23,21 +23,21 @@ export const asyncRouterMap = [
         name: 'PresetSchemeList',
         // redirect: '/preset/list',
         component: () => import('@/views/preset/List'),
-        meta: { title: '预设卡口管理', keepAlive: true, icon: 'flag' }
+        meta: { title: '预设卡口管理', keepAlive: true, icon: 'flag', permission: [ 'preset' ] }
       },
       // actualScheme 实际布设卡口方案
       {
         path: '/actual/list',
         name: 'ActualSchemeList',
         component: () => import('@/views/actual_scheme/List'),
-        meta: { title: '布设卡口管理', keepAlive: true, icon: 'bg-colors' }
+        meta: { title: '布设卡口管理', keepAlive: true, icon: 'bg-colors', permission: [ 'actualBayonet' ] }
       },
       // RouteBayone 车辆途径卡口方案
       {
         path: '/route-bayonet/list',
         name: 'RouteBayoneList',
         component: () => import('@/views/route_bayonet/List'),
-        meta: { title: '途经卡口管理', keepAlive: true, icon: 'deployment-unit' }
+        meta: { title: '途经卡口管理', keepAlive: true, icon: 'deployment-unit', permission: [ 'via' ] }
       },
       // ram访问控制
       {

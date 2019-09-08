@@ -77,7 +77,8 @@
             :loading="loading"
             style="margin-bottom: 24px;"
             :bordered="false"
-            title="我的账户"
+            title="访问控制"
+            v-if="$auth('dashboard.ram')"
             :body-style="{ padding: 0 }"
           >
             <div>
