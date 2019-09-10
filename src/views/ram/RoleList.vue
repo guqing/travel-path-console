@@ -31,11 +31,13 @@
       <a-button type="primary" icon="plus">新建</a-button>
     </div>
 
-    <s-table
+    <a-table
       ref="table"
       size="default"
       :columns="columns"
-      :data="loadData"
+      rowKey="id"
+      :dataSource="roleList"
+      :pagination="pagination"
     >
       <div
         slot="expandedRowRender"
@@ -56,7 +58,7 @@
         </a-row>
       </div>
       <span slot="action" slot-scope="text, record">
-        <a @click="$refs.modal.edit(record)">编辑</a>
+        <a @click="handleEdit(record)">编辑</a>
         <a-divider type="vertical" />
         <a-dropdown>
           <a class="ant-dropdown-link">
@@ -75,14 +77,22 @@
           </a-menu>
         </a-dropdown>
       </span>
-    </s-table>
-
-    <role-modal ref="modal" @ok="handleOk"></role-modal>
-
+    </a-table>
+    <a-modal
+      title="操作"
+      style="top: 20px;"
+      :width="800"
+      v-model="visible"
+      @ok="handleOk"
+    >
+      <role-modal></role-modal>
+    </a-modal>
   </a-card>
 </template>
 
 <script>
+import { getRoleList } from '@/api/manage'
+import moment from 'moment'
 import { STable } from '@/components'
 import RoleModal from './modules/RoleModal'
 
@@ -101,10 +111,16 @@ export default {
       form: null,
       mdl: {},
 
+      roleList: null,
       // 高级搜索 展开/关闭
       advanced: false,
       // 查询参数
       queryParam: {},
+      pagination: {
+        current: 1,
+        pageSize: 10,
+        total: 0
+      },
       // 表头
       columns: [
         {
@@ -122,6 +138,9 @@ export default {
         {
           title: '创建时间',
           dataIndex: 'createTime',
+          customRender: function (index, text, record) {
+            return moment(text).format('YYYY-MM-DD')
+          },
           sorter: true
         }, {
           title: '操作',
@@ -130,30 +149,27 @@ export default {
           scopedSlots: { customRender: 'action' }
         }
       ],
-      // 加载数据方法 必须为 Promise 对象
-      loadData: parameter => {
-        return this.$http.get('/role', {
-          params: Object.assign(parameter, this.queryParam)
-        }).then(res => {
-          return res.result
-        })
-      },
-
       selectedRowKeys: [],
       selectedRows: []
     }
   },
+  created () {
+    this.loadRoleList()
+  },
   methods: {
-    handleEdit (record) {
-      this.mdl = Object.assign({}, record)
-
-      this.mdl.permissions.forEach(permission => {
-        permission.actionsOptions = permission.actionEntitySet.map(action => {
-          return { label: action.describe, value: action.action, defaultCheck: action.defaultCheck }
+    loadRoleList () {
+      getRoleList(this.pagination).then(res => {
+        this.roleList = res.data.list
+      }).catch(err => {
+        this.$notification.error({
+          message: '错误',
+          description: '获取角色列表失败，error:' + err
         })
       })
-
-      console.log(this.mdl)
+    },
+    handleEdit (record) {
+      console.log('record', record)
+      this.mdl = Object.assign({}, record)
       this.visible = true
     },
     handleOk () {
@@ -167,20 +183,6 @@ export default {
     toggleAdvanced () {
       this.advanced = !this.advanced
     }
-  },
-  watch: {
-    /*
-      'selectedRows': function (selectedRows) {
-        this.needTotalList = this.needTotalList.map(item => {
-          return {
-            ...item,
-            total: selectedRows.reduce( (sum, val) => {
-              return sum + val[item.dataIndex]
-            }, 0)
-          }
-        })
-      }
-      */
   }
 }
 </script>

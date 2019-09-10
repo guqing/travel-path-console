@@ -5,9 +5,9 @@ const api = {
   schemeOverview: '/dashboard/scheme-overview',
   ramOverview: '/dashboard/ram-overview',
   listLog: '/log/list',
-  permission: '/permission',
+  permission: '/permission/list',
   role: '/role/list',
-  permissionNoPager: '/permission/no-pager',
+  permissionNoPager: '/permission/list-all',
   orgTree: '/org/tree'
 }
 
