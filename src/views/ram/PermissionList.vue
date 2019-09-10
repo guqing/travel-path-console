@@ -27,10 +27,16 @@
       </a-form>
     </div>
 
-    <s-table :columns="columns" :data="loadData">
+    <a-table
+      size="default"
+      :columns="columns"
+      rowKey="id"
+      :dataSource="permissionList"
+      :pagination="pagination"
+    >
 
       <span slot="actions" slot-scope="text, record">
-        <a-tag v-for="(action, index) in record.actionList" :key="index">{{ action.describe }}</a-tag>
+        <a-tag v-for="(action, index) in record.actionList" :key="index">{{ action.description }}</a-tag>
       </span>
 
       <span slot="status" slot-scope="text">
@@ -57,7 +63,7 @@
           </a-menu>
         </a-dropdown>
       </span>
-    </s-table>
+    </a-table>
 
     <a-modal
       title="操作"
@@ -84,7 +90,7 @@
           hasFeedback
           validateStatus="success"
         >
-          <a-input placeholder="起一个名字" v-model="mdl.name" id="permission_name" />
+          <a-input placeholder="起一个名字" v-model="mdl.permissionName" id="permission_name" />
         </a-form-item>
 
         <a-form-item
@@ -106,7 +112,7 @@
           label="描述"
           hasFeedback
         >
-          <a-textarea :rows="5" v-model="mdl.describe" placeholder="..." id="describe"/>
+          <a-textarea :rows="5" v-model="mdl.description" placeholder="..." id="describe"/>
         </a-form-item>
 
         <a-divider />
@@ -123,7 +129,7 @@
             v-model="mdl.actions"
             :allowClear="true"
           >
-            <a-select-option v-for="(action, index) in permissionList" :key="index" :value="action.value">{{ action.label }}</a-select-option>
+            <a-select-option v-for="(action, index) in permissionList" :key="index" :value="action.value">{{ action }}</a-select-option>
           </a-select>
         </a-form-item>
 
@@ -158,15 +164,29 @@ export default {
       advanced: false,
       // 查询参数
       queryParam: {},
+      pagination: {
+        current: 1,
+        pageSize: 10,
+        total: 0
+      },
       // 表头
       columns: [
         {
+          title: '编号',
+          dataIndex: 'id',
+          key: 'id',
+          customRender: function (text, record, index) {
+            // 行号
+            return index + 1
+          }
+        },
+        {
           title: '唯一识别码',
-          dataIndex: 'id'
+          dataIndex: 'permissionId'
         },
         {
           title: '权限名称',
-          dataIndex: 'name'
+          dataIndex: 'permissionName'
         },
         {
           title: '可操作权限',
@@ -175,8 +195,10 @@ export default {
         },
         {
           title: '状态',
-          dataIndex: 'status',
-          scopedSlots: { customRender: 'status' }
+          dataIndex: 'available',
+          customRender: function (text, record, index) {
+            return text === 0 ? '正常' : '禁用'
+          }
         },
         {
           title: '操作',
@@ -187,19 +209,6 @@ export default {
       ],
       // 向后端拉取可以用的操作列表
       permissionList: null,
-      // 加载数据方法 必须为 Promise 对象
-      loadData: parameter => {
-        return this.$http.get('/permission', {
-          params: Object.assign(parameter, this.queryParam)
-        }).then(res => {
-          const result = res.result
-          result.data.map(permission => {
-            permission.actionList = JSON.parse(permission.actionData)
-            return permission
-          })
-          return result
-        })
-      },
       selectedRowKeys: [],
       selectedRows: []
     }
@@ -218,20 +227,17 @@ export default {
   },
   methods: {
     loadPermissionList () {
-      // permissionList
-      new Promise(resolve => {
-        const data = [
-          { label: '新增', value: 'add', defaultChecked: false },
-          { label: '查询', value: 'get', defaultChecked: false },
-          { label: '修改', value: 'update', defaultChecked: false },
-          { label: '列表', value: 'query', defaultChecked: false },
-          { label: '删除', value: 'delete', defaultChecked: false },
-          { label: '导入', value: 'import', defaultChecked: false },
-          { label: '导出', value: 'export', defaultChecked: false }
-        ]
-        setTimeout(resolve(data), 1500)
+      this.$http.get('/permission/list', {
+        params: Object.assign(this.pagination, this.queryParam)
       }).then(res => {
-        this.permissionList = res
+        const result = res.data.list
+        result.map(permission => {
+          // 为permission增加一个actionList字段
+          permission.actionList = JSON.parse(permission.actions)
+          return permission
+        })
+        // 为集合赋值
+        this.permissionList = result
       })
     },
     handleEdit (record) {

@@ -61,6 +61,12 @@ export const asyncRouterMap = [
             meta: { title: '角色列表', keepAlive: true, permission: [ 'ram' ] }
           },
           {
+            path: '/ram/list/permission',
+            name: 'PermissionList',
+            component: () => import('@/views/ram/PermissionList'),
+            meta: { title: '权限列表', keepAlive: true, permission: [ 'ram' ] }
+          },
+          {
             path: '/ram/icon-selector',
             name: 'TestIconSelect',
             component: () => import('@/views/ram/IconSelectorView'),
