@@ -86,9 +86,8 @@
           :activeTabKey="noTitleKey"
           @tabChange="key => handleTabChange(key, 'noTitleKey')"
         >
-          <article-page v-if="noTitleKey === 'article'"></article-page>
-          <app-page v-else-if="noTitleKey === 'app'"></app-page>
-          <project-page v-else-if="noTitleKey === 'project'"></project-page>
+          <base-setting v-if="noTitleKey === 'base'"></base-setting>
+          <password-page v-else-if="noTitleKey === 'password'"></password-page>
         </a-card>
       </a-col>
     </a-row>
@@ -97,7 +96,7 @@
 
 <script>
 import { PageView, RouteView } from '@/layouts'
-import { AppPage, ArticlePage, ProjectPage } from './page'
+import { BaseSetting, PasswordPage } from './page'
 
 import { mapGetters } from 'vuex'
 
@@ -105,9 +104,8 @@ export default {
   components: {
     RouteView,
     PageView,
-    AppPage,
-    ArticlePage,
-    ProjectPage
+    BaseSetting,
+    PasswordPage
   },
   data () {
     return {
@@ -121,19 +119,15 @@ export default {
 
       tabListNoTitle: [
         {
-          key: 'article',
-          tab: '文章(8)'
+          key: 'base',
+          tab: '基础设置'
         },
         {
-          key: 'app',
-          tab: '应用(8)'
-        },
-        {
-          key: 'project',
-          tab: '项目(8)'
+          key: 'password',
+          tab: '密码'
         }
       ],
-      noTitleKey: 'app'
+      noTitleKey: 'base'
     }
   },
   mounted () {
