@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { getRoleList, getPermissions } from '@/api/manage'
+import { getRoleList, getPermissions, saveRole } from '@/api/manage'
 import { mixinDevice } from '@/utils/mixin'
 import { actionToObject } from '@/utils/permissions'
 import pick from 'lodash.pick'
@@ -120,17 +120,17 @@ export default {
               values.permissionIds.push(selected)
             })
           })
-          console.log('form values:', values)
           _this.confirmLoading = true
           // 模拟后端请求 2000 毫秒延迟
           new Promise((resolve) => {
-            setTimeout(() => resolve(), 2000)
-          }).then(() => {
-            // Do something
-            _this.$message.success('保存成功')
-            _this.$emit('ok')
-          }).catch(() => {
-            // Do something
+            // 保存数据到数据库
+            console.log('form values:', values)
+            saveRole(values).then(res => {
+              _this.$message.success('保存成功')
+              _this.$emit('ok')
+            }).catch(err => {
+              _this.$message.error('保存失败，error:' + err.message)
+            })
           }).finally(() => {
             _this.confirmLoading = false
             _this.close()

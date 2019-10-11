@@ -28,7 +28,7 @@
     </div>
 
     <div class="table-operator">
-      <a-button type="primary" icon="plus">新建</a-button>
+      <a-button type="primary" icon="plus" @click="$refs.modal.add()">新建</a-button>
     </div>
 
     <a-table
@@ -72,19 +72,19 @@
               <a href="javascript:;">禁用</a>
             </a-menu-item>
             <a-menu-item>
-              <a href="javascript:;">删除</a>
+              <a href="javascript:;" @click="handleDeleteRole(record.id)">删除</a>
             </a-menu-item>
           </a-menu>
         </a-dropdown>
       </span>
     </a-table>
 
-    <role-modal ref="modal"></role-modal>
+    <role-modal ref="modal" @ok="handleOk"></role-modal>
   </a-card>
 </template>
 
 <script>
-import { getRoleList } from '@/api/manage'
+import { getRoleList, deleteRole } from '@/api/manage'
 import moment from 'moment'
 import { STable } from '@/components'
 import RoleModal from './modules/RoleModal'
@@ -163,15 +163,33 @@ export default {
         })
       })
     },
-    handleEdit (record) {
-      console.log('record', record)
-      this.mdl = Object.assign({}, record)
-      this.$refs.roleModal.edit(record)
-      this.visible = true
-    },
     handleOk () {
       // 新增/修改 成功时，重载列表
-      this.$refs.table.refresh()
+      this.loadRoleList()
+    },
+    handleDeleteRole (roleId) {
+      var _this = this
+      this.$confirm({
+        title: '确定要删除该角色吗?',
+        content: '警告',
+        okText: '确认',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk () {
+          deleteRole(roleId).then(res => {
+            _this.loadRoleList()
+            _this.$notification.success({
+              message: '提示',
+              description: '删除成功'
+            })
+          }).catch(err => {
+            _this.$notification.error({
+              message: '错误',
+              description: '删除角色失败，error:' + err
+            })
+          })
+        }
+      })
     },
     onChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys

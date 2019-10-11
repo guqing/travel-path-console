@@ -7,6 +7,9 @@ const api = {
   listLog: '/log/list',
   permission: '/permission/list',
   role: '/role/list',
+  addRole: '/role/save',
+  updateRole: '/role/update',
+  deleteRole: '/role/delete',
   permissionNoPager: '/permission/list-all',
   orgTree: '/org/tree'
 }
@@ -59,14 +62,6 @@ export function getRoleList (parameter) {
   })
 }
 
-export function getServiceList (parameter) {
-  return axios({
-    url: api.role,
-    method: 'get',
-    params: parameter
-  })
-}
-
 export function getOrgTree (parameter) {
   return axios({
     url: api.orgTree,
@@ -77,10 +72,20 @@ export function getOrgTree (parameter) {
 
 // id == 0 add     post
 // id != 0 update  put
-export function saveService (parameter) {
+export function saveRole (parameter) {
   return axios({
-    url: api.service,
+    url: parameter.id === 0 ? api.addRole : api.updateRole,
     method: parameter.id === 0 ? 'post' : 'put',
-    data: parameter
+    data: parameter,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
+export function deleteRole (parameter) {
+  return axios({
+    url: api.deleteRole + '/' + parameter,
+    method: 'post'
   })
 }
