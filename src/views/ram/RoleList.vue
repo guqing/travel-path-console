@@ -51,14 +51,14 @@
               <span>{{ role.permissionName }}：</span>
             </a-col>
             <a-col :span="20" v-if="role.actionEntitySet.length > 0">
-              <a-tag color="cyan" v-for="(action, k) in role.actionEntitySet" :key="k">{{ action.describe }}</a-tag>
+              <a-tag color="cyan" v-for="(action, k) in role.actionEntitySet" :key="k">{{ action.description }}</a-tag>
             </a-col>
             <a-col :span="20" v-else>-</a-col>
           </a-col>
         </a-row>
       </div>
       <span slot="action" slot-scope="text, record">
-        <a @click="handleEdit(record)">编辑</a>
+        <a @click="$refs.modal.edit(record)">编辑</a>
         <a-divider type="vertical" />
         <a-dropdown>
           <a class="ant-dropdown-link">
@@ -78,15 +78,8 @@
         </a-dropdown>
       </span>
     </a-table>
-    <a-modal
-      title="操作"
-      style="top: 20px;"
-      :width="800"
-      v-model="visible"
-      @ok="handleOk"
-    >
-      <role-modal></role-modal>
-    </a-modal>
+
+    <role-modal ref="modal"></role-modal>
   </a-card>
 </template>
 
@@ -133,7 +126,10 @@ export default {
         },
         {
           title: '状态',
-          dataIndex: 'status'
+          dataIndex: 'available',
+          customRender: function (text, record) {
+            return text === '1' ? '正常' : '禁用'
+          }
         },
         {
           title: '创建时间',
@@ -170,6 +166,7 @@ export default {
     handleEdit (record) {
       console.log('record', record)
       this.mdl = Object.assign({}, record)
+      this.$refs.roleModal.edit(record)
       this.visible = true
     },
     handleOk () {
