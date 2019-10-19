@@ -2,45 +2,58 @@
   <div class="account-settings-info-view">
     <a-row :gutter="16">
       <a-col :md="24" :lg="16">
-
         <a-form layout="vertical">
           <a-form-item
             label="昵称"
+            :required="true"
           >
-            <a-input placeholder="给自己起个名字" />
+            <a-input placeholder="给自己起个名字" v-model="user.name"/>
           </a-form-item>
           <a-form-item
             label="Bio"
           >
-            <a-textarea rows="4" placeholder="You are not alone."/>
+            <a-textarea rows="4" placeholder="You are not alone." v-model="user.description"/>
           </a-form-item>
 
           <a-form-item
             label="电子邮件"
             :required="false"
           >
-            <a-input placeholder="exp@admin.com"/>
+            <a-input placeholder="exp@admin.com" v-model="user.email"/>
+          </a-form-item>
+
+          <a-form-item
+            label="手机号码"
+            :required="false"
+          >
+            <a-input placeholder="填写一个手机号" v-model="user.telephone"/>
           </a-form-item>
 
           <a-form-item>
-            <a-button type="primary">保存</a-button>
+            <a-button type="primary" @click="handleUpdateUserInfo">保存</a-button>
           </a-form-item>
         </a-form>
 
       </a-col>
       <a-col :md="24" :lg="8" :style="{ minHeight: '180px' }">
-        <div class="ant-upload-preview" @click="$refs.modal.edit(1)" >
-          <a-icon type="cloud-upload-o" class="upload-icon"/>
-          <div class="mask">
-            <a-icon type="plus" />
+        <a-upload
+          name="file"
+          :showUploadList="false"
+          :beforeUpload="handleBeforeUpload"
+        >
+          <div class="ant-upload-preview" type="upload">
+            <a-icon type="cloud-upload-o" class="upload-icon"/>
+            <div class="mask">
+              <a-icon type="plus" />
+            </div>
+            <img :src="getAvatar"/>
           </div>
-          <img :src="option.img"/>
-        </div>
+        </a-upload>
       </a-col>
 
     </a-row>
 
-    <avatar-modal ref="modal">
+    <avatar-modal ref="modal" @success="handleUploadAvatar">
 
     </avatar-modal>
   </div>
@@ -48,6 +61,8 @@
 
 <script>
 import AvatarModal from './AvatarModal'
+import userApi from '@/api/user'
+import { mapActions } from 'vuex'
 
 export default {
   components: {
@@ -55,27 +70,59 @@ export default {
   },
   data () {
     return {
-      // cropper
-      preview: {},
-      option: {
-        img: '/avatar2.jpg',
-        info: true,
-        size: 1,
-        outputType: 'jpeg',
-        canScale: false,
-        autoCrop: true,
-        // 只有自动截图开启 宽度高度才生效
-        autoCropWidth: 180,
-        autoCropHeight: 180,
-        fixedBox: true,
-        // 开启宽度和高度比例
-        fixed: true,
-        fixedNumber: [1, 1]
-      }
+      user: {}
     }
   },
+  mounted () {
+    this.loadUser()
+  },
   methods: {
+    ...mapActions(['GetInfo']),
 
+    loadUser () {
+      userApi.getBaseUserInfo().then(res => {
+        console.log('base user info:', res)
+        if (res.code === 0) {
+          this.user = res.data
+        }
+      })
+    },
+
+    handleBeforeUpload (file) {
+      console.log('before upload:', file)
+      this.$refs.modal.edit(file)
+      return false
+    },
+
+    handleUpdateUserInfo () {
+      if (this.user.name === '') {
+        this.$message.warning('昵称不能为空')
+        return
+      }
+      if (this.user.description.length > 144) {
+        this.$message.warning('个人说明不能超过144个字符')
+        return
+      }
+      userApi.updateUserInfo(this.user).then(res => {
+        this.$message.success('保存成功')
+        this.loadUser()
+        // 更新vuex状态
+        this.GetInfo()
+      }).catch(err => {
+        this.$message.error(`更新用户信息出错,error: ${err.message}`)
+      })
+    },
+    handleUploadAvatar (avatarUrl) {
+      this.user['avatar'] = avatarUrl
+    }
+  },
+  computed: {
+    getAvatar () {
+      if (this.user.avatar === '') {
+        return '/avatar2.jpg'
+      }
+      return this.user.avatar
+    }
   }
 }
 </script>

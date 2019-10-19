@@ -5,7 +5,7 @@
     :maskClosable="false"
     :confirmLoading="confirmLoading"
     :width="800"
-    @cancel="cancelHandel">
+    @cancel="cancelHandle">
     <a-row>
       <a-col :xs="24" :md="12" :style="{height: '350px'}">
         <vue-cropper
@@ -28,62 +28,81 @@
     </a-row>
 
     <template slot="footer">
-      <a-button key="back" @click="cancelHandel">取消</a-button>
-      <a-button key="submit" type="primary" :loading="confirmLoading" @click="okHandel">保存</a-button>
+      <a-button key="back" @click="cancelHandle">取消</a-button>
+      <a-button key="submit" type="primary" :loading="confirmLoading" @click="okHandle">保存</a-button>
     </template>
   </a-modal>
 </template>
 <script>
-// import { VueCropper } from 'vue-cropper'
-
+import userApi from '@/api/user'
 export default {
-  /*
-  components: {
-    VueCropper
-  },
-  */
   data () {
     return {
       visible: false,
-      id: null,
       confirmLoading: false,
 
       options: {
-        img: '/avatar2.jpg',
+        img: '',
         autoCrop: true,
         autoCropWidth: 200,
         autoCropHeight: 200,
         fixedBox: true
       },
-      previews: {}
+      previews: {},
+      avatarFile: {}
     }
   },
   methods: {
-    edit (id) {
+    edit (imageFile) {
+      var that = this
+      this.avatarFile = imageFile
+      var reader = new FileReader()
+      reader.readAsDataURL(imageFile)
+      reader.onloadend = function () {
+        that.options.img = this.result
+      }
       this.visible = true
-      this.id = id
-      /* 获取原始头像 */
     },
     close () {
-      this.id = null
       this.visible = false
     },
-    cancelHandel () {
+    cancelHandle () {
       this.close()
     },
-    okHandel () {
-      const vm = this
-
-      vm.confirmLoading = true
-      setTimeout(() => {
-        vm.confirmLoading = false
-        vm.close()
-        vm.$message.success('上传头像成功')
-      }, 2000)
+    okHandle (type) {
+      var that = this
+      this.$refs.cropper.getCropData(data => {
+        that.uploadAvatar(data)
+      })
     },
-
     realTime (data) {
       this.previews = data
+    },
+
+    uploadAvatar (data) {
+      var file = this.dataUrlToFile(data)
+      var formData = new FormData()
+      formData.append('file', file)
+
+      userApi.uploadAvatar(formData).then(res => {
+        this.$message.success('头像上传成功')
+        this.$emit('success', res.data)
+      })
+
+      // 关闭裁剪窗口
+      this.close()
+    },
+
+    dataUrlToFile (dataurl) {
+      var arr = dataurl.split(',')
+      // var mime = arr[0].match(/:(.*?);/)[1]
+      var bstr = atob(arr[1])
+      var n = bstr.length
+      var u8arr = new Uint8Array(n)
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n)
+      }
+      return new File([u8arr], this.avatarFile.name, { type: this.avatarFile.type })
     }
   }
 }
