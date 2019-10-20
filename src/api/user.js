@@ -34,4 +34,15 @@ userApi.uploadAvatar = function (parameter) {
   })
 }
 
+userApi.updatePassword = function (parameter) {
+  return axios({
+    url: '/user/updatePassword',
+    method: 'put',
+    data: parameter,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
 export default userApi
