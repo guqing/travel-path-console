@@ -119,7 +119,7 @@ export default {
   computed: {
     getAvatar () {
       if (this.user.avatar === '') {
-        return '/avatar2.jpg'
+        return '/placeholder.jpg'
       }
       return this.user.avatar
     }

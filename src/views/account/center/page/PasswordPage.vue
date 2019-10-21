@@ -4,23 +4,16 @@
       <a-col :md="24" :lg="16">
 
         <a-form layout="vertical" :form="form">
-          <a-form-item
-            label="原始密码"
-          >
-            <a-input-password
-             v-decorator="[
+          <a-form-item label="原始密码">
+            <a-input-password v-decorator="[
                 'oldPassword',
                 {
                   rules: [{ required: true, message: '请输入原始密码', whitespace: false }],
                 },
-             ]"/>
+             ]" />
           </a-form-item>
-          <a-form-item
-            label="新密码"
-          >
-            <a-input-password
-              @blur="handleConfirmBlur"
-              v-decorator="[
+          <a-form-item label="新密码">
+            <a-input-password @blur="handleConfirmBlur" v-decorator="[
               'newPassword',
               {
                 rules: [
@@ -33,26 +26,24 @@
                   validator: validateToNextPassword,
                 }
               ]}
-             ]"/>
+             ]" />
           </a-form-item>
 
-          <a-form-item
-            label="确认密码"
-          >
-            <a-input-password
-             v-decorator="[
+          <a-form-item label="确认密码">
+            <a-input-password v-decorator="[
              'confirmPassword',
               {
                 rules: [
-                {
-                  required: true,
-                  message: '再次输入新密码'
-                },
-                {
-                  validator: compareToFirstPassword,
-                }
-              ]}
-             ]"/>
+                  {
+                    required: true,
+                    message: '再次输入新密码'
+                  },
+                  {
+                    validator: compareToFirstPassword,
+                  }
+                ]
+              }
+              ]" />
           </a-form-item>
 
           <a-form-item>
@@ -77,11 +68,11 @@ export default {
       validateMessage: {}
     }
   },
-  beforeCreate() {
+  beforeCreate () {
     this.form = this.$form.createForm(this, { name: 'updatePassword' })
   },
   methods: {
-    handleSubmit(e) {
+    handleSubmit (e) {
       this.form.validateFieldsAndScroll((err, values) => {
         const user = {
           id: this.userId,
@@ -94,27 +85,25 @@ export default {
         }
       })
     },
-    handleConfirmBlur(e) {
-      const value = e.target.value;
-      this.confirmDirty = this.confirmDirty || !!value;
+    handleConfirmBlur (e) {
+      const value = e.target.value
+      this.confirmDirty = this.confirmDirty || !!value
     },
-    compareToFirstPassword(rule, value, callback) {
+    compareToFirstPassword (rule, value, validateCallback) {
       const form = this.form
       if (value && value !== form.getFieldValue('newPassword')) {
-        callback('两次密码不一致，请重新输入')
+        validateCallback('两次密码不一致，请重新输入')
       } else {
-        callback()
+        validateCallback()
       }
     },
-    validateToNextPassword(rule, value, callback) {
+    validateToNextPassword (rule, value, validateCallback) {
       const form = this.form
       if (value && this.confirmDirty) {
         form.validateFields(['confirmPassword'], { force: true })
-        callback()
-      }
-      
-      if (value.length < 6 || value.length > 16) {
-        callback('密码长度必须在6-16字符之间')
+        validateCallback()
+      } else if (value.length < 6 || value.length > 16) {
+        validateCallback('密码长度必须在6-16字符之间')
       }
     },
     handleUpdatePassword (formValues) {
