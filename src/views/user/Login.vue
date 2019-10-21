@@ -186,7 +186,6 @@ export default {
       })
     },
     loginSuccess (res) {
-      console.log('loginSuccess:' + res)
       this.$router.push({ name: 'dashboard' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
@@ -199,7 +198,7 @@ export default {
     requestFailed (err) {
       this.$notification['error']({
         message: '错误',
-        description: ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试',
+        description: (err || {}).message || '请求出现错误，请稍后再试',
         duration: 4
       })
     }

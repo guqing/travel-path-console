@@ -37,9 +37,13 @@ const user = {
     Login ({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         login(userInfo).then(response => {
-          Vue.ls.set(ACCESS_TOKEN, response.data, 7 * 24 * 60 * 60 * 1000)
-          commit('SET_TOKEN', response.data)
-          resolve()
+          if (response.code === 0) {
+            Vue.ls.set(ACCESS_TOKEN, response.data, 7 * 24 * 60 * 60 * 1000)
+            commit('SET_TOKEN', response.data)
+            resolve(response)
+          } else {
+            reject(response)
+          }
         }).catch(error => {
           reject(error)
         })
