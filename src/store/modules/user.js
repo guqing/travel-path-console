@@ -78,7 +78,6 @@ const user = {
             commit('SET_AVATAR', avatar)
             result.avatar = avatar
           } else {
-            console.log('头像else')
             commit('SET_AVATAR', result.avatar)
           }
 

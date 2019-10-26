@@ -45,4 +45,23 @@ userApi.updatePassword = function (parameter) {
   })
 }
 
+userApi.register = function (parameter) {
+  return axios({
+    url: '/auth/register',
+    method: 'post',
+    data: parameter,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
+userApi.hasUser = function (parameter) {
+  return axios({
+    url: '/user/has-user',
+    method: 'get',
+    params: parameter
+  })
+}
+
 export default userApi

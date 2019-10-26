@@ -115,7 +115,6 @@ export default {
         this.$set(counts, 'actualCount', res.data.actualCount)
         this.$set(counts, 'viaCount', res.data.viaCount)
         this.$set(counts, 'routeCount', res.data.routeCount)
-        console.log('profile achieve -> call getSchemeOverViewData()', res)
       })
       this.counts = counts
       this.countsLoading = false

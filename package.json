@@ -15,7 +15,7 @@
     "@antv/data-set": "^0.10.1",
     "ant-design-vue": "~1.4.1",
     "axios": "^0.19.0",
-    "core-js": "^2.6.5",
+    "core-js": "^2.6.9",
     "enquire.js": "^2.1.6",
     "identicon.js": "^2.3.3",
     "js-cookie": "^2.2.0",

@@ -10,7 +10,7 @@
                 {
                   rules: [{ required: true, message: '请输入原始密码', whitespace: false }],
                 },
-             ]" />
+              ]" />
           </a-form-item>
           <a-form-item label="新密码">
             <a-input-password @blur="handleConfirmBlur" v-decorator="[
@@ -30,7 +30,8 @@
           </a-form-item>
 
           <a-form-item label="确认密码">
-            <a-input-password v-decorator="[
+            <a-input-password
+            v-decorator="[
              'confirmPassword',
               {
                 rules: [
@@ -42,8 +43,7 @@
                     validator: compareToFirstPassword,
                   }
                 ]
-              }
-              ]" />
+              }]" />
           </a-form-item>
 
           <a-form-item>
