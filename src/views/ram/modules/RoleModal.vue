@@ -127,6 +127,8 @@ export default {
             console.log('form values:', values)
             saveRole(values).then(res => {
               _this.$message.success('保存成功')
+              _this.close()
+              // 向父组件传递成功事件
               _this.$emit('ok')
             }).catch(err => {
               _this.$message.error('保存失败，error:' + err.message)

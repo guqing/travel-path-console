@@ -11,19 +11,6 @@
       </div>
       <div><img src="http://v2.jinrishici.com/one.svg"/></div>
     </div>
-    <!-- <div slot="extra">
-      <a-row class="more-info">
-        <a-col :span="8">
-          <head-info title="项目数" content="56" :center="false" :bordered="false"/>
-        </a-col>
-        <a-col :span="8">
-          <head-info title="团队排名" content="8/24" :center="false" :bordered="false"/>
-        </a-col>
-        <a-col :span="8">
-          <head-info title="项目访问" content="2,223" :center="false" />
-        </a-col>
-      </a-row>
-    </div> -->
 
     <div>
       <a-row :gutter="24">
@@ -113,6 +100,7 @@
           <a-card
             :loading="loading"
             title="日志"
+            v-if="$auth('log.log_list')"
             :bordered="false"
           >
             <a-list>
@@ -185,12 +173,36 @@ export default {
     this.avatar = this.userInfo.avatar
   },
   mounted () {
-    this.getSchemeOverViewData()
-    this.getRamData()
-    this.getLog()
+    this.loadData()
   },
   methods: {
     ...mapGetters(['nickname', 'welcome']),
+    loadData () {
+      console.log(this.hasPermission('scheme_count'))
+      if (this.hasPermission('ram_count')) {
+        this.getRamData()
+      }
+
+      if (this.hasPermission('scheme_count')) {
+        this.getSchemeOverViewData()
+      }
+
+      if (this.hasPermission('log_list')) {
+        this.getSchemeOverViewData()
+      }
+      this.getLog()
+      this.loading = false
+    },
+    hasPermission (permissionId) {
+      var flag = false
+      this.userInfo.role.permissions.forEach(p => {
+        var actionList = p.actionList
+        if (actionList.includes(permissionId)) {
+          flag = true
+        }
+      })
+      return flag
+    },
     getSchemeOverviewList () {
       this.dataOverview = [
         {

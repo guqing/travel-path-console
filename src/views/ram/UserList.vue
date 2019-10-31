@@ -12,8 +12,8 @@
             <a-form-item label="状态">
               <a-select placeholder="请选择" default-value="2">
                 <a-select-option value="2">全部</a-select-option>
-                <a-select-option value="0">正常</a-select-option>
-                <a-select-option value="1">禁用</a-select-option>
+                <a-select-option value="1">正常</a-select-option>
+                <a-select-option value="0">禁用</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
@@ -112,7 +112,7 @@
         >
           <a-select v-model="mdl.status">
             <a-select-option value="1">正常</a-select-option>
-            <a-select-option value="2">禁用</a-select-option>
+            <a-select-option value="0">禁用</a-select-option>
           </a-select>
         </a-form-item>
 
@@ -203,7 +203,7 @@ export default {
           title: '状态',
           dataIndex: 'status',
           customRender: function (text, record, index) {
-            return text === 0 ? '正常' : '禁用'
+            return text === 1 ? '正常' : '禁用'
           }
         },
         {
