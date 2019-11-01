@@ -45,7 +45,7 @@ export const asyncRouterMap = [
         name: 'ram',
         component: PageView,
         redirect: '/ram/list/user',
-        meta: { title: '访问控制', icon: 'table' },
+        meta: { title: '访问控制', icon: 'table', permission: [ 'ram' ] },
         children: [
           {
             path: '/ram/list/user',
@@ -87,35 +87,6 @@ export const asyncRouterMap = [
             name: 'ProfileAdvanced',
             component: () => import('@/views/profile/advanced/Advanced'),
             meta: { title: '高级详情页', permission: [ 'profile' ] }
-          }
-        ]
-      },
-
-      // Exception
-      {
-        path: '/exception',
-        name: 'exception',
-        component: RouteView,
-        redirect: '/exception/403',
-        meta: { title: '异常页', icon: 'warning', permission: [ 'exception' ] },
-        children: [
-          {
-            path: '/exception/403',
-            name: 'Exception403',
-            component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/403'),
-            meta: { title: '403', permission: [ 'exception' ] }
-          },
-          {
-            path: '/exception/404',
-            name: 'Exception404',
-            component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/404'),
-            meta: { title: '404', permission: [ 'exception' ] }
-          },
-          {
-            path: '/exception/500',
-            name: 'Exception500',
-            component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/500'),
-            meta: { title: '500', permission: [ 'exception' ] }
           }
         ]
       },
@@ -169,29 +140,6 @@ export const asyncRouterMap = [
             ]
           }
         ]
-      },
-
-      // result
-      {
-        path: '/result',
-        name: 'result',
-        component: PageView,
-        redirect: '/result/success',
-        meta: { title: '结果页', icon: 'check-circle-o', permission: [ 'result' ] },
-        children: [
-          {
-            path: '/result/success',
-            name: 'ResultSuccess',
-            component: () => import(/* webpackChunkName: "result" */ '@/views/result/Success'),
-            meta: { title: '成功', keepAlive: false, hiddenHeaderContent: true, permission: [ 'result' ] }
-          },
-          {
-            path: '/result/fail',
-            name: 'ResultFail',
-            component: () => import(/* webpackChunkName: "result" */ '@/views/result/Error'),
-            meta: { title: '失败', keepAlive: false, hiddenHeaderContent: true, permission: [ 'result' ] }
-          }
-        ]
       }
     ]
   },
@@ -230,21 +178,26 @@ export const constantRouterMap = [
   },
 
   {
-    path: '/test',
-    component: BlankLayout,
-    redirect: '/test/home',
-    children: [
-      {
-        path: 'home',
-        name: 'TestHome',
-        component: () => import('@/views/Home')
-      }
-    ]
+    path: '/exception/403',
+    name: 'Exception403',
+    component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/403'),
+    meta: { title: '403', permission: [ 'exception' ] }
   },
-
   {
     path: '/404',
     component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/404')
+  },
+  {
+    path: '/exception/404',
+    name: 'Exception404',
+    component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/404'),
+    meta: { title: '404', permission: [ 'exception' ] }
+  },
+  {
+    path: '/exception/500',
+    name: 'Exception500',
+    component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/500'),
+    meta: { title: '500', permission: [ 'exception' ] }
   }
 
 ]
