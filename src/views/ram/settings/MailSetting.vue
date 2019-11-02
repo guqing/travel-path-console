@@ -14,40 +14,28 @@
                     label="SMTP 地址："
                     :wrapper-col="wrapperCol"
                   >
-                    <a-input v-model="options.email_host" />
-                  </a-form-item>
-                  <a-form-item
-                    label="发送协议："
-                    :wrapper-col="wrapperCol"
-                  >
-                    <a-input v-model="options.email_protocol" />
+                    <a-input v-model="options.host" />
                   </a-form-item>
                   <a-form-item
                     label="SSL 端口："
                     :wrapper-col="wrapperCol"
                   >
-                    <a-input v-model="options.email_ssl_port" />
+                    <a-input v-model="options.port" />
                   </a-form-item>
                   <a-form-item
                     label="邮箱账号："
                     :wrapper-col="wrapperCol"
                   >
-                    <a-input v-model="options.email_username" />
+                    <a-input v-model="options.username" />
                   </a-form-item>
                   <a-form-item
                     label="邮箱密码："
                     :wrapper-col="wrapperCol"
                   >
                     <a-input-password
-                      v-model="options.email_password"
+                      v-model="options.password"
                       placeholder="部分邮箱可能是授权码"
                     />
-                  </a-form-item>
-                  <a-form-item
-                    label="发件人："
-                    :wrapper-col="wrapperCol"
-                  >
-                    <a-input v-model="options.email_from_name" />
                   </a-form-item>
                   <a-form-item>
                     <a-button
@@ -87,6 +75,7 @@
                   <a-form-item>
                     <a-button
                       type="primary"
+                      :loading="sendMailLoading"
                       @click="handleTestMailClick"
                     >发送</a-button>
                   </a-form-item>
@@ -102,7 +91,7 @@
 
 <script>
 // import optionApi from '@/api/option'
-// import mailApi from '@/api/mail'
+import mailApi from '@/api/mail'
 export default {
   data () {
     return {
@@ -112,11 +101,22 @@ export default {
         sm: { span: 12 },
         xs: { span: 24 }
       },
+      sendMailLoading: false,
       options: {},
       mailParam: {}
     }
   },
+  mounted () {
+    this.getMailOptions()
+  },
   methods: {
+    getMailOptions () {
+      mailApi.getMailOptions().then(res => {
+        if(res.code === 0) {
+          this.options = res.data
+        }
+      })
+    },
     handleTestMailClick () {
       if (!this.mailParam.to) {
         this.$notification['error']({
@@ -139,13 +139,51 @@ export default {
         })
         return
       }
-      console.log('提交')
-      // mailApi.testMail(this.mailParam).then(response => {
-      //   this.$message.info(response.data.message)
-      // })
+      // 开启按钮加载动画
+      this.sendMailLoading = true
+      // 发送测试邮件
+      mailApi.testMail(this.mailParam).then(response => {
+        this.sendMailLoading = false
+        this.$message.info(`邮件提示: ${response.message}`)
+      }).catch(err => {
+        this.$message.error(`发送失败, error:${err}`)
+        this.sendMailLoading = false
+      })
     },
     handleSaveOptions () {
-
+      if (!this.options.host) {
+        this.$notification['error']({
+          message: '提示',
+          description: 'SMTP地址不能为空！'
+        })
+        return
+      }
+      if (!this.options.port) {
+        this.$notification['error']({
+          message: '提示',
+          description: 'SSL端口不能为空！'
+        })
+        return
+      }
+      if (!this.options.username) {
+        this.$notification['error']({
+          message: '提示',
+          description: '邮箱账号不能为空！'
+        })
+        return
+      }
+       if (!this.options.password) {
+        this.$notification['error']({
+          message: '提示',
+          description: '邮箱密码不能为空！'
+        })
+        return
+      }
+      mailApi.saveOptions(this.options).then(res => {
+        this.$message.success('保存成功')
+      }).catch(err => {
+        this.$message.error(`保存失败：error: ${ err }`)
+      })
     }
   }
 }
