@@ -65,6 +65,22 @@ export const asyncRouterMap = [
             name: 'PermissionList',
             component: () => import('@/views/ram/PermissionList'),
             meta: { title: '权限列表', keepAlive: true, permission: [ 'ram' ] }
+          },
+          {
+            path: '/ram/settings',
+            name: 'SystemSetting',
+            component: () => import('@/views/ram/SystemSetting'),
+            redirect: '/ram/settings/mail',
+            hideChildrenInMenu: true,
+            meta: { title: '系统设置', keepAlive: true, permission: [ 'ram' ] },
+            children: [
+              {
+                path: '/ram/settings/mail',
+                name: 'MailSetting',
+                component: () => import('@/views/ram/settings/MailSetting'),
+                meta: { title: 'SMTP服务', hidden: true, keepAlive: true, permission: [ 'ram' ] }
+              }
+            ]
           }
         ]
       },
