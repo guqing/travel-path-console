@@ -1,5 +1,5 @@
 <template>
-<div class="page-header-index-wide">
+  <div class="page-header-index-wide">
     <a-card :bordered="false" :bodyStyle="{ padding: '16px 0', height: '100%' }" :style="{ height: '100%' }">
       <div class="account-settings-info-main" :class="device">
         <div class="account-settings-info-left">
@@ -15,6 +15,11 @@
                 SMTP服务
               </router-link>
             </a-menu-item>
+            <a-menu-item key="/ram/settings/user">
+              <router-link :to="{ name: 'UserSetting' }">
+                用户设置
+              </router-link>
+            </a-menu-item>
           </a-menu>
         </div>
         <div class="account-settings-info-right">
@@ -26,8 +31,8 @@
       </div>
     </a-card>
   </div>
-  
 </template>
+
 <script>
 import { PageView, RouteView } from '@/layouts'
 import { mixinDevice } from '@/utils/mixin.js'

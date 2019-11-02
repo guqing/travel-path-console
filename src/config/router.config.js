@@ -79,6 +79,12 @@ export const asyncRouterMap = [
                 name: 'MailSetting',
                 component: () => import('@/views/ram/settings/MailSetting'),
                 meta: { title: 'SMTP服务', hidden: true, keepAlive: true, permission: [ 'ram' ] }
+              },
+              {
+                path: '/ram/settings/user',
+                name: 'UserSetting',
+                component: () => import('@/views/ram/settings/UserSetting'),
+                meta: { title: '用户设置', hidden: true, keepAlive: true, permission: [ 'ram' ] }
               }
             ]
           }
