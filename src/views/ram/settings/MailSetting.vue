@@ -112,7 +112,7 @@ export default {
   methods: {
     getMailOptions () {
       mailApi.getMailOptions().then(res => {
-        if(res.code === 0) {
+        if (res.code === 0) {
           this.options = res.data
         }
       })
@@ -172,7 +172,7 @@ export default {
         })
         return
       }
-       if (!this.options.password) {
+      if (!this.options.password) {
         this.$notification['error']({
           message: '提示',
           description: '邮箱密码不能为空！'
@@ -182,7 +182,7 @@ export default {
       mailApi.saveOptions(this.options).then(res => {
         this.$message.success('保存成功')
       }).catch(err => {
-        this.$message.error(`保存失败：error: ${ err }`)
+        this.$message.error(`保存失败：error: ${err}`)
       })
     }
   }

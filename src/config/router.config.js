@@ -160,6 +160,12 @@ export const asyncRouterMap = [
                 meta: { title: '新消息通知', hidden: true, keepAlive: true, permission: [ 'user' ] }
               }
             ]
+          },
+          {
+            path: '/account/trash',
+            name: 'trash',
+            component: () => import('@/views/account/trash/Index'),
+            meta: { title: '回收站', hideHeader: true, permission: [ 'user' ] }
           }
         ]
       }
