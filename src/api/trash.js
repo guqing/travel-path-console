@@ -4,7 +4,11 @@ const api = {
   queryPreset: '/preset/trash/query',
   recoverPreset: '/preset/trash/recover',
   batchDeletePreset: '/preset/trash/batchDelete',
-  deletePresetById: '/preset/trash/deleteById'
+  deletePresetById: '/preset/trash/deleteById',
+  queryActualBayonetList: '/actual/trash/query',
+  recoverActualBayonet: '/actual/trash/recover',
+  deleteActualBayonetById: '/actual/trash/delete',
+  batchDeleteActualBayonet: '/actual/trash/batch-delete'
 }
 
 const trashApi = {}
@@ -34,6 +38,39 @@ trashApi.deletePresetById = function (parameter) {
 trashApi.batchDeletePreset = function (parameter) {
   return axios({
     url: api.batchDeletePreset,
+    method: 'post',
+    data: parameter,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
+trashApi.queryActualBayonetList = function (parameter) {
+  return axios({
+    url: api.queryActualBayonetList,
+    method: 'get',
+    params: parameter
+  })
+}
+
+trashApi.recoverActualBayonetById = function (parameter) {
+  return axios({
+    url: api.recoverActualBayonet + `/${parameter}`,
+    method: 'post'
+  })
+}
+
+trashApi.deleteActualBayonetById = function (parameter) {
+  return axios({
+    url: api.deleteActualBayonetById + `/${parameter}`,
+    method: 'post'
+  })
+}
+
+trashApi.batchDeleteActualBayonet = function (parameter) {
+  return axios({
+    url: api.batchDeleteActualBayonet,
     method: 'post',
     data: parameter,
     headers: {
