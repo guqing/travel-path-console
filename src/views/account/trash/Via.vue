@@ -12,6 +12,7 @@
             <a style="font-weight: 600">{{ pagination.total }} 条</a>
           </span>
           <a style="margin-left: 24px" v-show="selectedRows.length > 0" @click="clearSelected">清空</a>
+          <a style="margin-left: 24px" v-show="selectedRows.length > 0" @click="handleBatchDelete">批量删除</a>
         </template>
       </a-alert>
       <a-table
@@ -43,9 +44,7 @@
         <template slot="action" slot-scope="text, record">
           <div class="editable-row-operations">
             <span>
-              <a class="show" @click="() => showData(record)">查看</a>
-              <a-divider type="vertical" />
-              <a class="edit" @click="() => handleRecodeEdit(record)">修改</a>
+              <a class="show" @click="() => handleRecover(record)">恢复</a>
               <a-divider type="vertical" />
               <a class="delete" @click="() => handleRecodeDelete(record)">删除</a>
             </span>
@@ -57,7 +56,7 @@
 </template>
 
 <script>
-import viaApi from '@/api/routeBayonet'
+import trashApi from '@/api/trash'
 import { tableColums } from '@/mystatic/js/common'
 
 export default {
@@ -76,6 +75,9 @@ export default {
       viaSchemeData: []
     }
   },
+  mounted () {
+    this.loadData()
+  },
   methods: {
     loadData () {
       this.loading = true
@@ -86,15 +88,15 @@ export default {
         pageSize: this.pagination.pageSize
       }
 
-      viaApi.listScheme(pagination).then(res => {
-        this.presetSchemeData = res.data.list
+      trashApi.queryViaList(pagination).then(res => {
+        this.viaSchemeData = res.data.list
         this.pagination.total = res.data.total
         this.loading = false
       }).catch(err => {
         this.loading = false
         this.$notification.error({
           message: '失败',
-          description: '获取预设卡口方案列表失败：' + err.message
+          description: '获取路径方案列表失败：' + err.message
         })
       })
     },
@@ -114,6 +116,40 @@ export default {
     handlePaginationChange (pagination, filters, sorter) {
       this.pagination.current = pagination.current
       this.loadPresetData()
+    },
+    handleRecodeDelete (record) {
+      var id = record.id
+      var that = this
+      this.$confirm({
+        title: '确定要彻底删除这条数据吗?',
+        content: '如果彻底删除该数据，将不可恢复，请谨慎操作',
+        onOk () {
+          trashApi.deleteViaById(id).then(res => {
+            that.$message.success(`删除成功`)
+            that.loadData()
+          }).catch(err => {
+            that.$message.error(`操作失败，error: ${err}`)
+          })
+        },
+        onCancel () {}
+      })
+    },
+    handleBatchDelete () {
+      var ids = this.selectedRowKeys
+      var that = this
+      this.$confirm({
+        title: '确定要彻底删除这些数据吗?',
+        content: '如果彻底删除数据，将不可恢复，请谨慎操作',
+        onOk () {
+          trashApi.batchDeleteVia(ids).then(res => {
+            that.$message.success('删除成功')
+            that.loadData()
+          }).catch(err => {
+            that.$message.error(`操作失败，error: ${err}`)
+          })
+        },
+        onCancel () {}
+      })
     }
   }
 }

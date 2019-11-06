@@ -5,10 +5,16 @@ const api = {
   recoverPreset: '/preset/trash/recover',
   batchDeletePreset: '/preset/trash/batchDelete',
   deletePresetById: '/preset/trash/deleteById',
+
   queryActualBayonetList: '/actual/trash/query',
   recoverActualBayonet: '/actual/trash/recover',
   deleteActualBayonetById: '/actual/trash/delete',
-  batchDeleteActualBayonet: '/actual/trash/batch-delete'
+  batchDeleteActualBayonet: '/actual/trash/batch-delete',
+
+  queryViaList: '/via/trash/query',
+  recoverVia: '/via/trash/recover',
+  deleteViaById: '/via/trash/delete',
+  batchDeleteVia: '/via/trash/batch-delete'
 }
 
 const trashApi = {}
@@ -79,4 +85,36 @@ trashApi.batchDeleteActualBayonet = function (parameter) {
   })
 }
 
+trashApi.queryViaList = function (parameter) {
+  return axios({
+    url: api.queryViaList,
+    method: 'get',
+    params: parameter
+  })
+}
+
+trashApi.recoverViaById = function (parameter) {
+  return axios({
+    url: api.recoverVia + `/${parameter}`,
+    method: 'post'
+  })
+}
+
+trashApi.deleteViaById = function (parameter) {
+  return axios({
+    url: api.deleteViaById + `/${parameter}`,
+    method: 'post'
+  })
+}
+
+trashApi.batchDeleteVia = function (parameter) {
+  return axios({
+    url: api.batchDeleteVia,
+    method: 'post',
+    data: parameter,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
 export default trashApi

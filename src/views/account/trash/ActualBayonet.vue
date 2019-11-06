@@ -43,7 +43,7 @@
         </template>
         <template slot="action" slot-scope="text, record">
           <div class="editable-row-operations">
-           <span>
+            <span>
               <a class="show" @click="() => handleRecover(record)">恢复</a>
               <a-divider type="vertical" />
               <a class="delete" @click="() => handleRecodeDelete(record)">删除</a>
