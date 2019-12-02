@@ -2,55 +2,61 @@
   <div class="account-settings-info-view">
     <a-row :gutter="16">
       <a-col :md="24" :lg="16">
-
         <a-form layout="vertical" :form="form">
           <a-form-item label="原始密码">
-            <a-input-password v-decorator="[
+            <a-input-password
+              v-decorator="[
                 'oldPassword',
                 {
-                  rules: [{ required: true, message: '请输入原始密码', whitespace: false }],
-                },
-              ]" />
+                  rules: [{ required: true, message: '请输入原始密码', whitespace: false }]
+                }
+              ]"
+            />
           </a-form-item>
           <a-form-item label="新密码">
-            <a-input-password @blur="handleConfirmBlur" v-decorator="[
-              'newPassword',
-              {
-                rules: [
+            <a-input-password
+              @blur="handleConfirmBlur"
+              v-decorator="[
+                'newPassword',
                 {
-                  required: true,
-                  message: '请输入新密码',
-                  whitespace: false
-                },
-                {
-                  validator: validateToNextPassword,
+                  rules: [
+                    {
+                      required: true,
+                      message: '请输入新密码',
+                      whitespace: false
+                    },
+                    {
+                      validator: validateToNextPassword
+                    }
+                  ]
                 }
-              ]}
-             ]" />
+              ]"
+            />
           </a-form-item>
 
           <a-form-item label="确认密码">
             <a-input-password
-            v-decorator="[
-             'confirmPassword',
-              {
-                rules: [
-                  {
-                    required: true,
-                    message: '再次输入新密码'
-                  },
-                  {
-                    validator: compareToFirstPassword,
-                  }
-                ]
-              }]" />
+              v-decorator="[
+                'confirmPassword',
+                {
+                  rules: [
+                    {
+                      required: true,
+                      message: '再次输入新密码'
+                    },
+                    {
+                      validator: compareToFirstPassword
+                    }
+                  ]
+                }
+              ]"
+            />
           </a-form-item>
 
           <a-form-item>
             <a-button type="primary" @click="handleSubmit">确认更改</a-button>
           </a-form-item>
         </a-form>
-
       </a-col>
     </a-row>
   </div>
@@ -107,21 +113,23 @@ export default {
       }
     },
     handleUpdatePassword (formValues) {
-      userApi.updatePassword(formValues).then(res => {
-        if (res.code === 402) {
-          this.$message.warning('原始密码输入有误，请重新输入')
-        } else if (res.code === 0) {
-          // 重置form表单
-          this.form.resetFields()
-          this.$message.success('修改成功')
-        }
-      }).catch(err => {
-        this.$message.error(`修改密码出错，error:${err}`)
-      })
+      userApi
+        .updatePassword(formValues)
+        .then(res => {
+          if (res.code === 402) {
+            this.$message.warning('原始密码输入有误，请重新输入')
+          } else if (res.code === 0) {
+            // 重置form表单
+            this.form.resetFields()
+            this.$message.success('修改成功')
+          }
+        })
+        .catch(err => {
+          this.$message.error(`修改密码出错，error:${err}`)
+        })
     }
   }
 }
 </script>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>
