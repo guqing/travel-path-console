@@ -23,6 +23,17 @@ userApi.updateUserInfo = function (parameter) {
   })
 }
 
+userApi.updateUserRole = function (parameter) {
+  return axios({
+    url: '/user/updateUserRole',
+    method: 'put',
+    data: parameter,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
 userApi.uploadAvatar = function (parameter) {
   return axios({
     url: '/attachment/uploadImage',

@@ -7,7 +7,13 @@
           size="large"
           type="text"
           placeholder="用户名"
-          v-decorator="['username', {rules: [{ required: true, message: '只允许数字字母下划线' }, { validator: this.handleUsernameValidate }], validateTrigger: ['change', 'blur']}]"
+          v-decorator="[
+            'username',
+            {
+              rules: [{ required: true, message: '只允许数字字母下划线' }, { validator: this.handleUsernameValidate }],
+              validateTrigger: ['change', 'blur']
+            }
+          ]"
         ></a-input>
       </a-form-item>
 
@@ -16,19 +22,28 @@
           size="large"
           type="text"
           placeholder="邮箱"
-          v-decorator="['email', {rules: [{ required: true, type: 'email', message: '请输入邮箱地址' }], validateTrigger: ['change', 'blur']}]"
+          v-decorator="[
+            'email',
+            {
+              rules: [{ required: true, type: 'email', message: '请输入邮箱地址' }],
+              validateTrigger: ['change', 'blur']
+            }
+          ]"
         ></a-input>
       </a-form-item>
 
       <a-popover
         placement="rightTop"
         :trigger="['focus']"
-        :getPopupContainer="(trigger) => trigger.parentElement"
-        v-model="state.passwordLevelChecked">
+        :getPopupContainer="trigger => trigger.parentElement"
+        v-model="state.passwordLevelChecked"
+      >
         <template slot="content">
-          <div :style="{ width: '240px' }" >
-            <div :class="['user-register', passwordLevelClass]">强度：<span>{{ passwordLevelName }}</span></div>
-            <a-progress :percent="state.percent" :showInfo="false" :strokeColor=" passwordLevelColor " />
+          <div :style="{ width: '240px' }">
+            <div :class="['user-register', passwordLevelClass]">
+              强度：<span>{{ passwordLevelName }}</span>
+            </div>
+            <a-progress :percent="state.percent" :showInfo="false" :strokeColor="passwordLevelColor" />
             <div style="margin-top: 10px;">
               <span>请至少输入 6 个字符。请不要使用容易被猜到的密码。</span>
             </div>
@@ -41,7 +56,16 @@
             @click="handlePasswordInputClick"
             autocomplete="false"
             placeholder="至少6位密码，区分大小写"
-            v-decorator="['password', {rules: [{ required: true, message: '至少6位密码，区分大小写'}, { validator: this.handlePasswordLevel }], validateTrigger: ['change', 'blur']}]"
+            v-decorator="[
+              'password',
+              {
+                rules: [
+                  { required: true, message: '至少6位密码，区分大小写' },
+                  { validator: this.handlePasswordLevel }
+                ],
+                validateTrigger: ['change', 'blur']
+              }
+            ]"
           ></a-input>
         </a-form-item>
       </a-popover>
@@ -52,7 +76,13 @@
           type="password"
           autocomplete="false"
           placeholder="确认密码"
-          v-decorator="['password2', {rules: [{ required: true, message: '至少6位密码，区分大小写' }, { validator: this.handlePasswordCheck }], validateTrigger: ['change', 'blur']}]"
+          v-decorator="[
+            'password2',
+            {
+              rules: [{ required: true, message: '至少6位密码，区分大小写' }, { validator: this.handlePasswordCheck }],
+              validateTrigger: ['change', 'blur']
+            }
+          ]"
         ></a-input>
       </a-form-item>
 
@@ -98,11 +128,11 @@
           class="register-button"
           :loading="registerBtn"
           @click.stop.prevent="handleSubmit"
-          :disabled="registerBtn">注册
+          :disabled="registerBtn"
+        >注册
         </a-button>
         <router-link class="login" :to="{ name: 'login' }">使用已有账户登录</router-link>
       </a-form-item>
-
     </a-form>
   </div>
 </template>
@@ -309,49 +339,46 @@ export default {
 }
 </script>
 <style lang="less">
-  .user-register {
-
-    &.error {
-      color: #ff0000;
-    }
-
-    &.warning {
-      color: #ff7e05;
-    }
-
-    &.success {
-      color: #52c41a;
-    }
-
+.user-register {
+  &.error {
+    color: #ff0000;
   }
 
-  .user-layout-register {
-    .ant-input-group-addon:first-child {
-      background-color: #fff;
-    }
+  &.warning {
+    color: #ff7e05;
   }
+
+  &.success {
+    color: #52c41a;
+  }
+}
+
+.user-layout-register {
+  .ant-input-group-addon:first-child {
+    background-color: #fff;
+  }
+}
 </style>
 <style lang="less" scoped>
-  .user-layout-register {
-
-    & > h3 {
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-
-    .getCaptcha {
-      display: block;
-      width: 100%;
-      height: 40px;
-    }
-
-    .register-button {
-      width: 50%;
-    }
-
-    .login {
-      float: right;
-      line-height: 40px;
-    }
+.user-layout-register {
+  & > h3 {
+    font-size: 16px;
+    margin-bottom: 20px;
   }
+
+  .getCaptcha {
+    display: block;
+    width: 100%;
+    height: 40px;
+  }
+
+  .register-button {
+    width: 50%;
+  }
+
+  .login {
+    float: right;
+    line-height: 40px;
+  }
+}
 </style>

@@ -4,10 +4,8 @@
     <div class="table-operator operator-btn-group">
       <a-dropdown>
         <a-menu slot="overlay">
-          <a-menu-item key="1" @click="openMapMark">
-            <a-icon type="delete"/>手动标注</a-menu-item>
-          <a-menu-item key="2" @click="uploadBtnHandle">
-            <a-icon type="export" />批量上传</a-menu-item>
+          <a-menu-item key="1" @click="openMapMark"> <a-icon type="delete" />手动标注</a-menu-item>
+          <a-menu-item key="2" @click="uploadBtnHandle"> <a-icon type="export" />批量上传</a-menu-item>
         </a-menu>
         <a-button type="primary" icon="plus">
           新建方案
@@ -18,11 +16,9 @@
 
       <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
-          <a-menu-item key="3" @click="handleBatchDeleteScheme">
-            <a-icon type="delete" />删除</a-menu-item>
+          <a-menu-item key="3" @click="handleBatchDeleteScheme"> <a-icon type="delete" />删除</a-menu-item>
           <!-- lock | unlock -->
-          <a-menu-item key="4" @click="downloadSchemeToExcel">
-            <a-icon type="export" />导出</a-menu-item>
+          <a-menu-item key="4" @click="downloadSchemeToExcel"> <a-icon type="export" />导出</a-menu-item>
         </a-menu>
         <a-button style="margin-left: 8px">
           批量操作
@@ -32,12 +28,12 @@
     </div>
 
     <div>
-      <a-alert
-        banner
-        style="margin-bottom: 16px"
-        type="info">
+      <a-alert banner style="margin-bottom: 16px" type="info">
         <template slot="message">
-          <span style="margin-right: 12px">已选择: <a style="font-weight: 600">{{ this.selectedRows.length }}</a></span>
+          <span style="margin-right: 12px">
+            已选择:
+            <a style="font-weight: 600">{{ this.selectedRows.length }}</a></span
+            >
           <span style="margin-right: 12px">
             预设卡口方案数据总计
             <a style="font-weight: 600">{{ pagination.total }} 条</a>
@@ -56,18 +52,21 @@
         @showSizeChange="handlePaginationChange"
         @change="handlePaginationChange"
         :alert="{ show: true, clear: true }"
-        :rowSelection="{ selectedRowKeys: this.selectedRowKeys, onChange: this.onSelectChange }">
+        :rowSelection="{ selectedRowKeys: this.selectedRowKeys, onChange: this.onSelectChange }"
+      >
         <template
           v-for="(col, index) in columns"
           v-show="col.scopedSlots"
           :slot="col.dataIndex"
-          slot-scope="text, record">
+          slot-scope="text, record"
+        >
           <div :key="index">
             <a-input
               v-if="record.editable"
               style="margin: -5px 0"
               :value="text"
-              @change="e => handleChange(e.target.value, record.key, col, record)" />
+              @change="e => handleChange(e.target.value, record.key, col, record)"
+            />
             <template v-else>{{ text }}</template>
           </div>
         </template>
@@ -91,35 +90,29 @@
         placement="right"
         :closable="false"
         :visible="drawerVisible"
-        @close="onDrawerClose">
+        @close="onDrawerClose"
+      >
         <a-table
           :columns="drawTableColumns"
           rowKey="lat"
-          :pagination="{pageSize: 5}"
+          :pagination="{ pageSize: 5 }"
           :dataSource="markerDataArray"
-          bordered>
+          bordered
+        >
         </a-table>
 
-        <a-form
-          layout="vertical">
+        <a-form layout="vertical">
           <a-row :gutter="16">
             <a-col :span="24">
               <a-form-item label="方案名称" required>
-                <a-input
-                  v-model="presetSchemeForm.name"
-                  placeholder="请输入方案名称"
-                />
+                <a-input v-model="presetSchemeForm.name" placeholder="请输入方案名称" />
               </a-form-item>
             </a-col>
           </a-row>
           <a-row :gutter="16">
             <a-col :span="24">
               <a-form-item label="方案描述">
-                <a-textarea
-                  v-model="presetSchemeForm.description"
-                  placeholder="请输入方案描述,240字以内"
-                  :rows="4"
-                >
+                <a-textarea v-model="presetSchemeForm.description" placeholder="请输入方案描述,240字以内" :rows="4">
                 </a-textarea>
               </a-form-item>
             </a-col>
@@ -136,33 +129,19 @@
             textAlign: 'right',
             left: 0,
             background: '#fff',
-            borderRadius: '0 0 4px 4px',
+            borderRadius: '0 0 4px 4px'
           }"
         >
-          <a-button
-            style="marginRight: 8px"
-            @click="onDrawerClose"
-          >
+          <a-button style="marginRight: 8px" @click="onDrawerClose">
             取消
           </a-button>
-          <a-button
-            @click="createOrUpdatePresetPointScheme"
-            type="primary">
+          <a-button @click="createOrUpdatePresetPointScheme" type="primary">
             提交
           </a-button>
         </div>
       </a-drawer>
-      <a-modal
-        title="上传附件"
-        v-model="uploadVisible"
-        :footer="null"
-        :afterClose="onUploadClose"
-      >
-        <upload
-          name="file"
-          accept=".xls,.xlsx"
-          :uploadHandler="uploadExcelHandler"
-        >
+      <a-modal title="上传附件" v-model="uploadVisible" :footer="null" :afterClose="onUploadClose">
+        <upload name="file" accept=".xls,.xlsx" :uploadHandler="uploadExcelHandler">
           <p class="ant-upload-drag-icon">
             <a-icon type="inbox" />
           </p>
@@ -456,13 +435,16 @@ export default {
       }
 
       const description = this.presetSchemeForm.description
-      if (description.length > 240) {
+      console.log('description length --->', description)
+      if (description !== undefined && description.length > 240) {
         this.$notification.error({
           message: '表单校验错误提示',
           description: '方案描述不能超过240字'
         })
+
         return false
       }
+
       return true
     },
     createOrUpdatePresetPointScheme () {
