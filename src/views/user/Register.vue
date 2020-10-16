@@ -1,23 +1,10 @@
 <template>
   <div class="main user-layout-register">
-    <h3><span>注册</span></h3>
+    <h3>
+      <span>{{ pageTitle }}</span>
+    </h3>
     <a-form ref="formRegister" :form="form" id="formRegister">
-      <a-form-item>
-        <a-input
-          size="large"
-          type="text"
-          placeholder="用户名"
-          v-decorator="[
-            'username',
-            {
-              rules: [{ required: true, message: '只允许数字字母下划线' }, { validator: this.handleUsernameValidate }],
-              validateTrigger: ['change', 'blur']
-            }
-          ]"
-        ></a-input>
-      </a-form-item>
-
-      <a-form-item>
+      <a-form-item has-feedback>
         <a-input
           size="large"
           type="text"
@@ -25,8 +12,13 @@
           v-decorator="[
             'email',
             {
-              rules: [{ required: true, type: 'email', message: '请输入邮箱地址' }],
-              validateTrigger: ['change', 'blur']
+              rules: [
+                { required: true, type: 'email', message: '请输入邮箱地址' },
+                {
+                  validator: validateEmail
+                }
+              ],
+              validateTrigger: ['blur']
             }
           ]"
         ></a-input>
@@ -86,27 +78,19 @@
         ></a-input>
       </a-form-item>
 
-      <!-- <a-form-item>
-        <a-input size="large" placeholder="11 位手机号" v-decorator="['mobile', {rules: [{ required: true, message: '请输入正确的手机号', pattern: /^1[3456789]\d{9}$/ }, { validator: this.handlePhoneCheck } ], validateTrigger: ['change', 'blur'] }]">
-          <a-select slot="addonBefore" size="large" defaultValue="+86">
-            <a-select-option value="+86">+86</a-select-option>
-            <a-select-option value="+87">+87</a-select-option>
-          </a-select>
-        </a-input>
-      </a-form-item> -->
-      <!--<a-input-group size="large" compact>
-            <a-select style="width: 20%" size="large" defaultValue="+86">
-              <a-select-option value="+86">+86</a-select-option>
-              <a-select-option value="+87">+87</a-select-option>
-            </a-select>
-            <a-input style="width: 80%" size="large" placeholder="11 位手机号"></a-input>
-          </a-input-group>-->
-
-      <!-- <a-row :gutter="16">
+      <a-row :gutter="16">
         <a-col class="gutter-row" :span="16">
           <a-form-item>
-            <a-input size="large" type="text" placeholder="验证码" v-decorator="['captcha', {rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur'}]">
-              <a-icon slot="prefix" type="mail" :style="{ color: 'rgba(0,0,0,.25)' }"/>
+            <a-input
+              size="large"
+              type="text"
+              placeholder="验证码"
+              v-decorator="[
+                'captcha',
+                { rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur' }
+              ]"
+            >
+              <a-icon slot="prefix" type="mail" :style="{ color: 'rgba(0,0,0,.25)' }" />
             </a-input>
           </a-form-item>
         </a-col>
@@ -116,9 +100,10 @@
             size="large"
             :disabled="state.smsSendBtn"
             @click.stop.prevent="getCaptcha"
-            v-text="!state.smsSendBtn && '获取验证码'||(state.time+' s')"></a-button>
+            v-text="(!state.smsSendBtn && '获取验证码') || state.time + ' s'"
+          ></a-button>
         </a-col>
-      </a-row> -->
+      </a-row>
 
       <a-form-item>
         <a-button
@@ -129,18 +114,39 @@
           :loading="registerBtn"
           @click.stop.prevent="handleSubmit"
           :disabled="registerBtn"
-        >注册
+        >
+          {{ createBtnTitle }}
         </a-button>
-        <router-link class="login" :to="{ name: 'login' }">使用已有账户登录</router-link>
+        <router-link class="login" :to="{ name: 'login' }">
+          使用已有账户登录
+        </router-link>
       </a-form-item>
     </a-form>
   </div>
 </template>
 
 <script>
-import { mixinDevice } from '@/utils/mixin.js'
-import { getSmsCaptcha } from '@/api/login'
+import { baseMixin } from '@/store/app-mixin'
+import { timeFix } from '@/utils/util'
 import userApi from '@/api/user'
+import supportApi from '@/api/support'
+import { mapActions } from 'vuex'
+import { isEmpty } from 'lodash'
+
+const validateEmail = (rule, value, callback) => {
+  if (!value) {
+    callback()
+    return
+  }
+
+  userApi.checkEmail(value).then(res => {
+    if (res.data) {
+      callback(new Error('邮箱地址已经被使用'))
+    } else {
+      callback()
+    }
+  })
+}
 
 const levelNames = {
   0: '低',
@@ -164,7 +170,7 @@ export default {
   name: 'Register',
   components: {
   },
-  mixins: [mixinDevice],
+  mixins: [baseMixin],
   data () {
     return {
       form: this.$form.createForm(this),
@@ -177,7 +183,10 @@ export default {
         percent: 10,
         progressColor: '#FF0000'
       },
-      registerBtn: false
+
+      validateEmail: validateEmail,
+      registerBtn: false,
+      socialLoginAuthUser: {}
     }
   },
   computed: {
@@ -189,25 +198,30 @@ export default {
     },
     passwordLevelColor () {
       return levelColor[this.state.passwordLevel]
+    },
+    pageTitle () {
+      if (!isEmpty(this.socialLoginAuthUser)) {
+        return '第三方帐号未绑定，立即创建帐号完成绑定'
+      }
+      return '创建帐号'
+    },
+    createBtnTitle () {
+      if (!isEmpty(this.socialLoginAuthUser)) {
+        return '创建帐号'
+      }
+      return '注册'
     }
   },
+  created () {
+    this.socialLoginAuthUser = this.$route.params
+    this.$log.debug(this.socialLoginAuthUser)
+  },
+  destroyed () {
+    // this.socialLoginAuthUser = {}
+    this.$log.debug('清空socialLoginAuthUser')
+  },
   methods: {
-    handleUsernameValidate (rule, value, validateCallback) {
-      // 正则校验用户名
-      var usernamePattern = /^[a-zA-Z0-9_-]{4,16}$/
-      if (!usernamePattern.test(value)) {
-        validateCallback(new Error('用户名不符合规范'))
-        return
-      }
-      // 校验用户名是否被占用
-      userApi.hasUser({ username: value }).then(res => {
-        if (res.code === 0 && res.data) {
-          validateCallback('用户名已经存在,请重新输入')
-        } else {
-          validateCallback()
-        }
-      })
-    },
+    ...mapActions(['SocialSignLogin']),
     handlePasswordLevel (rule, value, callback) {
       let level = 0
 
@@ -249,47 +263,54 @@ export default {
       }
       callback()
     },
-
-    handlePhoneCheck (rule, value, callback) {
-      console.log('handlePhoneCheck, rule:', rule)
-      console.log('handlePhoneCheck, value', value)
-      console.log('handlePhoneCheck, callback', callback)
-
-      callback()
-    },
-
     handlePasswordInputClick () {
-      if (!this.isMobile()) {
+      if (!this.isMobile) {
         this.state.passwordLevelChecked = true
         return
       }
       this.state.passwordLevelChecked = false
     },
 
-    handleSubmit (e) {
+    handleSubmit () {
       const { form: { validateFields }, state, $router } = this
       validateFields({ force: true }, (err, values) => {
-        if (!err) {
-          // 提交表单
-          userApi.register(values).then(res => {
-            if (res.code === 0) {
-              state.passwordLevelChecked = false
-              $router.push({ name: 'registerResult', params: { ...values } })
-            } else {
-              this.$message.error(`注册用户出错,error:${res.data}`)
-            }
-          }).catch(err => {
-            this.$message.error(`注册用户出错,error:${err.message}`)
+        if (err) {
+          return
+        }
+        state.passwordLevelChecked = false
+        this.registerBtn = true
+        if (this.socialLoginAuthUser) {
+          const userParam = Object.assign({}, values)
+          // 将authUser中的token置为null，否则其中后端authUser中的token没有空惨构造函数回导致绑定失败
+          this.socialLoginAuthUser.token = null
+          userParam.authUser = this.socialLoginAuthUser
+          this.SocialSignLogin(userParam).then(res => {
+            this.registerBtn = false
+            this.loginSuccess(res)
+          }).finally(() => {
+            this.registerBtn = false
           })
+        } else {
+          $router.push({ name: 'registerResult', params: { ...values } })
+          this.registerBtn = false
         }
       })
     },
-
+    loginSuccess (res) {
+      this.$router.push({ name: 'dashboard' })
+      // 延迟 1 秒显示欢迎信息
+      setTimeout(() => {
+        this.$notification.success({
+          message: '欢迎',
+          description: `${timeFix()}，欢迎加入`
+        })
+      }, 1000)
+    },
     getCaptcha (e) {
       e.preventDefault()
-      const { form: { validateFields }, state, $message, $notification } = this
+      const { form: { validateFields }, state, $message } = this
 
-      validateFields(['mobile'], { force: true },
+      validateFields(['email'], { force: true },
         (err, values) => {
           if (!err) {
             state.smsSendBtn = true
@@ -302,21 +323,10 @@ export default {
               }
             }, 1000)
 
-            const hide = $message.loading('验证码发送中..', 0)
+            $message.loading('验证码发送中..')
 
-            getSmsCaptcha({ mobile: values.mobile }).then(res => {
-              setTimeout(hide, 2500)
-              $notification['success']({
-                message: '提示',
-                description: '验证码获取成功，您的验证码为：' + res.result.captcha,
-                duration: 8
-              })
-            }).catch(err => {
-              setTimeout(hide, 1)
-              clearInterval(interval)
-              state.time = 60
-              state.smsSendBtn = false
-              this.requestFailed(err)
+            supportApi.sendEmailCaptcha(values).then(res => {
+              $message.success('验证码发送成功')
             })
           }
         }

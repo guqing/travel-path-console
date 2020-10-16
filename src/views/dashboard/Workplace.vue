@@ -1,319 +1,173 @@
-
 <template>
-  <page-view
-    :avatar="avatar"
-    :title="false"
-  >
-    <div slot="headerContent">
-      <div class="title">
-        {{ timeFix }}，{{ user.name }}
-        <span class="welcome-text">，{{ welcome() }}</span>
+  <page-header-wrapper>
+    <template v-slot:content>
+      <div class="page-header-content">
+        <div class="avatar">
+          <a-avatar size="large" :src="avatar" />
+        </div>
+        <div class="content">
+          <div class="content-title">
+            {{ timeFix }}，{{ userInfo.nickname }}<span class="welcome-text">，{{ welcome }}</span>
+          </div>
+          <div>前端工程师 | 蚂蚁金服 - 某某某事业群 - VUE平台</div>
+        </div>
       </div>
-      <div><img src="http://v2.jinrishici.com/one.svg"/></div>
-    </div>
+    </template>
+    <template v-slot:extraContent>
+      <div class="extra-content">
+        <div class="stat-item">
+          <a-statistic title="项目数" :value="56" />
+        </div>
+        <div class="stat-item">
+          <a-statistic title="团队内排名" :value="8" suffix="/ 24" />
+        </div>
+        <div class="stat-item">
+          <a-statistic title="项目访问" :value="2223" />
+        </div>
+      </div>
+    </template>
 
     <div>
       <a-row :gutter="24">
-        <a-col
-          :xl="24"
-          :lg="24"
-          :md="24"
-          :sm="24"
-          :xs="24"
-        >
+        <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
           <a-card
-            class="project-list"
             :loading="loading"
             style="margin-bottom: 24px;"
             :bordered="false"
-            title="数据概览"
+            title="进行中的项目"
             :body-style="{ padding: 0 }"
           >
-            <!-- <a slot="extra">全部项目</a> -->
+            <a slot="extra">全部项目</a>
             <div>
-              <a-card-grid
-                class="project-card-grid"
-                :key="i"
-                v-for="(item, i) in dataOverview"
-              >
-                <a-card
-                  :bordered="false"
-                  :body-style="{ padding: 0 }"
-                >
+              <a-card-grid class="project-card-grid" :key="i" v-for="(item, i) in projects">
+                <a-card :bordered="false" :body-style="{ padding: 0 }">
                   <a-card-meta>
-                    <div slot="title" class="card-description">
-                      {{ item.count }}
+                    <div slot="title" class="card-title">
+                      <a-avatar size="small" :src="item.cover" />
+                      <a>{{ item.title }}</a>
                     </div>
-                    <div
-                      slot="title"
-                      class="card-title"
-                    >
-                      <a>
-                        <img :src="item.icon" class="card-title-icon"/>
-                        {{ item.title }}
-                      </a>
+                    <div slot="description" class="card-description">
+                      {{ item.description }}
                     </div>
                   </a-card-meta>
-                </a-card>
-              </a-card-grid>
-            </div>
-          </a-card>
-
-          <a-card
-            class="project-list"
-            :loading="loading"
-            style="margin-bottom: 24px;"
-            :bordered="false"
-            title="访问控制"
-            v-if="$auth('dashboard.ram')"
-            :body-style="{ padding: 0 }"
-          >
-            <div>
-              <a-card-grid
-                class="project-card-grid"
-                :key="i"
-                v-for="(item, i) in ramOverView"
-              >
-                <a-card
-                  :bordered="false"
-                  :body-style="{ padding: 0 }"
-                >
-                  <a-card-meta>
-                    <div slot="title" class="card-description">
-                      {{ item.count }}
-                    </div>
-                    <div
-                      slot="title"
-                      class="card-title"
-                    >
-                      <a>
-                        <img :src="item.icon" class="card-title-icon"/>
-                        {{ item.title }}
-                      </a>
-                    </div>
-                  </a-card-meta>
-                </a-card>
-              </a-card-grid>
-            </div>
-          </a-card>
-
-          <a-card
-            :loading="loading"
-            title="日志"
-            v-if="$auth('log.log_list')"
-            :bordered="false"
-          >
-            <a-list>
-              <a-list-item
-                :key="index"
-                v-for="(item, index) in activities"
-              >
-                <a-list-item-meta>
-                  <a-avatar
-                    slot="avatar"
-                    :src="avatar"
-                  />
-                  <div slot="title">
-                    <span>{{ item.username }}</span>&nbsp;
-                    <a href="#">{{ item.content }}</a>
+                  <div class="project-item">
+                    <a href="/#/">科学搬砖组</a>
+                    <span class="datetime">9小时前</span>
                   </div>
-                  <div slot="description">{{ item.createTime | timeAgo }}</div>
+                </a-card>
+              </a-card-grid>
+            </div>
+          </a-card>
+
+          <a-card :loading="loading" title="操作记录" :bordered="false">
+            <a-list>
+              <a-list-item :key="index" v-for="(item, index) in activities">
+                <a-list-item-meta :description="item.createTime">
+                  <span slot="title">{{ item.operation }}</span>
                 </a-list-item-meta>
+                <ellipsis :length="35" tooltip>{{ item.username }}</ellipsis>
               </a-list-item>
             </a-list>
-            <a-pagination @change="onPageChange" v-model="pagination.current" :total="pagination.total" style="text-align:right;"/>
+            <a-pagination
+              v-model="pagination.current"
+              :pageSize="pagination.pageSize"
+              :total="pagination.total"
+              @change="handleLogPageChange"
+              style="text-align: right;"
+            />
           </a-card>
         </a-col>
       </a-row>
     </div>
-  </page-view>
+  </page-header-wrapper>
 </template>
 
 <script>
 import { timeFix } from '@/utils/util'
-import { mapGetters } from 'vuex'
-import { PageView } from '@/layouts'
-import HeadInfo from '@/components/tools/HeadInfo'
-import { timeAgo } from '@/mystatic/js/common'
-
-import { getSchemeOverviewData, getRAMOverView, getLog } from '@/api/manage'
+import { mapState } from 'vuex'
+import Ellipsis from '@/components/Ellipsis'
+import { PageHeaderWrapper } from '@ant-design-vue/pro-layout'
+import actionLogApi from '@/api/action-log'
 
 export default {
   name: 'Workplace',
   components: {
-    PageView,
-    HeadInfo
+    PageHeaderWrapper,
+    Ellipsis
   },
   data () {
     return {
       timeFix: timeFix(),
       avatar: '',
       user: {},
-      schemeOverView: {},
-      myProjects: {},
+
+      projects: [],
+      loading: false,
+      activities: [],
+      teams: [],
       pagination: {
         current: 1,
         pageSize: 5,
         total: 0
-      },
-
-      ramOverView: [],
-      dataOverview: [],
-      loading: true,
-      activities: [] // 日志
+      }
     }
   },
   computed: {
+    ...mapState({
+      nickname: (state) => state.user.nickname,
+      welcome: (state) => state.user.welcome
+    }),
+    currentUser () {
+      return {
+        name: this.userInfo.username,
+        avatar: this.avatar
+      }
+    },
     userInfo () {
       return this.$store.getters.userInfo
     }
   },
   created () {
+    console.log(this.$router)
     this.user = this.userInfo
     this.avatar = this.userInfo.avatar
-  },
-  mounted () {
-    this.loadData()
+    this.handleListActivity()
   },
   methods: {
-    ...mapGetters(['nickname', 'welcome']),
-    loadData () {
-      console.log(this.hasPermission('scheme_count'))
-      if (this.hasPermission('ram_count')) {
-        this.getRamData()
-      }
-
-      if (this.hasPermission('scheme_count')) {
-        this.getSchemeOverViewData()
-      }
-
-      if (this.hasPermission('log_list')) {
-        this.getSchemeOverViewData()
-      }
-      this.getLog()
-      this.loading = false
-    },
-    hasPermission (permissionId) {
-      var flag = false
-      this.userInfo.role.permissions.forEach(p => {
-        var actionList = p.actionList
-        if (actionList.includes(permissionId)) {
-          flag = true
-        }
-      })
-      return flag
-    },
-    getSchemeOverviewList () {
-      this.dataOverview = [
-        {
-          id: 1,
-          title: '预设卡口方案',
-          icon: '/dashboard/presetpoint.png',
-          count: this.schemeOverView.presetCount
-        },
-        {
-          id: 2,
-          title: '布设卡口方案',
-          icon: '/dashboard/bayonet.png',
-          count: this.schemeOverView.actualCount
-        },
-        {
-          id: 3,
-          title: '途经卡口方案',
-          icon: '/dashboard/via.png',
-          count: this.schemeOverView.viaCount
-        },
-        {
-          id: 4,
-          title: '轨迹',
-          icon: '/dashboard/route.png',
-          count: this.schemeOverView.routeCount
-        }
-      ]
+    handleLogPageChange (current) {
+      this.pagination.current = current
+      this.handleListActivity()
     },
     getProjects () {
-      this.ramOverView = [
-        {
-          id: 1,
-          title: '用户',
-          icon: '/dashboard/user.png',
-          count: this.myProjects.userCount
-        },
-        {
-          id: 2,
-          title: 'RAM角色',
-          icon: '/dashboard/RAM.png',
-          count: this.myProjects.roleCount
-        },
-        {
-          id: 3,
-          title: '权限',
-          icon: '/dashboard/usergroup.png',
-          count: this.myProjects.permissionCount
-        }
-      ]
-      this.loading = false
     },
-    getRamData () {
-      var myProjects = {}
-      getRAMOverView().then(res => {
-        this.$set(myProjects, 'userCount', res.data.userCount)
-        this.$set(myProjects, 'roleCount', res.data.roleCount)
-        this.$set(myProjects, 'permissionCount', res.data.permissionCount)
-        console.log('workplace -> call getRamData()', res)
-      })
-      this.myProjects = myProjects
-    },
-    getSchemeOverViewData () {
-      var schemeOverView = {}
-      getSchemeOverviewData().then(res => {
-        console.log(res)
-        this.$set(schemeOverView, 'presetCount', res.data.presetCount)
-        this.$set(schemeOverView, 'actualCount', res.data.actualCount)
-        this.$set(schemeOverView, 'viaCount', res.data.viaCount)
-        this.$set(schemeOverView, 'routeCount', res.data.routeCount)
-        console.log('workplace -> call getSchemeOverViewData()', res)
-      })
-      this.schemeOverView = schemeOverView
-    },
-    getLog () {
-      getLog(this.pagination).then(res => {
+    handleListActivity () {
+      const param = {
+        current: this.pagination.current,
+        pageSize: this.pagination.pageSize
+      }
+      actionLogApi.list(param).then(res => {
         this.activities = res.data.list
         this.pagination.total = res.data.total
-      }).catch(err => {
-        this.$notification.error({
-          message: 'error',
-          description: '查询日志列表失败：' + err.message
-        })
       })
     },
-    onPageChange () {
-      this.getLog()
+    getTeams () {
     }
-  },
-  watch: {
-    myProjects (val) {
-      this.getProjects()
-    },
-    schemeOverView (val) {
-      this.getSchemeOverviewList()
-    }
-  },
-  filters: {
-    timeAgo
   }
 }
 </script>
 
 <style lang="less" scoped>
+@import './Workplace.less';
+
 .project-list {
   .card-title {
     font-size: 0;
+
     a {
       color: rgba(0, 0, 0, 0.85);
+      margin-left: 12px;
       line-height: 24px;
       height: 24px;
-      margin-left: 12px;
       display: inline-block;
       vertical-align: top;
       font-size: 14px;
@@ -323,18 +177,14 @@ export default {
       }
     }
   }
-  .card-title-icon{
-    width: 14px;
-    margin-right: 8px;
-  }
+
   .card-description {
-    color: #262626;
-    font-size: 28px;
-    margin-left: 12px;
+    color: rgba(0, 0, 0, 0.45);
     height: 44px;
     line-height: 22px;
     overflow: hidden;
   }
+
   .project-item {
     display: flex;
     margin-top: 8px;
@@ -342,6 +192,7 @@ export default {
     font-size: 12px;
     height: 20px;
     line-height: 20px;
+
     a {
       color: rgba(0, 0, 0, 0.45);
       display: inline-block;
@@ -351,12 +202,14 @@ export default {
         color: #1890ff;
       }
     }
+
     .datetime {
       color: rgba(0, 0, 0, 0.25);
       flex: 0 0 auto;
       float: right;
     }
   }
+
   .ant-card-meta-description {
     color: rgba(0, 0, 0, 0.45);
     height: 44px;
@@ -368,6 +221,7 @@ export default {
 .item-group {
   padding: 20px 0 8px 24px;
   font-size: 0;
+
   a {
     color: rgba(0, 0, 0, 0.65);
     display: inline-block;
@@ -383,6 +237,7 @@ export default {
     margin: 12px 0;
     line-height: 24px;
     height: 24px;
+
     .member {
       font-size: 14px;
       color: rgba(0, 0, 0, 0.65);
@@ -393,6 +248,7 @@ export default {
       transition: all 0.3s;
       display: inline-block;
     }
+
     &:hover {
       span {
         color: #1890ff;

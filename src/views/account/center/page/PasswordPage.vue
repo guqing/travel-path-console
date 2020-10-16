@@ -8,8 +8,14 @@
               v-decorator="[
                 'oldPassword',
                 {
-                  rules: [{ required: true, message: '请输入原始密码', whitespace: false }]
-                }
+                  rules: [
+                    {
+                      required: true,
+                      message: '请输入原始密码',
+                      whitespace: false,
+                    },
+                  ],
+                },
               ]"
             />
           </a-form-item>
@@ -23,13 +29,13 @@
                     {
                       required: true,
                       message: '请输入新密码',
-                      whitespace: false
+                      whitespace: false,
                     },
                     {
-                      validator: validateToNextPassword
-                    }
-                  ]
-                }
+                      validator: validateToNextPassword,
+                    },
+                  ],
+                },
               ]"
             />
           </a-form-item>
@@ -42,13 +48,13 @@
                   rules: [
                     {
                       required: true,
-                      message: '再次输入新密码'
+                      message: '再次输入新密码',
                     },
                     {
-                      validator: compareToFirstPassword
-                    }
-                  ]
-                }
+                      validator: compareToFirstPassword,
+                    },
+                  ],
+                },
               ]"
             />
           </a-form-item>
@@ -69,7 +75,6 @@ export default {
   data () {
     return {
       confirmDirty: false,
-      userId: this.$store.state.user.info.id,
       confirmPassword: '',
       validateMessage: {}
     }
@@ -81,7 +86,6 @@ export default {
     handleSubmit (e) {
       this.form.validateFieldsAndScroll((err, values) => {
         const user = {
-          id: this.userId,
           oldPassword: values.oldPassword,
           newPassword: values.newPassword
         }
@@ -108,21 +112,17 @@ export default {
       if (value && this.confirmDirty) {
         form.validateFields(['confirmPassword'], { force: true })
         validateCallback()
-      } else if (value.length < 6 || value.length > 16) {
-        validateCallback('密码长度必须在6-16字符之间')
+      } else if (value.length < 3 || value.length > 16) {
+        validateCallback('密码长度必须在3-16字符之间')
       }
     },
     handleUpdatePassword (formValues) {
       userApi
         .updatePassword(formValues)
         .then(res => {
-          if (res.code === 402) {
-            this.$message.warning('原始密码输入有误，请重新输入')
-          } else if (res.code === 0) {
-            // 重置form表单
-            this.form.resetFields()
-            this.$message.success('修改成功')
-          }
+          // 重置form表单
+          this.form.resetFields()
+          this.$message.success('修改成功')
         })
         .catch(err => {
           this.$message.error(`修改密码出错，error:${err}`)
@@ -131,5 +131,3 @@ export default {
   }
 }
 </script>
-
-<style lang="less" scoped></style>
