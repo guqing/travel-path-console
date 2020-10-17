@@ -25,7 +25,7 @@ export default {
   menu: {
     locale: false
   },
-  title: 'Violet Cloud',
+  title: 'TP Analysis',
   multiTab: false,
   pwa: false,
   iconfontUrl: '',

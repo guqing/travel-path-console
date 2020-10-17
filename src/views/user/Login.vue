@@ -15,7 +15,7 @@
               v-decorator="[
                 'username',
                 {
-                  rules: [{ required: true, message: '请输入帐户名或邮箱地址' }],
+                  rules: [{ required: true, message: '请输入帐户名或邮箱地址' }, { validator: handleUsernameOrEmail }],
                   validateTrigger: 'change',
                 },
               ]"
@@ -129,6 +129,13 @@
         <router-link class="register" :to="{ name: 'register' }"> 注册账户 </router-link>
       </div>
     </a-form>
+    <!--
+    <two-step-captcha
+      v-if="requiredTwoStepCaptcha"
+      :visible="stepCaptchaVisible"
+      @success="stepCaptchaSuccess"
+      @cancel="stepCaptchaCancel"
+    ></two-step-captcha> -->
   </div>
 </template>
 
@@ -150,6 +157,8 @@ export default {
       state: {
         time: 60,
         loginBtn: false,
+        // login type: 0 email, 1 username, 2 telephone
+        loginType: 0,
         smsSendBtn: false
       },
       socialPage: {
@@ -163,6 +172,17 @@ export default {
   },
   methods: {
     ...mapActions(['Login', 'SocialLogin', 'Logout']),
+    // handler
+    handleUsernameOrEmail (rule, value, callback) {
+      const { state } = this
+      const regex = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/
+      if (regex.test(value)) {
+        state.loginType = 0
+      } else {
+        state.loginType = 1
+      }
+      callback()
+    },
     handleTabClick (key) {
       this.customActiveKey = key
       // this.form.resetFields()
@@ -187,8 +207,9 @@ export default {
         if (!err) {
           const loginParams = { ...values }
           delete loginParams.username
-          loginParams['username'] = values.username
+          loginParams[!state.loginType ? 'email' : 'username'] = values.username
           loginParams.password = values.password
+          loginParams.loginType = state.loginType
           Login(loginParams)
             .then(res => this.loginSuccess(res))
             .catch(err => this.requestFailed(err))

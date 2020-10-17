@@ -1,6 +1,6 @@
 <template>
   <pro-layout
-    title="Violet Cloud"
+    title="TP Analysis"
     :menus="menus"
     :collapsed="collapsed"
     :mediaQuery="query"

@@ -5,11 +5,11 @@
         <div class="header">
           <a href="/">
             <img src="~@/assets/logo.svg" class="logo" alt="logo" />
-            <span class="title">Violet Cloud</span>
+            <span class="title">TP Analysis</span>
           </a>
         </div>
         <div class="desc">
-          Violet Cloud 一个基于Spring Cloud的微服务快速开发脚手架
+          TP Analysis 车辆行驶轨迹分析管理平台
         </div>
       </div>
 
@@ -22,7 +22,7 @@
           <a href="_self">条款</a>
         </div>
         <div class="copyright">
-          Copyright &copy; 2020 violet cloud
+          Copyright &copy; 2020 TP Analysis
         </div>
       </div>
     </div>
