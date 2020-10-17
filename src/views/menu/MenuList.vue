@@ -54,7 +54,7 @@
           </a-form-model-item>
           <a-form-model-item label="图标">
             <a-input v-model="menuForm.icon" @click="handleSelectIcon" placeholder="选择一个图标可以展示在菜单标题左侧">
-              <a-icon slot="suffix" :type="menuForm.icon" />
+              <a-icon slot="suffix" :type="menuForm.icon || 'question-circle'" title="图标预览" />
             </a-input>
           </a-form-model-item>
           <a-col :style="{ display: moreFormItem ? 'block' : 'none' }">
@@ -230,10 +230,23 @@ export default {
       if (id) {
         menuApi.getById(id).then(res => {
           this.menuForm = res.data
-          if (res.data.parentId === 0) {
-            this.menuForm.parentId = null
-          }
+          this.handleMenuFormValueConvert()
         })
+      }
+    },
+    handleMenuFormValueConvert () {
+      if (this.menuForm.keepAlive === 1) {
+        this.menuForm.keepAlive = true
+      } else {
+        this.menuForm.keepAlive = false
+      }
+      if (this.menuForm.hidden === 1) {
+        this.menuForm.hidden = true
+      } else {
+        this.menuForm.hidden = false
+      }
+      if (this.menuForm.parentId === 0) {
+        this.menuForm.parentId = null
       }
     },
     handleToggleTreeMenu (selectedKeys, event) {

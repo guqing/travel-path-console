@@ -55,6 +55,7 @@
       ref="table"
       size="default"
       rowKey="username"
+      showPagination="auto"
       :columns="columns"
       :data="loadData"
       :alert="{ show: true, clear: true }"
@@ -107,7 +108,7 @@ import UserModal from './modules/UserModal'
 
 import userApi from '@/api/user'
 export default {
-  name: 'TableList',
+  name: 'UserList',
   components: {
     STable,
     UserModal
@@ -213,6 +214,7 @@ export default {
 
         this.$log.debug('loadData request parameters:', queryRequest)
         return userApi.list(queryRequest).then(res => {
+          console.log(res.data)
           return {
             pageSize: res.data.pageSize,
             pageNo: res.data.current,
