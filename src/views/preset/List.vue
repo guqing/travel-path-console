@@ -28,7 +28,7 @@
     <s-table
       ref="table"
       size="default"
-      rowKey="username"
+      rowKey="id"
       showPagination="auto"
       :columns="columns"
       :data="loadData"
@@ -94,7 +94,7 @@
         }"
       >
         <a-button style="margin-right: 8px" @click="drawer.visible = false"> 取消 </a-button>
-        <a-button type="primary"> 提交 </a-button>
+        <a-button type="primary" @click="handleSavePresetPlan"> 提交 </a-button>
       </div>
     </a-drawer>
   </a-card>
@@ -140,37 +140,24 @@ export default {
       // 表头
       columns: [
         {
-          title: '用户名',
-          dataIndex: 'username'
+          title: 'ID',
+          scopedSlots: { customRender: 'serial' }
         },
         {
-          title: '昵称',
-          dataIndex: 'nickname'
+          title: '方案名称',
+          dataIndex: 'name'
         },
         {
-          title: '性别',
-          dataIndex: 'gender'
+          title: '方案描述',
+          dataIndex: 'description'
         },
         {
-          title: '邮箱',
-          dataIndex: 'email'
-        },
-        {
-          title: '手机号',
-          dataIndex: 'mobile'
-        },
-        {
-          title: '角色',
-          dataIndex: 'roleNames'
-        },
-        {
-          title: '状态',
-          dataIndex: 'status'
+          title: '方案卡口数',
+          dataIndex: 'count'
         },
         {
           title: '创建时间',
-          dataIndex: 'createTime',
-          sorter: true
+          dataIndex: 'createTime'
         },
         {
           table: '操作',
@@ -222,6 +209,15 @@ export default {
     }
   },
   methods: {
+    onSelectChange (selectedRowKeys, selectedRows) {
+      this.selectedRowKeys = selectedRowKeys
+      this.selectedRows = selectedRows
+    },
+    clearSelected () {
+      // 清空 table 已选中项
+      this.selectedRows = []
+      this.selectedRowKeys = []
+    },
     initMap (map) {
       this.map = map
       this.markerLayerGroup = L.layerGroup().addTo(this.map)
@@ -280,6 +276,17 @@ export default {
           that.markerLayerGroup.removeLayer(e.target)
         },
         onCancel () { }
+      })
+    },
+    handleSavePresetPlan () {
+      var presetForm = Object.assign({}, this.drawer.presetForm)
+      presetForm.checkpoints = this.checkpoints
+      presetPlanApi.create(presetForm).then(res => {
+        this.$message.success('添加成功')
+        this.$table.refresh()
+        this.checkpoints = []
+        this.layerGroup.clearLayers()
+        this.drawer.presetForm = {}
       })
     }
   }
