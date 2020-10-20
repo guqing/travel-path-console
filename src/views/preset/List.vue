@@ -15,6 +15,7 @@
           <a-icon type="down" />
         </a-button>
       </a-dropdown>
+      <a-button type="dashed" @click="handleClearMap" v-show="viewMarkedBtnVisible">清空地图</a-button>
 
       <a-dropdown v-show="tableOpsVisible">
         <a-menu slot="overlay">
@@ -35,11 +36,12 @@
       :alert="{ show: true, clear: true }"
       :rowSelection="rowSelection"
     >
-      <template slot="action">
+      <template slot="action" slot-scope="text, record">
         <div class="editable-row-operations">
           <span>
-            <a class="edit">删除</a>
-            <a class="edit">预览</a>
+            <a class="preview" @click="handlePreviewPlan(record)">预览</a>
+            <a-divider type="vertical" />
+            <a class="delete">删除</a>
           </span>
         </div>
       </template>
@@ -104,13 +106,9 @@ import LeafletMap from '@/components/LeafletMap'
 import * as L from 'leaflet'
 import { STable } from '@/components'
 import presetPlanApi from '@/api/presetplan'
-// var PresetPointIcon = L.Icon.extend({
-//   options: {
-//     iconUrl: require('@/assets/icons/presetpoint.svg'),
-//     iconSize: [36, 36],
-//     iconAnchor: [17, 36]
-//   }
-// })
+import pick from 'lodash.pick'
+// import { CheckPointIcon } from '@/utils/leafletHelper'
+
 export default {
   name: 'PresetPlanList',
   components: {
@@ -220,12 +218,32 @@ export default {
     },
     initMap (map) {
       this.map = map
-      this.markerLayerGroup = L.layerGroup().addTo(this.map)
+      this.markerLayerGroup = L.featureGroup().addTo(this.map)
     },
-    handlePreviewPlan (id) {
-      presetPlanApi.getById(id).then(res => {
+    handleClearMap () {
+      this.markerLayerGroup.clearLayers()
+      this.checkpoints = []
+    },
+    handlePreviewPlan (record) {
+      // 先清空, 否则会叠加
+      this.markerLayerGroup.clearLayers()
+      // 获取数据
+      presetPlanApi.getById(record.id).then(res => {
         this.$log.debug('预览卡口方案:', res.data)
+        var checkpoints = res.data.checkpoints || []
+        // 回显表单数据
+        this.handleFillPresetForm(res.data, checkpoints)
+        // 绘制点
+        checkpoints.forEach(point => {
+          var marker = L.marker([point.lat, point.lng], { draggable: true })
+          this.markerLayerGroup.addLayer(marker)
+        })
+        this.map.fitBounds(this.markerLayerGroup.getBounds())
       })
+    },
+    handleFillPresetForm (presetPlan, checkpoints) {
+      this.checkpoints = checkpoints
+      this.drawer.presetForm = pick(presetPlan, 'name', 'count', 'description')
     },
     handleOpenMapMark () {
       // 为地图注册点击事件，为了防止事件重复绑定，绑定前先解除先前的事件绑定
@@ -283,11 +301,16 @@ export default {
       presetForm.checkpoints = this.checkpoints
       presetPlanApi.create(presetForm).then(res => {
         this.$message.success('添加成功')
-        this.$table.refresh()
-        this.checkpoints = []
-        this.layerGroup.clearLayers()
-        this.drawer.presetForm = {}
+        this.handleResetForm()
       })
+    },
+    handleResetForm () {
+      this.checkpoints = []
+      this.markerLayerGroup.clearLayers()
+      this.drawer.presetForm = {}
+      this.drawer.visible = false
+      // 刷新表格
+      this.$table.refresh()
     }
   }
 }
