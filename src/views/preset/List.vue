@@ -7,23 +7,24 @@
           <a-menu-item key="1" @click="handleCloseMapMark" v-if="mapMark.isOpen">
             <a-icon type="undo" />撤销标注
           </a-menu-item>
-          <a-menu-item key="1" @click="handleOpenMapMark" v-else> <a-icon type="edit" />手动标注 </a-menu-item>
+          <a-menu-item key="1" @click="handleCreateMark" v-else> <a-icon type="edit" />手动标注 </a-menu-item>
           <a-menu-item key="2"> <a-icon type="export" />批量上传</a-menu-item>
         </a-menu>
         <a-button type="primary" icon="plus">
-          新建方案
+          新增
           <a-icon type="down" />
         </a-button>
       </a-dropdown>
-      <a-button type="dashed" @click="handleClearMap" v-show="viewMarkedBtnVisible">清空地图</a-button>
-
+      <a-button @click="handleClearMap" v-show="viewMarkedBtnVisible"><a-icon type="undo" />清空地图 </a-button>
+      <a-button type="primary" @click="drawer.visible = true" v-show="viewMarkedBtnVisible">
+        <a-icon type="eye" />查看已选数据
+      </a-button>
       <a-dropdown v-show="tableOpsVisible">
         <a-menu slot="overlay">
           <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
         </a-menu>
         <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>
       </a-dropdown>
-      <a-button type="dashed" @click="drawer.visible = true" v-show="viewMarkedBtnVisible">查看已选数据</a-button>
     </div>
 
     <s-table
@@ -36,12 +37,25 @@
       :alert="{ show: true, clear: true }"
       :rowSelection="rowSelection"
     >
+      <span slot="serial" slot-scope="text, record, index">
+        {{ index + 1 }}
+      </span>
       <template slot="action" slot-scope="text, record">
         <div class="editable-row-operations">
           <span>
             <a class="preview" @click="handlePreviewPlan(record)">预览</a>
             <a-divider type="vertical" />
-            <a class="delete">删除</a>
+            <a class="edit" @click="handleEditPlan(record)">编辑</a>
+            <a-divider type="vertical" />
+            <a-popconfirm
+              title="你确定要删除这条方案吗?"
+              placement="rightBottom"
+              ok-text="确定"
+              cancel-text="取消"
+              @confirm="handleDeleteById(record)"
+            >
+              <a class="delete" href="#">删除</a>
+            </a-popconfirm>
           </span>
         </div>
       </template>
@@ -83,6 +97,7 @@
       </a-form>
 
       <div
+        v-show="!drawer.isPreview"
         :style="{
           position: 'absolute',
           bottom: 0,
@@ -96,7 +111,7 @@
         }"
       >
         <a-button style="margin-right: 8px" @click="drawer.visible = false"> 取消 </a-button>
-        <a-button type="primary" @click="handleSavePresetPlan"> 提交 </a-button>
+        <a-button type="primary" @click="handleSavePresetPlan"> 保存 </a-button>
       </div>
     </a-drawer>
   </a-card>
@@ -125,6 +140,7 @@ export default {
         cursorStyle: null
       },
       drawer: {
+        isPreview: false,
         visible: false,
         tableColumns: [{
           title: '纬度',
@@ -221,12 +237,20 @@ export default {
       this.markerLayerGroup = L.featureGroup().addTo(this.map)
     },
     handleClearMap () {
+      // 从集合中删除marker
       this.markerLayerGroup.clearLayers()
+      this.map.off('click')
+      this.mapMark.isOpen = false
+      this.mapMark.cursorStyle = null
       this.checkpoints = []
     },
+    handleCreateMark () {
+      this.handleResetForm()
+      this.handleOpenMapMark()
+    },
     handlePreviewPlan (record) {
-      // 先清空, 否则会叠加
-      this.markerLayerGroup.clearLayers()
+      this.drawer.isPreview = true
+      this.handleResetForm()
       // 获取数据
       presetPlanApi.getById(record.id).then(res => {
         this.$log.debug('预览卡口方案:', res.data)
@@ -235,15 +259,43 @@ export default {
         this.handleFillPresetForm(res.data, checkpoints)
         // 绘制点
         checkpoints.forEach(point => {
-          var marker = L.marker([point.lat, point.lng], { draggable: true })
+          var marker = L.marker([point.lat, point.lng], { draggable: false })
           this.markerLayerGroup.addLayer(marker)
         })
         this.map.fitBounds(this.markerLayerGroup.getBounds())
       })
     },
+    handleEditPlan (record) {
+      this.drawer.isPreview = false
+      // 先重置表单
+      this.handleResetForm()
+      // 获取数据
+      presetPlanApi.getById(record.id).then(res => {
+        this.$log.debug('编辑卡口方案:', res.data)
+        var checkpoints = res.data.checkpoints || []
+        // 回显表单数据
+        this.handleFillPresetForm(res.data, checkpoints)
+        // 绘制点
+        checkpoints.forEach(point => {
+          var marker = L.marker([point.lat, point.lng], { draggable: true })
+          // // 为marker添加相应事件
+          marker.on('click', e => this.handleOnMarkerClick(e))
+          this.markerLayerGroup.addLayer(marker)
+        })
+        this.map.fitBounds(this.markerLayerGroup.getBounds())
+      })
+      // 开启地图标注
+      this.handleOpenMapMark()
+    },
+    handleDeleteById (record) {
+      presetPlanApi.deleteById(record.id).then(res => {
+        this.$message.success('删除成功')
+        this.handleReloadTable()
+      })
+    },
     handleFillPresetForm (presetPlan, checkpoints) {
       this.checkpoints = checkpoints
-      this.drawer.presetForm = pick(presetPlan, 'name', 'count', 'description')
+      this.drawer.presetForm = pick(presetPlan, 'id', 'name', 'description')
     },
     handleOpenMapMark () {
       // 为地图注册点击事件，为了防止事件重复绑定，绑定前先解除先前的事件绑定
@@ -271,11 +323,7 @@ export default {
       this.$confirm({
         title: '撤销标注将清除所有标记,是否继续?',
         onOk () {
-          // 从集合中删除marker
-          that.markerLayerGroup.clearLayers()
-          that.map.off('click')
-          that.mapMark.isOpen = false
-          that.mapMark.cursorStyle = null
+          that.handleClearMap()
         },
         onCancel () { }
       })
@@ -299,18 +347,21 @@ export default {
     handleSavePresetPlan () {
       var presetForm = Object.assign({}, this.drawer.presetForm)
       presetForm.checkpoints = this.checkpoints
-      presetPlanApi.create(presetForm).then(res => {
-        this.$message.success('添加成功')
+      presetPlanApi.createOrUpdate(presetForm).then(res => {
+        this.$message.success('保存成功')
         this.handleResetForm()
+        this.handleReloadTable()
       })
     },
     handleResetForm () {
       this.checkpoints = []
-      this.markerLayerGroup.clearLayers()
       this.drawer.presetForm = {}
       this.drawer.visible = false
+      this.handleClearMap()
+    },
+    handleReloadTable () {
       // 刷新表格
-      this.$table.refresh()
+      this.$refs.table.refresh()
     }
   }
 }

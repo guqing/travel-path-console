@@ -2,9 +2,9 @@ import { axios } from '@/utils/request'
 
 const presetPlanApi = {}
 
-presetPlanApi.create = function (parameter) {
+presetPlanApi.createOrUpdate = function (parameter) {
   return axios({
-    url: '/preset',
+    url: '/preset/create-update',
     method: 'post',
     data: parameter
   })
@@ -24,4 +24,20 @@ presetPlanApi.getById = function (parameter) {
     method: 'get'
   })
 }
+
+presetPlanApi.deleteByIds = function (parameter) {
+  return axios({
+    url: '/preset',
+    method: 'delete',
+    data: parameter
+  })
+}
+presetPlanApi.deleteById = function (parameter) {
+  return axios({
+    url: '/preset',
+    method: 'delete',
+    data: [parameter]
+  })
+}
+
 export default presetPlanApi
