@@ -21,7 +21,7 @@
       </a-button>
       <a-dropdown v-show="tableOpsVisible">
         <a-menu slot="overlay">
-          <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
+          <a-menu-item key="1" @click="handleDeleteByIds"><a-icon type="delete" />删除</a-menu-item>
         </a-menu>
         <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>
       </a-dropdown>
@@ -291,6 +291,18 @@ export default {
       presetPlanApi.deleteById(record.id).then(res => {
         this.$message.success('删除成功')
         this.handleReloadTable()
+      })
+    },
+    handleDeleteByIds () {
+      this.$confirm({
+        title: '你确定要删除选中的预设卡口点吗?',
+        onOk () {
+          presetPlanApi.deleteByIds(this.selectedRowKeys).then(res => {
+            this.$message.success('删除成功')
+            this.handleReloadTable()
+          })
+        },
+        onCancel () { }
       })
     },
     handleFillPresetForm (presetPlan, checkpoints) {
