@@ -6,7 +6,6 @@ import { welcome } from '@/utils/util'
 const user = {
   state: {
     token: '',
-    gatewayToken: '',
     name: '',
     welcome: '',
     avatar: '',
@@ -14,14 +13,9 @@ const user = {
     info: {},
     routerMap: []
   },
-
   mutations: {
     SET_TOKEN: (state, token) => {
       state.token = token
-    },
-    SET_GATEWAY_TOKEN: (state, token) => {
-      state.gatewayToken = token
-      sessionStorage.setItem('GateWay_Token', token)
     },
     SET_NAME: (state, { name, welcome }) => {
       state.name = name
@@ -40,7 +34,6 @@ const user = {
       state.routerMap = routerMap
     }
   },
-
   actions: {
     // 登录
     Login ({ commit }, userInfo) {
