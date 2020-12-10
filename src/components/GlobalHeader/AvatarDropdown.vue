@@ -44,18 +44,18 @@ export default {
   },
   methods: {
     ...mapActions(['Logout']),
-    handleToCenter () {
+    handleToCenter() {
       this.$router.push({ path: '/account/center' })
     },
-    handleToSettings () {
+    handleToSettings() {
       this.$router.push({ path: '/account/settings' })
     },
-    handleLogout (e) {
+    handleLogout(e) {
       const that = this
       this.$confirm({
         title: '提示',
         content: '真的要注销登录吗 ?',
-        onOk () {
+        onOk() {
           return that.Logout({}).then(() => {
             window.location.reload()
           }).catch(err => {
@@ -65,7 +65,7 @@ export default {
             })
           })
         },
-        onCancel () { }
+        onCancel() { }
       })
     }
   }

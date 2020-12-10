@@ -77,7 +77,7 @@ export default {
     STable,
     PresetModal
   },
-  data () {
+  data() {
     return {
       map: {},
       modalVisible: false,
@@ -120,63 +120,66 @@ export default {
         const queryParam = Object.assign({}, this.queryParam)
         queryParam.current = parameter.pageNo
         queryParam.pageSize = parameter.pageSize
-        return presetPlanApi.list(queryParam).then(res => {
-          this.$log.debug('预设卡口方案列表数据:', res.data)
-          return {
-            pageSize: res.data.pageSize,
-            pageNo: res.data.current,
-            totalCount: res.data.total,
-            totalPage: res.data.pages,
-            data: res.data.list
-          }
-        }).catch(err => {
-          this.$message.error(`查询出错:${err}`)
-          return {
-            pageSize: 0,
-            pageNo: 1,
-            totalCount: 0,
-            totalPage: 0,
-            data: []
-          }
-        })
+        return presetPlanApi
+          .list(queryParam)
+          .then(res => {
+            this.$log.debug('预设卡口方案列表数据:', res.data)
+            return {
+              pageSize: res.data.pageSize,
+              pageNo: res.data.current,
+              totalCount: res.data.total,
+              totalPage: res.data.pages,
+              data: res.data.list
+            }
+          })
+          .catch(err => {
+            this.$message.error(`查询出错:${err}`)
+            return {
+              pageSize: 0,
+              pageNo: 1,
+              totalCount: 0,
+              totalPage: 0,
+              data: []
+            }
+          })
       }
     }
   },
   computed: {
-    rowSelection () {
+    rowSelection() {
       return {
         selectedRowKeys: this.selectedRowKeys,
         onChange: this.onSelectChange
       }
     },
-    tableOpsVisible () {
+    tableOpsVisible() {
       return this.selectedRowKeys.length > 0
     },
-    checkpoints () {
+    checkpoints() {
       return this.designMarkers.map(marker => {
         return marker.getLatLng()
       })
     }
   },
   methods: {
-    initMap (map) {
+    initMap(map) {
       this.map = map
       this.markerLayerGroup = L.featureGroup().addTo(this.map)
     },
-    onSelectChange (selectedRowKeys, selectedRows) {
+    onSelectChange(selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
-    handleOpenModal () {
+    handleOpenModal() {
       this.modalVisible = true
     },
-    handleModalOk (id) {
+    handleModalOk(id) {
       this.modalVisible = false
       presetPlanApi.getById(id).then(res => {
         this.handleDrawMarkers(res.data.checkpoints, true)
       })
     },
-    handleDrawMarkers (checkpoints, clickable) {
+    handleDrawMarkers(checkpoints, clickable) {
       checkpoints = checkpoints || []
       checkpoints.forEach(point => {
         var marker = L.marker([point.lat, point.lng], { icon: new PresetIcon() })
@@ -187,7 +190,7 @@ export default {
       })
       this.map.fitBounds(this.markerLayerGroup.getBounds())
     },
-    handleOnMarkerClick (e) {
+    handleOnMarkerClick(e) {
       const marker = e.target
       var index = this.designMarkers.indexOf(marker)
       if (index > -1) {
@@ -198,21 +201,18 @@ export default {
         e.target.setIcon(new DesignIcon())
       }
     },
-    clearSelected () {
+    clearSelected() {
       // 清空 table 已选中项
       this.selectedRows = []
       this.selectedRowKeys = []
     },
-    handleClearMap () {
+    handleClearMap() {
       this.markerLayerGroup.clearLayers()
       this.designMarkers = []
     },
-    handlePreviewPlan () {
-    },
-    handleEditPlan () {
-    },
-    handleDeleteById () {
-    }
+    handlePreviewPlan() {},
+    handleEditPlan() {},
+    handleDeleteById() {}
   }
 }
 </script>

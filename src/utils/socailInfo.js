@@ -1,4 +1,4 @@
-export function getSocailInfo (type) {
+export function getSocailInfo(type) {
   switch (type) {
     case 'GITHUB':
       return { logo: '', name: 'GitHub', url: 'https://github.com' }

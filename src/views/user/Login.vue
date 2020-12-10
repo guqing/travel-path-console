@@ -16,8 +16,8 @@
                 'username',
                 {
                   rules: [{ required: true, message: '请输入帐户名或邮箱地址' }, { validator: handleUsernameOrEmail }],
-                  validateTrigger: 'change',
-                },
+                  validateTrigger: 'change'
+                }
               ]"
             >
               <a-icon slot="prefix" type="user" :style="{ color: 'rgba(0,0,0,.25)' }" />
@@ -34,8 +34,8 @@
                 'password',
                 {
                   rules: [{ required: true, message: '请输入密码' }],
-                  validateTrigger: 'blur',
-                },
+                  validateTrigger: 'blur'
+                }
               ]"
             >
               <a-icon slot="prefix" type="lock" :style="{ color: 'rgba(0,0,0,.25)' }" />
@@ -55,11 +55,11 @@
                     {
                       required: true,
                       pattern: /^1[34578]\d{9}$/,
-                      message: '请输入正确的手机号',
-                    },
+                      message: '请输入正确的手机号'
+                    }
                   ],
-                  validateTrigger: 'change',
-                },
+                  validateTrigger: 'change'
+                }
               ]"
             >
               <a-icon slot="prefix" type="mobile" :style="{ color: 'rgba(0,0,0,.25)' }" />
@@ -77,8 +77,8 @@
                     'captcha',
                     {
                       rules: [{ required: true, message: '请输入验证码' }],
-                      validateTrigger: 'blur',
-                    },
+                      validateTrigger: 'blur'
+                    }
                   ]"
                 >
                   <a-icon slot="prefix" type="mail" :style="{ color: 'rgba(0,0,0,.25)' }" />
@@ -145,7 +145,7 @@ import { timeFix } from '@/utils/util'
 import { socialLoginApi } from '@/api/login'
 
 export default {
-  data () {
+  data() {
     return {
       customActiveKey: 'tab1',
       loginBtn: false,
@@ -167,13 +167,13 @@ export default {
       }
     }
   },
-  destroyed () {
+  destroyed() {
     window.removeEventListener('message', this.resolveSocialLogin)
   },
   methods: {
     ...mapActions(['Login', 'SocialLogin', 'Logout']),
     // handler
-    handleUsernameOrEmail (rule, value, callback) {
+    handleUsernameOrEmail(rule, value, callback) {
       const { state } = this
       const regex = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/
       if (regex.test(value)) {
@@ -183,11 +183,11 @@ export default {
       }
       callback()
     },
-    handleTabClick (key) {
+    handleTabClick(key) {
       this.customActiveKey = key
       // this.form.resetFields()
     },
-    handleSubmit (e) {
+    handleSubmit(e) {
       e.preventDefault()
       const {
         form: { validateFields },
@@ -198,10 +198,7 @@ export default {
 
       state.loginBtn = true
 
-      const validateFieldsKey =
-        customActiveKey === 'tab1'
-          ? ['username', 'password']
-          : ['mobile', 'captcha']
+      const validateFieldsKey = customActiveKey === 'tab1' ? ['username', 'password'] : ['mobile', 'captcha']
 
       validateFields(validateFieldsKey, { force: true }, (err, values) => {
         if (!err) {
@@ -223,7 +220,7 @@ export default {
         }
       })
     },
-    getCaptcha (e) {
+    getCaptcha(e) {
       e.preventDefault()
       const {
         form: { validateFields },
@@ -246,16 +243,16 @@ export default {
         }
       })
     },
-    stepCaptchaSuccess () {
+    stepCaptchaSuccess() {
       this.loginSuccess()
     },
-    stepCaptchaCancel () {
+    stepCaptchaCancel() {
       this.Logout().then(() => {
         this.loginBtn = false
         this.stepCaptchaVisible = false
       })
     },
-    loginSuccess (res) {
+    loginSuccess(res) {
       this.$router.push({ name: 'dashboard' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
@@ -265,23 +262,25 @@ export default {
         })
       }, 1000)
     },
-    requestFailed (err) {
+    requestFailed(err) {
       console.log('login error:', err)
       this.$notification['error']({
         message: '错误',
-        description:
-          ((err.response || {}).data || {}).message ||
-          '请求出现错误，请稍后再试',
+        description: ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试',
         duration: 4
       })
     },
-    handleSocialLogin (oauthType) {
+    handleSocialLogin(oauthType) {
       const url = `${socialLoginApi}/${oauthType}/login`
-      window.open(url, 'newWindow', `resizable=yes, height=${this.socialPage.height},
-      width=${this.socialPage.width}, top=10%, left=10%, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no`)
+      window.open(
+        url,
+        'newWindow',
+        `resizable=yes, height=${this.socialPage.height},
+      width=${this.socialPage.width}, top=10%, left=10%, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no`
+      )
       window.addEventListener('message', this.resolveSocialLogin, false)
     },
-    resolveSocialLogin (e) {
+    resolveSocialLogin(e) {
       var data = e.data
       if (data.isBind) {
         this.$log.debug('resolveSocialLogin data is bind:', data.accessToken)

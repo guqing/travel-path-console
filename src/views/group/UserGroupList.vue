@@ -62,7 +62,7 @@ import { baseMixin } from '@/store/app-mixin'
 export default {
   name: 'TreeList',
   mixins: [baseMixin],
-  data () {
+  data() {
     return {
       treeDataLoading: false,
       userGroupForm: {},
@@ -78,32 +78,37 @@ export default {
       userGroupTreeData: []
     }
   },
-  created () {
+  created() {
     this.listUserGroupTree()
   },
-  computed: {
-  },
+  computed: {},
   methods: {
-    listUserGroupTree () {
+    listUserGroupTree() {
       this.treeDataLoading = true
-      groupApi.list().then(res => {
-        this.userGroupTreeData = res.data
-      }).catch(err => {
-        this.userGroupTreeData = []
-        this.$message.error(`查询出错:${err}`)
-      }).finally(() => { this.treeDataLoading = false })
+      groupApi
+        .list()
+        .then(res => {
+          this.userGroupTreeData = res.data
+        })
+        .catch(err => {
+          this.userGroupTreeData = []
+          this.$message.error(`查询出错:${err}`)
+        })
+        .finally(() => {
+          this.treeDataLoading = false
+        })
     },
-    onTreeGroupExpand (expandedKeys) {
+    onTreeGroupExpand(expandedKeys) {
       console.log('onExpand', expandedKeys)
       // if not set autoExpandParent to false, if children expanded, parent can not collapse.
       // or, you can remove all expanded children keys.
       this.expandedGroupKeys = expandedKeys
       this.autoExpandParent = false
     },
-    onTreeGroupCheck (checkedGroupKeys) {
+    onTreeGroupCheck(checkedGroupKeys) {
       console.log('onCheck', checkedGroupKeys)
     },
-    onSelect (selectedKeys, event) {
+    onSelect(selectedKeys, event) {
       this.handleToggleTreeMenu(selectedKeys, event)
 
       this.selectedKeys = selectedKeys
@@ -117,13 +122,13 @@ export default {
         })
       }
     },
-    handleToggleTreeMenu (selectedKeys, event) {
+    handleToggleTreeMenu(selectedKeys, event) {
       // 控制树形菜单的展开与折叠
       if (event.node.dataRef.hasChildren) {
         this.expandedMenuKeys = selectedKeys
       }
     },
-    handleSaveOrUpdate () {
+    handleSaveOrUpdate() {
       if (this.userGroupForm) {
         this.$message.warning('必填参数为空')
         return
@@ -133,7 +138,7 @@ export default {
         this.listUserGroupTree()
       })
     },
-    handleResetGroupForm () {
+    handleResetGroupForm() {
       this.userGroupForm = {}
     }
   }

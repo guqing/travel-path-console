@@ -83,7 +83,7 @@ const app = {
     }
   },
   actions: {
-    setLang ({ commit }, lang) {
+    setLang({ commit }, lang) {
       return new Promise((resolve, reject) => {
         commit(APP_LANGUAGE, lang)
         loadLanguageAsync(lang).then(() => {

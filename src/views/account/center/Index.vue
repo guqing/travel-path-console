@@ -83,7 +83,7 @@
           :bordered="false"
           :tabList="tabListNoTitle"
           :activeTabKey="noTitleKey"
-          @tabChange="(key) => handleTabChange(key, 'noTitleKey')"
+          @tabChange="key => handleTabChange(key, 'noTitleKey')"
         >
           <base-setting v-if="noTitleKey === 'base'"></base-setting>
           <password-page v-else-if="noTitleKey === 'password'"></password-page>
@@ -102,13 +102,7 @@ import BaseSetting from './page/BaseSetting'
 import PasswordPage from './page/PasswordPage'
 import AvatarModal from './page/AvatarModal'
 import { mapGetters } from 'vuex'
-import {
-  listSupportSocail,
-  socialLoginApi,
-  bindSocial,
-  listUserConnectedSocail,
-  unbindSocial
-} from '@/api/login'
+import { listSupportSocail, socialLoginApi, bindSocial, listUserConnectedSocail, unbindSocial } from '@/api/login'
 import { getSocailInfo } from '@/utils/socailInfo'
 import userApi from '@/api/user'
 
@@ -120,7 +114,7 @@ export default {
     BaseSetting,
     PasswordPage
   },
-  data () {
+  data() {
     return {
       page: {
         width: window.screen.width * 0.5,
@@ -145,61 +139,65 @@ export default {
     }
   },
   filters: {
-    dateToNow (date) {
+    dateToNow(date) {
       return moment(date).toNow(true)
     },
-    formatDate (date) {
+    formatDate(date) {
       return moment(date).format('YYYY-MM-DD HH:mm:ss')
     }
   },
   computed: {
     ...mapGetters(['avatar', 'userInfo'])
   },
-  mounted () {
+  mounted() {
     this.handleListUserSocial()
   },
-  destroyed () {
+  destroyed() {
     window.removeEventListener('message', this.resolveBindResult)
   },
   methods: {
-    handleBindSocialAccount (oauthType) {
+    handleBindSocialAccount(oauthType) {
       const url = `${socialLoginApi}/${oauthType.toLowerCase()}/bind`
-      window.open(url,
+      window.open(
+        url,
         'Bind Social Account',
-        `height=${this.page.height},width=${this.page.width}, top=10%, left=10%, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no`)
+        `height=${this.page.height},width=${this.page.width}, top=10%, left=10%, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no`
+      )
       window.addEventListener('message', this.resolveBindResult, false)
     },
-    resolveBindResult (e) {
+    resolveBindResult(e) {
       this.$log.debug('解析得到绑定结果:', e.data, e.data.data)
       if (e.data.authUser) {
-        bindSocial(e.data.authUser).then(res => {
-          this.$message.success('绑定成功')
-          this.handleListUserSocial()
-        }).catch(err => {
-          this.$message.error(`绑定失败:${err.message}`)
-        })
+        bindSocial(e.data.authUser)
+          .then(res => {
+            this.$message.success('绑定成功')
+            this.handleListUserSocial()
+          })
+          .catch(err => {
+            this.$message.error(`绑定失败:${err.message}`)
+          })
       }
     },
-    handleUnbindSocial (oauthType) {
+    handleUnbindSocial(oauthType) {
       var that = this
       this.$confirm({
         title: '确定要解除绑定吗?',
-        onOk () {
+        onOk() {
           unbindSocial(oauthType).then(res => {
             that.$message.success('解绑成功')
             that.handleListUserSocial()
           })
         },
-        onCancel () { }
+        onCancel() {}
       })
     },
-    handleListUserSocial () {
+    handleListUserSocial() {
       listUserConnectedSocail().then(res => {
         this.userConnectedSocail = res.data
         this.handleListSupportSocial()
       })
     },
-    handleListSupportSocial () {
+    handleListSupportSocial() {
       listSupportSocail().then(res => {
         var socailAccounts = []
         res.data.forEach(item => {
@@ -215,12 +213,12 @@ export default {
         })
       })
     },
-    handleBeforeUpload (file) {
+    handleBeforeUpload(file) {
       console.log('before upload:', file)
       this.$refs.modal.edit(file)
       return false
     },
-    handleUploadAvatar (avatarUrl) {
+    handleUploadAvatar(avatarUrl) {
       // 更新用户头像
       userApi.updateAvatar(avatarUrl).then(res => {
         this.$message.success('更新成功')
@@ -228,24 +226,24 @@ export default {
         this.$store.commit('SET_AVATAR', avatarUrl)
       })
     },
-    handleTabChange (key, type) {
+    handleTabChange(key, type) {
       this[type] = key
     },
-    handleTagClose (removeTag) {
+    handleTagClose(removeTag) {
       const tags = this.tags.filter(tag => tag !== removeTag)
       this.tags = tags
     },
     // tag
-    showTagInput () {
+    showTagInput() {
       this.tagInputVisible = true
       this.$nextTick(() => {
         this.$refs.tagInput.focus()
       })
     },
-    handleInputChange (e) {
+    handleInputChange(e) {
       this.tagInputValue = e.target.value
     },
-    handleTagInputConfirm () {
+    handleTagInputConfirm() {
       const inputValue = this.tagInputValue
       let tags = this.tags
       if (inputValue && !tags.includes(inputValue)) {

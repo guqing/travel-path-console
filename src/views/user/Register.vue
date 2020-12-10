@@ -168,10 +168,9 @@ const levelColor = {
 }
 export default {
   name: 'Register',
-  components: {
-  },
+  components: {},
   mixins: [baseMixin],
-  data () {
+  data() {
     return {
       form: this.$form.createForm(this),
 
@@ -190,39 +189,39 @@ export default {
     }
   },
   computed: {
-    passwordLevelClass () {
+    passwordLevelClass() {
       return levelClass[this.state.passwordLevel]
     },
-    passwordLevelName () {
+    passwordLevelName() {
       return levelNames[this.state.passwordLevel]
     },
-    passwordLevelColor () {
+    passwordLevelColor() {
       return levelColor[this.state.passwordLevel]
     },
-    pageTitle () {
+    pageTitle() {
       if (!isEmpty(this.socialLoginAuthUser)) {
         return '第三方帐号未绑定，立即创建帐号完成绑定'
       }
       return '创建帐号'
     },
-    createBtnTitle () {
+    createBtnTitle() {
       if (!isEmpty(this.socialLoginAuthUser)) {
         return '创建帐号'
       }
       return '注册'
     }
   },
-  created () {
+  created() {
     this.socialLoginAuthUser = this.$route.params
     this.$log.debug(this.socialLoginAuthUser)
   },
-  destroyed () {
+  destroyed() {
     // this.socialLoginAuthUser = {}
     this.$log.debug('清空socialLoginAuthUser')
   },
   methods: {
     ...mapActions(['SocialSignLogin']),
-    handlePasswordLevel (rule, value, callback) {
+    handlePasswordLevel(rule, value, callback) {
       let level = 0
 
       // 判断这个字符串中有没有数字
@@ -252,7 +251,7 @@ export default {
       }
     },
 
-    handlePasswordCheck (rule, value, callback) {
+    handlePasswordCheck(rule, value, callback) {
       const password = this.form.getFieldValue('password')
       console.log('value', value)
       if (value === undefined) {
@@ -263,7 +262,7 @@ export default {
       }
       callback()
     },
-    handlePasswordInputClick () {
+    handlePasswordInputClick() {
       if (!this.isMobile) {
         this.state.passwordLevelChecked = true
         return
@@ -271,8 +270,12 @@ export default {
       this.state.passwordLevelChecked = false
     },
 
-    handleSubmit () {
-      const { form: { validateFields }, state, $router } = this
+    handleSubmit() {
+      const {
+        form: { validateFields },
+        state,
+        $router
+      } = this
       validateFields({ force: true }, (err, values) => {
         if (err) {
           return
@@ -284,19 +287,21 @@ export default {
           // 将authUser中的token置为null，否则其中后端authUser中的token没有空惨构造函数回导致绑定失败
           this.socialLoginAuthUser.token = null
           userParam.authUser = this.socialLoginAuthUser
-          this.SocialSignLogin(userParam).then(res => {
-            this.registerBtn = false
-            this.loginSuccess(res)
-          }).finally(() => {
-            this.registerBtn = false
-          })
+          this.SocialSignLogin(userParam)
+            .then(res => {
+              this.registerBtn = false
+              this.loginSuccess(res)
+            })
+            .finally(() => {
+              this.registerBtn = false
+            })
         } else {
           $router.push({ name: 'registerResult', params: { ...values } })
           this.registerBtn = false
         }
       })
     },
-    loginSuccess (res) {
+    loginSuccess(res) {
       this.$router.push({ name: 'dashboard' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
@@ -306,33 +311,35 @@ export default {
         })
       }, 1000)
     },
-    getCaptcha (e) {
+    getCaptcha(e) {
       e.preventDefault()
-      const { form: { validateFields }, state, $message } = this
+      const {
+        form: { validateFields },
+        state,
+        $message
+      } = this
 
-      validateFields(['email'], { force: true },
-        (err, values) => {
-          if (!err) {
-            state.smsSendBtn = true
+      validateFields(['email'], { force: true }, (err, values) => {
+        if (!err) {
+          state.smsSendBtn = true
 
-            const interval = window.setInterval(() => {
-              if (state.time-- <= 0) {
-                state.time = 60
-                state.smsSendBtn = false
-                window.clearInterval(interval)
-              }
-            }, 1000)
+          const interval = window.setInterval(() => {
+            if (state.time-- <= 0) {
+              state.time = 60
+              state.smsSendBtn = false
+              window.clearInterval(interval)
+            }
+          }, 1000)
 
-            $message.loading('验证码发送中..')
+          $message.loading('验证码发送中..')
 
-            supportApi.sendEmailCaptcha(values).then(res => {
-              $message.success('验证码发送成功')
-            })
-          }
+          supportApi.sendEmailCaptcha(values).then(res => {
+            $message.success('验证码发送成功')
+          })
         }
-      )
+      })
     },
-    requestFailed (err) {
+    requestFailed(err) {
       this.$notification['error']({
         message: '错误',
         description: ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试',
@@ -342,7 +349,7 @@ export default {
     }
   },
   watch: {
-    'state.passwordLevel' (val) {
+    'state.passwordLevel'(val) {
       console.log(val)
     }
   }

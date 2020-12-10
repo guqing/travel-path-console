@@ -34,7 +34,7 @@
 <script>
 export default {
   name: 'UserModal',
-  data () {
+  data() {
     return {
       visible: false,
       confirmLoading: false,
@@ -42,19 +42,19 @@ export default {
     }
   },
   methods: {
-    close () {
+    close() {
       this.$emit('close')
       this.visible = false
     },
-    detail (record) {
+    detail(record) {
       this.visible = true
       this.actionLog = Object.assign({}, record)
     },
-    handleOk () {
+    handleOk() {
       this.actionLog = {}
       this.close()
     },
-    handleCancel () {
+    handleCancel() {
       this.actionLog = {}
       this.close()
     }

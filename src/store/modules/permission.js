@@ -16,7 +16,7 @@ const permission = {
     }
   },
   actions: {
-    GenerateRoutes ({ commit }) {
+    GenerateRoutes({ commit }) {
       return new Promise((resolve, reject) => {
         var routerMap = storage.get(ROUTER_MAP)
         if (routerMap) {
@@ -38,7 +38,7 @@ const permission = {
   }
 }
 
-function getDnamicRouter (data, commit) {
+function getDnamicRouter(data, commit) {
   generatorDynamicRouter(data).then(res => {
     commit('SET_ROUTERS', res)
     commit('SET_ROUTERMAP', res)

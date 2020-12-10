@@ -25,10 +25,10 @@
                   rules: [
                     { type: 'email', message: '邮箱地址格式不正确!' },
                     {
-                      validator: validateDuplicateEmail,
-                    },
-                  ],
-                },
+                      validator: validateDuplicateEmail
+                    }
+                  ]
+                }
               ]"
               placeholder="exp@admin.com"
             />
@@ -55,23 +55,23 @@ import antiShake from '@/utils/antiShake'
 
 export default {
   name: 'BaseSetting',
-  beforeCreate () {
+  beforeCreate() {
     this.form = this.$form.createForm(this, { name: 'user_profile' })
   },
   computed: {
     ...mapGetters(['userInfo']),
-    currentUser () {
+    currentUser() {
       return pick(this.userInfo, 'nickname', 'email', 'mobile', 'description')
     }
   },
-  mounted () {
+  mounted() {
     this.initForm()
   },
   methods: {
-    initForm () {
+    initForm() {
       this.form.setFieldsValue(this.currentUser)
     },
-    validateDuplicateEmail (rule, value, callback) {
+    validateDuplicateEmail(rule, value, callback) {
       if (this.currentUser.email === value) {
         callback()
       }
@@ -86,17 +86,20 @@ export default {
         })
       }, 500)
     },
-    handleUpdateUserInfo (e) {
+    handleUpdateUserInfo(e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          userApi.updateProfile(values).then(res => {
-            this.$message.success('保存成功')
-            // 更新vuex状态
-            this.$store.dispatch('GetInfo')
-          }).catch(err => {
-            this.$message.error(`更新用户信息出错,error: ${err.message}`)
-          })
+          userApi
+            .updateProfile(values)
+            .then(res => {
+              this.$message.success('保存成功')
+              // 更新vuex状态
+              this.$store.dispatch('GetInfo')
+            })
+            .catch(err => {
+              this.$message.error(`更新用户信息出错,error: ${err.message}`)
+            })
         }
       })
     }

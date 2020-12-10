@@ -39,7 +39,7 @@ export default {
     RightContent,
     GlobalFooter
   },
-  data () {
+  data() {
     return {
       // base
       menus: [],
@@ -74,7 +74,7 @@ export default {
       mainMenu: state => state.permission.addRouters
     })
   },
-  created () {
+  created() {
     const routes = this.mainMenu.find(item => item.path === '/')
     this.menus = (routes && routes.children) || []
     // 处理侧栏收起状态
@@ -85,7 +85,7 @@ export default {
       this.$store.commit(TOGGLE_MOBILE_TYPE, this.isMobile)
     })
   },
-  mounted () {
+  mounted() {
     const userAgent = navigator.userAgent
     if (userAgent.indexOf('Edge') > -1) {
       this.$nextTick(() => {
@@ -98,7 +98,7 @@ export default {
   },
   methods: {
     i18nRender,
-    handleMediaQuery (val) {
+    handleMediaQuery(val) {
       this.query = val
       if (this.isMobile && !val['screen-xs']) {
         this.isMobile = false
@@ -111,10 +111,10 @@ export default {
         // this.settings.fixSiderbar = false
       }
     },
-    handleCollapse (val) {
+    handleCollapse(val) {
       this.collapsed = val
     },
-    handleSettingChange ({ type, value }) {
+    handleSettingChange({ type, value }) {
       console.log('type', type, value)
       type && (this.settings[type] = value)
       switch (type) {
@@ -131,7 +131,7 @@ export default {
           break
       }
     },
-    logoRender () {
+    logoRender() {
       return <LogoSvg />
     }
   }

@@ -38,7 +38,7 @@ const user = {
 
   actions: {
     // 登录
-    Login ({ commit }, userInfo) {
+    Login({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         login(userInfo)
           .then(response => {
@@ -53,7 +53,7 @@ const user = {
           })
       })
     },
-    SocialLogin ({ commit }, data) {
+    SocialLogin({ commit }, data) {
       return new Promise((resolve, reject) => {
         console.log('social login:', data)
         var tokenInfo = data || ''
@@ -73,7 +73,7 @@ const user = {
         resolve(tokenInfo)
       })
     },
-    SocialSignLogin ({ commit }, data) {
+    SocialSignLogin({ commit }, data) {
       return new Promise(resolve => {
         socailSignLogin(data).then(res => {
           console.log('social sign login:', res)
@@ -91,7 +91,7 @@ const user = {
       })
     },
     // 获取用户信息
-    GetInfo ({ commit }) {
+    GetInfo({ commit }) {
       return new Promise((resolve, reject) => {
         getInfo()
           .then(response => {
@@ -107,7 +107,7 @@ const user = {
     },
 
     // 登出
-    Logout ({ commit }) {
+    Logout({ commit }) {
       return new Promise(resolve => {
         commit('SET_TOKEN', '')
         commit('SET_ROLES', [])
@@ -118,7 +118,7 @@ const user = {
   }
 }
 
-function getToken (tokenInfo) {
+function getToken(tokenInfo) {
   const current = new Date()
   const expireTime = current.setTime(current.getTime() + 1000 * tokenInfo.expires_in)
 
@@ -130,7 +130,7 @@ function getToken (tokenInfo) {
   }
 }
 
-function setUserInfo (result, commit) {
+function setUserInfo(result, commit) {
   // commit('SET_ROLES', [result.roleName])
   commit('SET_INFO', result)
   commit('SET_ROLES', result.roleIds)

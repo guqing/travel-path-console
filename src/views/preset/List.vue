@@ -107,7 +107,7 @@
           textAlign: 'right',
           left: 0,
           background: '#fff',
-          borderRadius: '0 0 4px 4px',
+          borderRadius: '0 0 4px 4px'
         }"
       >
         <a-button style="margin-right: 8px" @click="drawer.visible = false"> 取消 </a-button>
@@ -130,7 +130,7 @@ export default {
     LeafletMap,
     STable
   },
-  data () {
+  data() {
     return {
       map: {},
       markerLayerGroup: null,
@@ -142,13 +142,16 @@ export default {
       drawer: {
         isPreview: false,
         visible: false,
-        tableColumns: [{
-          title: '纬度',
-          dataIndex: 'lat'
-        }, {
-          title: '经度',
-          dataIndex: 'lng'
-        }],
+        tableColumns: [
+          {
+            title: '纬度',
+            dataIndex: 'lat'
+          },
+          {
+            title: '经度',
+            dataIndex: 'lng'
+          }
+        ],
         presetForm: {}
       },
       // 表头
@@ -186,57 +189,60 @@ export default {
         const queryParam = Object.assign({}, this.queryParam)
         queryParam.current = parameter.pageNo
         queryParam.pageSize = parameter.pageSize
-        return presetPlanApi.list(queryParam).then(res => {
-          this.$log.debug('预设卡口方案列表数据:', res.data)
-          return {
-            pageSize: res.data.pageSize,
-            pageNo: res.data.current,
-            totalCount: res.data.total,
-            totalPage: res.data.pages,
-            data: res.data.list
-          }
-        }).catch(err => {
-          this.$message.error(`查询出错:${err}`)
-          return {
-            pageSize: 0,
-            pageNo: 1,
-            totalCount: 0,
-            totalPage: 0,
-            data: []
-          }
-        })
+        return presetPlanApi
+          .list(queryParam)
+          .then(res => {
+            this.$log.debug('预设卡口方案列表数据:', res.data)
+            return {
+              pageSize: res.data.pageSize,
+              pageNo: res.data.current,
+              totalCount: res.data.total,
+              totalPage: res.data.pages,
+              data: res.data.list
+            }
+          })
+          .catch(err => {
+            this.$message.error(`查询出错:${err}`)
+            return {
+              pageSize: 0,
+              pageNo: 1,
+              totalCount: 0,
+              totalPage: 0,
+              data: []
+            }
+          })
       }
     }
   },
   computed: {
-    rowSelection () {
+    rowSelection() {
       return {
         selectedRowKeys: this.selectedRowKeys,
         onChange: this.onSelectChange
       }
     },
-    tableOpsVisible () {
+    tableOpsVisible() {
       return this.selectedRowKeys.length > 0
     },
-    viewMarkedBtnVisible () {
+    viewMarkedBtnVisible() {
       return this.checkpoints.length > 0
     }
   },
   methods: {
-    onSelectChange (selectedRowKeys, selectedRows) {
+    onSelectChange(selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
-    clearSelected () {
+    clearSelected() {
       // 清空 table 已选中项
       this.selectedRows = []
       this.selectedRowKeys = []
     },
-    initMap (map) {
+    initMap(map) {
       this.map = map
       this.markerLayerGroup = L.featureGroup().addTo(this.map)
     },
-    handleClearMap () {
+    handleClearMap() {
       // 从集合中删除marker
       this.markerLayerGroup.clearLayers()
       this.map.off('click')
@@ -244,11 +250,11 @@ export default {
       this.mapMark.cursorStyle = null
       this.checkpoints = []
     },
-    handleCreateMark () {
+    handleCreateMark() {
       this.handleResetForm()
       this.handleOpenMapMark()
     },
-    handlePreviewPlan (record) {
+    handlePreviewPlan(record) {
       this.drawer.isPreview = true
       this.handleResetForm()
       // 获取数据
@@ -265,7 +271,7 @@ export default {
         this.map.fitBounds(this.markerLayerGroup.getBounds())
       })
     },
-    handleEditPlan (record) {
+    handleEditPlan(record) {
       this.drawer.isPreview = false
       // 先重置表单
       this.handleResetForm()
@@ -287,29 +293,29 @@ export default {
       // 开启地图标注
       this.handleOpenMapMark()
     },
-    handleDeleteById (record) {
+    handleDeleteById(record) {
       presetPlanApi.deleteById(record.id).then(res => {
         this.$message.success('删除成功')
         this.handleReloadTable()
       })
     },
-    handleDeleteByIds () {
+    handleDeleteByIds() {
       this.$confirm({
         title: '你确定要删除选中的预设卡口点吗?',
-        onOk () {
+        onOk() {
           presetPlanApi.deleteByIds(this.selectedRowKeys).then(res => {
             this.$message.success('删除成功')
             this.handleReloadTable()
           })
         },
-        onCancel () { }
+        onCancel() {}
       })
     },
-    handleFillPresetForm (presetPlan, checkpoints) {
+    handleFillPresetForm(presetPlan, checkpoints) {
       this.checkpoints = checkpoints
       this.drawer.presetForm = pick(presetPlan, 'id', 'name', 'description')
     },
-    handleOpenMapMark () {
+    handleOpenMapMark() {
       // 为地图注册点击事件，为了防止事件重复绑定，绑定前先解除先前的事件绑定
       // 但是注意，一定要指明解除什么事件的绑定，否则会解除所有绑定事件
       this.map.off('click').on('click', e => {
@@ -330,22 +336,22 @@ export default {
         description: '已开启地图标注功能，请手动点击地图标记卡口位置'
       })
     },
-    handleCloseMapMark () {
+    handleCloseMapMark() {
       var that = this
       this.$confirm({
         title: '撤销标注将清除所有标记,是否继续?',
-        onOk () {
+        onOk() {
           that.handleClearMap()
         },
-        onCancel () { }
+        onCancel() {}
       })
     },
-    handleOnMarkerClick (e) {
+    handleOnMarkerClick(e) {
       // 保存this对象
       var that = this
       this.$confirm({
         title: '你确定要删除该预设卡口点吗?',
-        onOk () {
+        onOk() {
           // 从marker map中删除
           that.checkpoints = that.checkpoints.filter(item => {
             return item.lat !== e.latlng.lat && item.lng !== e.latlng.lng
@@ -353,10 +359,10 @@ export default {
           // 从集合中删除marker
           that.markerLayerGroup.removeLayer(e.target)
         },
-        onCancel () { }
+        onCancel() {}
       })
     },
-    handleSavePresetPlan () {
+    handleSavePresetPlan() {
       var presetForm = Object.assign({}, this.drawer.presetForm)
       presetForm.checkpoints = this.checkpoints
       presetPlanApi.createOrUpdate(presetForm).then(res => {
@@ -365,13 +371,13 @@ export default {
         this.handleReloadTable()
       })
     },
-    handleResetForm () {
+    handleResetForm() {
       this.checkpoints = []
       this.drawer.presetForm = {}
       this.drawer.visible = false
       this.handleClearMap()
     },
-    handleReloadTable () {
+    handleReloadTable() {
       // 刷新表格
       this.$refs.table.refresh()
     }

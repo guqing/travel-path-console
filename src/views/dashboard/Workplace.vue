@@ -95,7 +95,7 @@ export default {
     PageHeaderWrapper,
     Ellipsis
   },
-  data () {
+  data() {
     return {
       timeFix: timeFix(),
       avatar: '',
@@ -114,33 +114,32 @@ export default {
   },
   computed: {
     ...mapState({
-      nickname: (state) => state.user.nickname,
-      welcome: (state) => state.user.welcome
+      nickname: state => state.user.nickname,
+      welcome: state => state.user.welcome
     }),
-    currentUser () {
+    currentUser() {
       return {
         name: this.userInfo.username,
         avatar: this.avatar
       }
     },
-    userInfo () {
+    userInfo() {
       return this.$store.getters.userInfo
     }
   },
-  created () {
+  created() {
     console.log(this.$router)
     this.user = this.userInfo
     this.avatar = this.userInfo.avatar
     this.handleListActivity()
   },
   methods: {
-    handleLogPageChange (current) {
+    handleLogPageChange(current) {
       this.pagination.current = current
       this.handleListActivity()
     },
-    getProjects () {
-    },
-    handleListActivity () {
+    getProjects() {},
+    handleListActivity() {
       const param = {
         current: this.pagination.current,
         pageSize: this.pagination.pageSize
@@ -150,8 +149,7 @@ export default {
         this.pagination.total = res.data.total
       })
     },
-    getTeams () {
-    }
+    getTeams() {}
   }
 }
 </script>

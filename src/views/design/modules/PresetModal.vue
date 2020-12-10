@@ -31,7 +31,7 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
       modalVisible: false,
       data: [],
@@ -61,7 +61,7 @@ export default {
     }
   },
   computed: {
-    rowSelection () {
+    rowSelection() {
       return {
         type: 'radio',
         selectedRowKeys: this.selectedRowKeys,
@@ -69,11 +69,11 @@ export default {
       }
     }
   },
-  created () {
+  created() {
     this.loadData()
   },
   methods: {
-    loadData () {
+    loadData() {
       presetPlanApi.list(this.queryParam).then(res => {
         const pagination = { ...this.pagination }
         pagination.total = res.data.total
@@ -82,7 +82,7 @@ export default {
         this.pagination = pagination
       })
     },
-    customRow (record, index) {
+    customRow(record, index) {
       return {
         on: {
           // 鼠标单击行
@@ -93,11 +93,11 @@ export default {
         }
       }
     },
-    onSelectChange (selectedRowKeys, selectedRows) {
+    onSelectChange(selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
-    handleOk () {
+    handleOk() {
       if (this.selectedRowKeys.length > 0) {
         this.$emit('ok', this.selectedRowKeys[0])
       }

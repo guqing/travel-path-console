@@ -11,9 +11,9 @@
         <a-step title="完成" />
       </a-steps>
       <div class="content">
-        <step1 v-if="currentTab === 0" @nextStep="nextStep"/>
-        <step2 v-if="currentTab === 1" @nextStep="nextStep" @prevStep="prevStep"/>
-        <step3 v-if="currentTab === 2" @prevStep="prevStep" @finish="finish"/>
+        <step1 v-if="currentTab === 0" @nextStep="nextStep" />
+        <step2 v-if="currentTab === 1" @nextStep="nextStep" @prevStep="prevStep" />
+        <step3 v-if="currentTab === 2" @prevStep="prevStep" @finish="finish" />
       </div>
     </a-card>
   </page-header-wrapper>
@@ -31,7 +31,7 @@ export default {
     Step2,
     Step3
   },
-  data () {
+  data() {
     return {
       currentTab: 0,
       // form
@@ -39,19 +39,18 @@ export default {
     }
   },
   methods: {
-
     // handler
-    nextStep () {
+    nextStep() {
       if (this.currentTab < 2) {
         this.currentTab += 1
       }
     },
-    prevStep () {
+    prevStep() {
       if (this.currentTab > 0) {
         this.currentTab -= 1
       }
     },
-    finish () {
+    finish() {
       this.currentTab = 0
     }
   }
@@ -59,8 +58,8 @@ export default {
 </script>
 
 <style lang="less" scoped>
-  .steps {
-    max-width: 750px;
-    margin: 16px auto;
-  }
+.steps {
+  max-width: 750px;
+  margin: 16px auto;
+}
 </style>

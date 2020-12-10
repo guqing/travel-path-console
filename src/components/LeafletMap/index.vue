@@ -18,22 +18,32 @@ export default {
       type: String,
       required: false,
       default: null
+    },
+    bounds: {
+      type: Array,
+      required: false,
+      default: () => {
+        return [
+          [34.041276143397731, 108.4084198740709],
+          [34.652635225618667, 109.56107192878135]
+        ]
+      }
     }
   },
-  data () {
+  data() {
     return {
       map: {}
     }
   },
-  mounted () {
+  mounted() {
     this.init()
   },
   methods: {
-    init () {
+    init() {
       // 设置左上角经纬度
-      var corner1 = L.latLng(34.041276143397731, 108.4084198740709)
+      var corner1 = L.latLng(this.bounds[0][0], this.bounds[0][1])
       // 设置右下点经纬度
-      var corner2 = L.latLng(34.652635225618667, 109.56107192878135)
+      var corner2 = L.latLng(this.bounds[1][0], this.bounds[1][1])
       // 构建视图限制范围
       var bounds = L.latLngBounds(corner1, corner2)
       this.map = new L.Map('mapContainer', {

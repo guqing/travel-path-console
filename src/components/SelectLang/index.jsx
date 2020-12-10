@@ -28,7 +28,7 @@ const SelectLang = {
   },
   name: 'SelectLang',
   mixins: [i18nMixin],
-  render () {
+  render() {
     const { prefixCls } = this
     const changeLang = ({ key }) => {
       this.setLang(key)

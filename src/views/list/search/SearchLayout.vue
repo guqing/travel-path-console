@@ -1,9 +1,5 @@
 <template>
-  <page-header-wrapper
-    :tab-list="tabList"
-    :tab-active-key="tabActiveKey"
-    :tab-change="handleTabChange"
-  >
+  <page-header-wrapper :tab-list="tabList" :tab-active-key="tabActiveKey" :tab-change="handleTabChange">
     <template v-slot:content>
       <div class="ant-pro-page-header-search">
         <a-input-search size="large" style="width: 80%; max-width: 522px;">
@@ -18,7 +14,7 @@
 </template>
 
 <script>
-const getActiveKey = (path) => {
+const getActiveKey = path => {
   switch (path) {
     case '/list/search/article':
       return '1'
@@ -32,7 +28,7 @@ const getActiveKey = (path) => {
 }
 export default {
   name: 'SearchLayout',
-  data () {
+  data() {
     return {
       tabList: [
         { key: '1', tab: '文章' },
@@ -43,15 +39,15 @@ export default {
       search: true
     }
   },
-  created () {
+  created() {
     this.tabActiveKey = getActiveKey(this.$route.path)
 
-    this.$watch('$route', (val) => {
+    this.$watch('$route', val => {
       this.tabActiveKey = getActiveKey(val.path)
     })
   },
   methods: {
-    handleTabChange (key) {
+    handleTabChange(key) {
       this.tabActiveKey = key
       switch (key) {
         case '1':

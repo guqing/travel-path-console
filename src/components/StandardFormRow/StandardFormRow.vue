@@ -37,13 +37,13 @@ export default {
     }
   },
   computed: {
-    lastCls () {
+    lastCls() {
       return this.last ? classes[2] : null
     },
-    blockCls () {
+    blockCls() {
       return this.block ? classes[0] : null
     },
-    gridCls () {
+    gridCls() {
       return this.grid ? classes[1] : null
     }
   }

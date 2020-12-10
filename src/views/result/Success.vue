@@ -22,11 +22,14 @@
             2016-12-12 ~ 2017-12-12
           </a-col>
         </a-row>
-        <a-steps :current="1" :direction="isMobile && directionType.vertical || directionType.horizontal" progressDot>
-          <a-step >
+        <a-steps :current="1" :direction="(isMobile && directionType.vertical) || directionType.horizontal" progressDot>
+          <a-step>
             <span style="font-size: 14px" slot="title">创建项目</span>
             <template slot="description">
-              <div style="fontSize: 12px; color: rgba(0, 0, 0, 0.45); position: relative; left: 42px;text-align: left;" slot="description" >
+              <div
+                style="fontSize: 12px; color: rgba(0, 0, 0, 0.45); position: relative; left: 42px;text-align: left;"
+                slot="description"
+              >
                 <div style="margin: 8px 0 4px">
                   曲丽丽
                   <a-icon style="margin-left: 8px" type="dingding-o" />
@@ -38,7 +41,10 @@
           <a-step title="部门初审">
             <span style="font-size: 14px" slot="title">部门初审</span>
             <template slot="description">
-              <div style="fontSize: 12px; color: rgba(0, 0, 0, 0.45); position: relative; left: 42px;text-align: left;" slot="description" >
+              <div
+                style="fontSize: 12px; color: rgba(0, 0, 0, 0.45); position: relative; left: 42px;text-align: left;"
+                slot="description"
+              >
                 <div style="margin: 8px 0 4px">
                   周毛毛
                   <a-icon style="margin-left: 8px; color: #00A0E9" type="dingding-o" />
@@ -50,7 +56,7 @@
           <a-step title="财务复核">
             <span style="font-size: 14px" slot="title">财务复核</span>
           </a-step>
-          <a-step title="完成" >
+          <a-step title="完成">
             <span style="font-size: 14px" slot="title">完成</span>
           </a-step>
         </a-steps>
@@ -70,14 +76,15 @@ const directionType = {
 export default {
   name: 'Success',
   mixins: [baseMixin],
-  data () {
+  data() {
     this.directionType = directionType
     return {
       title: '提交成功',
-      description: '提交结果页用于反馈一系列操作任务的处理结果，\n' +
-          ' 如果仅是简单操作，使用 Message 全局提示反馈即可。\n' +
-          ' 本文字区域可以展示简单的补充说明，如果有类似展示\n' +
-          ' “单据”的需求，下面这个灰色区域可以呈现比较复杂的内容。'
+      description:
+        '提交结果页用于反馈一系列操作任务的处理结果，\n' +
+        ' 如果仅是简单操作，使用 Message 全局提示反馈即可。\n' +
+        ' 本文字区域可以展示简单的补充说明，如果有类似展示\n' +
+        ' “单据”的需求，下面这个灰色区域可以呈现比较复杂的内容。'
     }
   }
 }

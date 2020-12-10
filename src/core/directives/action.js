@@ -15,7 +15,7 @@ import store from '@/store'
  *  @see https://github.com/sendya/ant-design-pro-vue/pull/53
  */
 const action = Vue.directive('action', {
-  inserted: function (el, binding, vnode) {
+  inserted: function(el, binding, vnode) {
     const actionName = binding.arg
     const permissions = store.getters.userInfo.permissions
     const elVal = vnode.context.$route.meta.permission

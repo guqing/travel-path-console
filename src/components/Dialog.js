@@ -1,6 +1,6 @@
 import Modal from 'ant-design-vue/es/modal'
 export default (Vue) => {
-  function dialog (component, componentProps, modalProps) {
+  function dialog(component, componentProps, modalProps) {
     const _vm = this
     modalProps = modalProps || {}
     if (!_vm || !_vm._isVue) {
@@ -13,7 +13,7 @@ export default (Vue) => {
       document.body.appendChild(dialogDiv)
     }
 
-    const handle = function (checkFunction, afterHandel) {
+    const handle = function(checkFunction, afterHandel) {
       if (checkFunction instanceof Function) {
         const res = checkFunction()
         if (res instanceof Promise) {
@@ -30,20 +30,20 @@ export default (Vue) => {
     }
 
     const dialogInstance = new Vue({
-      data () {
+      data() {
         return {
           visible: true
         }
       },
       router: _vm.$router,
       store: _vm.$store,
-      mounted () {
+      mounted() {
         this.$on('close', (v) => {
           this.handleClose()
         })
       },
       methods: {
-        handleClose () {
+        handleClose() {
           handle(this.$refs._component.onCancel, () => {
             this.visible = false
             this.$refs._component.$emit('close')
@@ -51,7 +51,7 @@ export default (Vue) => {
             dialogInstance.$destroy()
           })
         },
-        handleOk () {
+        handleOk() {
           handle(this.$refs._component.onOK || this.$refs._component.onOk, () => {
             this.visible = false
             this.$refs._component.$emit('close')
@@ -60,7 +60,7 @@ export default (Vue) => {
           })
         }
       },
-      render: function (h) {
+      render: function(h) {
         const that = this
         const modalModel = modalProps && modalProps.model
         if (modalModel) {
@@ -105,7 +105,7 @@ export default (Vue) => {
 
   Object.defineProperty(Vue.prototype, '$dialog', {
     get: () => {
-      return function () {
+      return function() {
         dialog.apply(this, arguments)
       }
     }

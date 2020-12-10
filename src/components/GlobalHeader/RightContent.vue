@@ -33,20 +33,20 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
       showMenu: true
     }
   },
   computed: {
     ...mapGetters(['nickname', 'avatar']),
-    wrpCls () {
+    wrpCls() {
       return {
         'ant-pro-global-header-index-right': true,
         [`ant-pro-global-header-index-${(this.topMenu && this.isMobile) && this.theme || 'light'}`]: true
       }
     },
-    currentUser () {
+    currentUser() {
       return {
         name: this.nickname,
         avatar: this.avatar
