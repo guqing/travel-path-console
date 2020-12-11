@@ -3,8 +3,25 @@
     <a-row :gutter="[16, 16]" type="flex">
       <a-col :span="4" :order="0">
         <div class="editor-wrapper">
-          <div class="editor-panel">
-            <div class="editor-content">中文</div>
+          <div class="editor-content">
+            <a-list item-layout="horizontal" :data-source="checkpoints">
+              <a-list-item slot="renderItem" slot-scope="item">
+                <a-list-item-meta
+                  description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                >
+                  <a slot="title" href="https://www.antdv.com/">{{ item.title }}</a>
+                  <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+                </a-list-item-meta>
+              </a-list-item>
+            </a-list>
+            <a-pagination
+              size="small"
+              :current="pagination.current"
+              :pageSize="pagination.pageSize"
+              :total="pagination.total"
+              @change="onPageChange"
+              hideOnSinglePage
+            />
           </div>
         </div>
       </a-col>
@@ -17,6 +34,7 @@
 <script>
 import LeafletMap from '@/components/LeafletMap'
 import * as L from 'leaflet'
+import designApi from '@/api/design'
 
 export default {
   name: 'RouteList',
@@ -25,12 +43,21 @@ export default {
   },
   data() {
     return {
+      checkpoints: [],
+      pagination: {
+        current: 1,
+        pageSize: 10,
+        total: 0
+      },
       map: {},
       mapMark: {
         isOpen: false,
         cursorStyle: null
       }
     }
+  },
+  created() {
+    this.loadData()
   },
   methods: {
     initMap(map) {
@@ -43,6 +70,19 @@ export default {
       this.map.off('click')
       // this.mapMark.isOpen = false
       // this.checkpoints = []
+    },
+    onPageChange() {
+      this.loadData()
+    },
+    loadData() {
+      const queryParam = {
+        current: this.pagination.current,
+        pageSize: this.pagination.pageSize
+      }
+      designApi.list(queryParam).then(res => {
+        this.checkpoints = res.data.list
+        this.pagination.total = res.data.total
+      })
     }
   }
 }
