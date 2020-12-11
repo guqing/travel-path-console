@@ -17,9 +17,17 @@ designApi.getById = function(id) {
   })
 }
 
-designApi.createOrpdate = function(parameter) {
+designApi.create = function(parameter) {
   return axios({
-    url: '/deploy/create-update',
+    url: '/deploy',
+    method: 'post',
+    data: parameter
+  })
+}
+
+designApi.updateById = function(id, parameter) {
+  return axios({
+    url: `/deploy/${id}`,
     method: 'post',
     data: parameter
   })

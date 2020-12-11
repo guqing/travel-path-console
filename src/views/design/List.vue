@@ -242,8 +242,18 @@ export default {
     handlePreviewPlan() {},
     handleEditPlan() {},
     handleDeleteById() {},
+    handleResetForm() {
+      this.drawer.visible = false
+      this.handleClearMap()
+    },
     handleOnSave(values) {
-      console.log(values)
+      const params = Object.assign({}, values)
+      params.checkpoints = this.checkpoints
+      designApi.create(params).then(res => {
+        this.$message.success('保存成功')
+        this.$refs.table.refresh()
+        this.handleResetForm()
+      })
     }
   }
 }

@@ -18,6 +18,9 @@
       :dataSource="dataSource"
       bordered
     >
+      <span slot="serial" slot-scope="text, record, index">
+        {{ index + 1 }}
+      </span>
     </a-table>
     <a-form
       :form="form"
@@ -70,14 +73,10 @@ const formItemLayout = {
   labelCol: { span: 5 },
   wrapperCol: { span: 19 }
 }
-let index = 1
 const columns = [
   {
     title: 'ID',
-    dataIndex: 'index',
-    customRender: () => {
-      return index++
-    }
+    scopedSlots: { customRender: 'serial' }
   },
   {
     title: '纬度',
