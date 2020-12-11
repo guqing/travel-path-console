@@ -6,13 +6,13 @@
       <a-button type="primary" icon="plus" @click="handleOpenModal">
         新增
       </a-button>
-      <a-button @click="handleClearMap">
+      <a-button @click="handleClearMap" v-if="clearMapVisible">
         <a-icon type="undo" />清空地图
       </a-button>
       <a-button
         type="primary"
         @click="drawer.visible = true"
-        v-show="viewMarkedBtnVisible"
+        v-if="mapOpsVisible"
       >
         <a-icon type="eye" />查看已选数据
       </a-button>
@@ -65,6 +65,15 @@
       @ok="handleModalOk"
       @cancel="modalVisible = false"
     />
+
+    <form-drawer
+      :title="'布设卡口方案坐标点数据集'"
+      :visible="drawer.visible"
+      :showFooter="!drawer.isPreview"
+      :dataSource="checkpoints"
+      @close="drawer.visible = false"
+      @ok="handleOnSave"
+    />
   </a-card>
 </template>
 <script>
@@ -89,10 +98,15 @@ export default {
     return {
       map: {},
       modalVisible: false,
+      clearMapVisible: false,
       designMarkers: [],
       mapMark: {
         isOpen: false,
         cursorStyle: null
+      },
+      drawer: {
+        isPreview: false,
+        visible: false
       },
       columns: [
         {
@@ -163,6 +177,9 @@ export default {
     tableOpsVisible() {
       return this.selectedRowKeys.length > 0
     },
+    mapOpsVisible() {
+      return this.checkpoints.length > 0
+    },
     checkpoints() {
       return this.designMarkers.map(marker => {
         return marker.getLatLng()
@@ -188,6 +205,7 @@ export default {
       })
     },
     handleDrawMarkers(checkpoints, clickable) {
+      this.clearMapVisible = true
       checkpoints = checkpoints || []
       checkpoints.forEach(point => {
         var marker = L.marker([point.lat, point.lng], {
@@ -219,10 +237,14 @@ export default {
     handleClearMap() {
       this.markerLayerGroup.clearLayers()
       this.designMarkers = []
+      this.clearMapVisible = false
     },
     handlePreviewPlan() {},
     handleEditPlan() {},
-    handleDeleteById() {}
+    handleDeleteById() {},
+    handleOnSave(values) {
+      console.log(values)
+    }
   }
 }
 </script>
