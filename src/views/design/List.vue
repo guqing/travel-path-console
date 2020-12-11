@@ -3,20 +3,13 @@
     <leaflet-map @onMapInit="initMap" style="height:50vh" />
 
     <div class="table-operator">
-      <a-dropdown>
-        <a-menu slot="overlay">
-          <a-menu-item key="1" @click="handleCloseMapMark" v-if="mapMark.isOpen">
-            <a-icon type="undo" />撤销标注
-          </a-menu-item>
-          <a-menu-item key="1" @click="handleOpenModal" v-else> <a-icon type="edit" />手动标注 </a-menu-item>
-          <a-menu-item key="2"> <a-icon type="export" />批量上传</a-menu-item>
-        </a-menu>
-        <a-button type="primary" icon="plus">
-          新增
-          <a-icon type="down" />
-        </a-button>
-      </a-dropdown>
+      <a-button type="primary" icon="plus" @click="handleOpenModal">
+        新增
+      </a-button>
       <a-button @click="handleClearMap"><a-icon type="undo" />清空地图 </a-button>
+      <a-button type="primary" @click="drawer.visible = true" v-show="viewMarkedBtnVisible">
+        <a-icon type="eye" />查看已选数据
+      </a-button>
       <a-dropdown v-show="tableOpsVisible">
         <a-menu slot="overlay">
           <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
@@ -67,6 +60,7 @@ import LeafletMap from '@/components/LeafletMap'
 import * as L from 'leaflet'
 import { STable } from '@/components'
 import presetPlanApi from '@/api/presetplan'
+import designApi from '@/api/design'
 import PresetModal from './modules/PresetModal'
 import { PresetIcon, DesignIcon } from '@/utils/leafletHelper'
 
@@ -120,10 +114,10 @@ export default {
         const queryParam = Object.assign({}, this.queryParam)
         queryParam.current = parameter.pageNo
         queryParam.pageSize = parameter.pageSize
-        return presetPlanApi
+        return designApi
           .list(queryParam)
           .then(res => {
-            this.$log.debug('预设卡口方案列表数据:', res.data)
+            this.$log.debug('布设卡口方案列表数据:', res.data)
             return {
               pageSize: res.data.pageSize,
               pageNo: res.data.current,

@@ -1,6 +1,7 @@
 <template>
   <a-modal
     :visible="visible"
+    :width="680"
     title="选择预设卡口方案"
     @ok="handleOk"
     @cancel="

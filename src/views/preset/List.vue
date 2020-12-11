@@ -1,13 +1,23 @@
 <template>
   <a-card :bordered="false">
-    <leaflet-map @onMapInit="initMap" :cursor="mapMark.cursorStyle" style="height:50vh" />
+    <leaflet-map
+      @onMapInit="initMap"
+      :cursor="mapMark.cursorStyle"
+      style="height:50vh"
+    />
     <div class="table-operator">
       <a-dropdown>
         <a-menu slot="overlay">
-          <a-menu-item key="1" @click="handleCloseMapMark" v-if="mapMark.isOpen">
+          <a-menu-item
+            key="1"
+            @click="handleCloseMapMark"
+            v-if="mapMark.isOpen"
+          >
             <a-icon type="undo" />撤销标注
           </a-menu-item>
-          <a-menu-item key="1" @click="handleCreateMark" v-else> <a-icon type="edit" />手动标注 </a-menu-item>
+          <a-menu-item key="1" @click="handleCreateMark" v-else>
+            <a-icon type="edit" />手动标注
+          </a-menu-item>
           <a-menu-item key="2"> <a-icon type="export" />批量上传</a-menu-item>
         </a-menu>
         <a-button type="primary" icon="plus">
@@ -15,15 +25,25 @@
           <a-icon type="down" />
         </a-button>
       </a-dropdown>
-      <a-button @click="handleClearMap" v-show="viewMarkedBtnVisible"><a-icon type="undo" />清空地图 </a-button>
-      <a-button type="primary" @click="drawer.visible = true" v-show="viewMarkedBtnVisible">
+      <a-button @click="handleClearMap" v-show="viewMarkedBtnVisible">
+        <a-icon type="undo" />清空地图
+      </a-button>
+      <a-button
+        type="primary"
+        @click="drawer.visible = true"
+        v-show="viewMarkedBtnVisible"
+      >
         <a-icon type="eye" />查看已选数据
       </a-button>
       <a-dropdown v-show="tableOpsVisible">
         <a-menu slot="overlay">
-          <a-menu-item key="1" @click="handleDeleteByIds"><a-icon type="delete" />删除</a-menu-item>
+          <a-menu-item key="1" @click="handleDeleteByIds">
+            <a-icon type="delete" />删除
+          </a-menu-item>
         </a-menu>
-        <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>
+        <a-button style="margin-left: 8px">
+          批量操作 <a-icon type="down" />
+        </a-button>
       </a-dropdown>
     </div>
 
@@ -61,59 +81,16 @@
       </template>
     </s-table>
 
-    <a-drawer
-      title="预设卡口方案坐标点数据集"
-      width="420"
-      placement="right"
-      :closable="false"
+    <form-drawer
+      :title="'预设卡口方案坐标点数据集'"
       :visible="drawer.visible"
+      :showFooter="!drawer.isPreview"
+      :columns="drawer.tableColumns"
+      rowKey="index"
+      :dataSource="checkpoints"
       @close="drawer.visible = false"
-    >
-      <a-table
-        :columns="drawer.tableColumns"
-        rowKey="lat"
-        :pagination="{ pageSize: 5 }"
-        :dataSource="checkpoints"
-        bordered
-      >
-      </a-table>
-
-      <a-form layout="vertical">
-        <a-row :gutter="16">
-          <a-col :span="24">
-            <a-form-item label="方案名称" required>
-              <a-input v-model="drawer.presetForm.name" placeholder="请输入方案名称" />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col :span="24">
-            <a-form-item label="方案描述">
-              <a-textarea v-model="drawer.presetForm.description" placeholder="请输入方案描述,240字以内" :rows="4">
-              </a-textarea>
-            </a-form-item>
-          </a-col>
-        </a-row>
-      </a-form>
-
-      <div
-        v-show="!drawer.isPreview"
-        :style="{
-          position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          borderTop: '1px solid #e8e8e8',
-          padding: '10px 16px',
-          textAlign: 'right',
-          left: 0,
-          background: '#fff',
-          borderRadius: '0 0 4px 4px'
-        }"
-      >
-        <a-button style="margin-right: 8px" @click="drawer.visible = false"> 取消 </a-button>
-        <a-button type="primary" @click="handleSavePresetPlan"> 保存 </a-button>
-      </div>
-    </a-drawer>
+      @ok="handleSavePresetPlan"
+    />
   </a-card>
 </template>
 <script>
@@ -122,13 +99,15 @@ import * as L from 'leaflet'
 import { STable } from '@/components'
 import presetPlanApi from '@/api/presetplan'
 import pick from 'lodash.pick'
+import FormDrawer from './modules/FormDrawer'
 // import { CheckPointIcon } from '@/utils/leafletHelper'
 
 export default {
   name: 'PresetPlanList',
   components: {
     LeafletMap,
-    STable
+    STable,
+    FormDrawer
   },
   data() {
     return {
@@ -362,8 +341,8 @@ export default {
         onCancel() {}
       })
     },
-    handleSavePresetPlan() {
-      var presetForm = Object.assign({}, this.drawer.presetForm)
+    handleSavePresetPlan(values) {
+      var presetForm = Object.assign({}, values)
       presetForm.checkpoints = this.checkpoints
       presetPlanApi.createOrUpdate(presetForm).then(res => {
         this.$message.success('保存成功')
@@ -373,7 +352,6 @@ export default {
     },
     handleResetForm() {
       this.checkpoints = []
-      this.drawer.presetForm = {}
       this.drawer.visible = false
       this.handleClearMap()
     },
