@@ -85,8 +85,6 @@
       :title="'预设卡口方案坐标点数据集'"
       :visible="drawer.visible"
       :showFooter="!drawer.isPreview"
-      :columns="drawer.tableColumns"
-      rowKey="index"
       :dataSource="checkpoints"
       @close="drawer.visible = false"
       @ok="handleSavePresetPlan"

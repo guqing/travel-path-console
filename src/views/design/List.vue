@@ -6,15 +6,23 @@
       <a-button type="primary" icon="plus" @click="handleOpenModal">
         新增
       </a-button>
-      <a-button @click="handleClearMap"><a-icon type="undo" />清空地图 </a-button>
-      <a-button type="primary" @click="drawer.visible = true" v-show="viewMarkedBtnVisible">
+      <a-button @click="handleClearMap">
+        <a-icon type="undo" />清空地图
+      </a-button>
+      <a-button
+        type="primary"
+        @click="drawer.visible = true"
+        v-show="viewMarkedBtnVisible"
+      >
         <a-icon type="eye" />查看已选数据
       </a-button>
       <a-dropdown v-show="tableOpsVisible">
         <a-menu slot="overlay">
           <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
         </a-menu>
-        <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>
+        <a-button style="margin-left: 8px">
+          批量操作 <a-icon type="down" />
+        </a-button>
       </a-dropdown>
     </div>
 
@@ -52,7 +60,11 @@
       </template>
     </s-table>
 
-    <preset-modal :visible="modalVisible" @ok="handleModalOk" @cancel="modalVisible = false" />
+    <preset-modal
+      :visible="modalVisible"
+      @ok="handleModalOk"
+      @cancel="modalVisible = false"
+    />
   </a-card>
 </template>
 <script>
@@ -63,13 +75,15 @@ import presetPlanApi from '@/api/presetplan'
 import designApi from '@/api/design'
 import PresetModal from './modules/PresetModal'
 import { PresetIcon, DesignIcon } from '@/utils/leafletHelper'
+import FormDrawer from '../preset/modules/FormDrawer'
 
 export default {
   name: 'DesignList',
   components: {
     LeafletMap,
     STable,
-    PresetModal
+    PresetModal,
+    FormDrawer
   },
   data() {
     return {
@@ -176,7 +190,9 @@ export default {
     handleDrawMarkers(checkpoints, clickable) {
       checkpoints = checkpoints || []
       checkpoints.forEach(point => {
-        var marker = L.marker([point.lat, point.lng], { icon: new PresetIcon() })
+        var marker = L.marker([point.lat, point.lng], {
+          icon: new PresetIcon()
+        })
         this.markerLayerGroup.addLayer(marker)
         if (clickable) {
           marker.on('click', e => this.handleOnMarkerClick(e))

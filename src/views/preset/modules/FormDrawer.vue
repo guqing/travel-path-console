@@ -9,7 +9,11 @@
   >
     <a-table
       :columns="columns"
-      :rowKey="rowKey"
+      :rowKey="
+        (record, index) => {
+          return index
+        }
+      "
       :pagination="pagination"
       :dataSource="dataSource"
       bordered
@@ -66,32 +70,22 @@ const formItemLayout = {
   labelCol: { span: 5 },
   wrapperCol: { span: 19 }
 }
+let index = 1
 const columns = [
   {
     title: 'ID',
-    scopedSlots: { customRender: 'serial' }
+    dataIndex: 'index',
+    customRender: () => {
+      return index++
+    }
   },
   {
-    title: '方案名称',
-    dataIndex: 'name'
+    title: '纬度',
+    dataIndex: 'lat'
   },
   {
-    title: '方案描述',
-    dataIndex: 'description'
-  },
-  {
-    title: '方案卡口数',
-    dataIndex: 'count'
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'createTime'
-  },
-  {
-    table: '操作',
-    title: '操作',
-    dataIndex: 'action',
-    scopedSlots: { customRender: 'action' }
+    title: '经度',
+    dataIndex: 'lng'
   }
 ]
 export default {
@@ -120,10 +114,6 @@ export default {
       default: () => {
         return columns
       }
-    },
-    rowKey: {
-      type: String,
-      required: true
     },
     pagination: {
       type: Object,
