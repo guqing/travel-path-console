@@ -70,10 +70,14 @@ export default {
 
 <style lang="less" scoped>
 .map-wrapper {
+  height: 70vh;
   margin-bottom: 24px;
 }
-
+html,
+body,
 #mapContainer {
-  height: 600px;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
 }
 </style>

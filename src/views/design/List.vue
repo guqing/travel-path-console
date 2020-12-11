@@ -1,6 +1,6 @@
 <template>
   <a-card :bordered="false">
-    <leaflet-map @onMapInit="initMap" />
+    <leaflet-map @onMapInit="initMap" style="height:50vh" />
 
     <div class="table-operator">
       <a-dropdown>

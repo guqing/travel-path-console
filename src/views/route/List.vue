@@ -1,7 +1,18 @@
 <template>
-  <a-card :bordered="false">
-    <leaflet-map @onMapInit="initMap" />
-  </a-card>
+  <div class="container">
+    <a-row :gutter="[16, 16]" type="flex">
+      <a-col :span="4" :order="0">
+        <div class="editor-wrapper">
+          <div class="editor-panel">
+            <div class="editor-content">中文</div>
+          </div>
+        </div>
+      </a-col>
+      <a-col :span="20" :order="1">
+        <leaflet-map @onMapInit="initMap" style="height:76vh" />
+      </a-col>
+    </a-row>
+  </div>
 </template>
 <script>
 import LeafletMap from '@/components/LeafletMap'
@@ -36,3 +47,11 @@ export default {
   }
 }
 </script>
+<style lang="less" scoped>
+.editor-wrapper {
+  width: 100%;
+  height: 76vh;
+  transition: width 0.3s ease-in-out;
+  background-color: #fff;
+}
+</style>

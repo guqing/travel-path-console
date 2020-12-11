@@ -1,6 +1,6 @@
 <template>
   <a-card :bordered="false">
-    <leaflet-map @onMapInit="initMap" :cursor="mapMark.cursorStyle" />
+    <leaflet-map @onMapInit="initMap" :cursor="mapMark.cursorStyle" style="height:50vh" />
     <div class="table-operator">
       <a-dropdown>
         <a-menu slot="overlay">
