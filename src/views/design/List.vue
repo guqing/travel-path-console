@@ -74,7 +74,7 @@
       :dataSource="checkpoints"
       :pagination="{ pageSize: 5, total: checkpoints.length }"
       @close="drawer.visible = false"
-      @cancel="onFormDrawerCancel"
+      @cancel="handleFormDrawerCancel"
       @ok="handleOnSave"
     />
   </a-card>
@@ -257,6 +257,7 @@ export default {
       })
     },
     handleEditPlan(record) {
+      this.handleClearMap()
       this.drawer.isPreview = false
       // 获取预设卡口方案数据
       const presetPromise = presetPlanApi.getById(record.id)
@@ -308,7 +309,7 @@ export default {
         })
       }
     },
-    onFormDrawerCancel() {
+    handleFormDrawerCancel() {
       this.handleResetForm()
       this.$refs.formDrawer.reset()
     }
