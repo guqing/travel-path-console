@@ -142,11 +142,10 @@ export default {
       this.$emit('close')
     },
     handleOnSave() {
-      this.$refs.form.validate(err => {
-        if (err) {
-          return
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          this.$emit('ok', this.form)
         }
-        this.$emit('ok', this.form)
       })
     }
   }

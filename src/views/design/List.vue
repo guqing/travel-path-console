@@ -74,7 +74,7 @@
       :dataSource="checkpoints"
       :pagination="{ pageSize: 5, total: checkpoints.length }"
       @close="drawer.visible = false"
-      @cancel="handleOnModalCancel"
+      @cancel="onFormDrawerCancel"
       @ok="handleOnSave"
     />
   </a-card>
@@ -293,13 +293,22 @@ export default {
     handleOnSave(values) {
       const params = Object.assign({}, values)
       params.checkpoints = this.checkpoints
-      designApi.create(params).then(res => {
-        this.$message.success('保存成功')
-        this.$refs.table.refresh()
-        this.handleResetForm()
-      })
+      if (params.id) {
+        this.$log.debug('编辑布设卡口', params)
+        designApi.updateById(params.id, params).then(res => {
+          this.$message.success('保存成功')
+          this.$refs.table.refresh()
+          this.handleResetForm()
+        })
+      } else {
+        designApi.create(params).then(res => {
+          this.$message.success('保存成功')
+          this.$refs.table.refresh()
+          this.handleResetForm()
+        })
+      }
     },
-    handleOnModalCancel() {
+    onFormDrawerCancel() {
       this.handleResetForm()
       this.$refs.formDrawer.reset()
     }

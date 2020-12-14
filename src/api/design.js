@@ -28,7 +28,7 @@ designApi.create = function(parameter) {
 designApi.updateById = function(id, parameter) {
   return axios({
     url: `/deploy/${id}`,
-    method: 'post',
+    method: 'put',
     data: parameter
   })
 }
