@@ -22,30 +22,20 @@
         {{ index + 1 }}
       </span>
     </a-table>
-    <a-form
-      :form="form"
+    <a-form-model
+      ref="form"
+      :model="form"
+      :rules="rules"
       :label-col="formItemLayout.labelCol"
       :wrapper-col="formItemLayout.wrapperCol"
     >
-      <a-form-item label="方案名称">
-        <a-input
-          v-decorator="[
-            'name',
-            { rules: [{ required: true, message: '请输入方案名称' }] }
-          ]"
-        />
-      </a-form-item>
-      <a-form-item label="方案名称">
-        <a-textarea
-          :rows="4"
-          v-decorator="[
-            'description',
-            { rules: [{ max: 240, message: '方案描述必须在240字以内' }] }
-          ]"
-        >
-        </a-textarea>
-      </a-form-item>
-    </a-form>
+      <a-form-model-item label="方案名称">
+        <a-input v-model="form.name" />
+      </a-form-model-item>
+      <a-form-model-item label="方案名称">
+        <a-textarea v-model="form.description" :rows="4"> </a-textarea>
+      </a-form-model-item>
+    </a-form-model>
 
     <div
       v-show="showFooter"
@@ -61,7 +51,7 @@
         borderRadius: '0 0 4px 4px'
       }"
     >
-      <a-button style="margin-right: 8px" @click="handleOnClose">
+      <a-button style="margin-right: 8px" @click="handleCancel">
         取消
       </a-button>
       <a-button type="primary" @click="handleOnSave"> 保存 </a-button>
@@ -69,6 +59,8 @@
   </a-drawer>
 </template>
 <script>
+import pick from 'lodash.pick'
+
 const formItemLayout = {
   labelCol: { span: 5 },
   wrapperCol: { span: 19 }
@@ -117,7 +109,7 @@ export default {
     pagination: {
       type: Object,
       default: () => {
-        return { pageSize: 5 }
+        return { pageSize: 5, total: 0 }
       }
     },
     showFooter: {
@@ -127,21 +119,34 @@ export default {
   },
   data() {
     return {
-      formItemLayout: formItemLayout,
-      form: this.$form.createForm(this, { name: 'planForm' })
+      form: {},
+      rules: {
+        name: [{ required: true, message: '请输入方案名称' }],
+        description: [{ max: 240, message: '方案描述必须在240字以内' }]
+      },
+      formItemLayout: formItemLayout
     }
   },
   methods: {
+    edit(values) {
+      this.form = pick(values, 'id', 'name', 'description')
+    },
+    reset() {
+      this.form = {}
+    },
+    handleCancel() {
+      this.reset()
+      this.$emit('cancel')
+    },
     handleOnClose() {
-      this.form.resetFields()
       this.$emit('close')
     },
     handleOnSave() {
-      this.form.validateFields((err, values) => {
+      this.$refs.form.validate(err => {
         if (err) {
           return
         }
-        this.$emit('ok', values)
+        this.$emit('ok', this.form)
       })
     }
   }

@@ -82,6 +82,7 @@
     </s-table>
 
     <form-drawer
+      ref="formDrawer"
       :title="'预设卡口方案坐标点数据集'"
       :visible="drawer.visible"
       :showFooter="!drawer.isPreview"
@@ -255,6 +256,7 @@ export default {
       // 获取数据
       presetPlanApi.getById(record.id).then(res => {
         this.$log.debug('编辑卡口方案:', res.data)
+        this.$refs.formDrawer.edit(res.data)
         var checkpoints = res.data.checkpoints || []
         // 回显表单数据
         this.handleFillPresetForm(res.data, checkpoints)

@@ -3,7 +3,7 @@
     <leaflet-map @onMapInit="initMap" style="height:50vh" />
 
     <div class="table-operator">
-      <a-button type="primary" icon="plus" @click="handleOpenModal">
+      <a-button type="primary" icon="plus" @click="handleCreate">
         新增
       </a-button>
       <a-button @click="handleClearMap" v-if="clearMapVisible">
@@ -67,11 +67,14 @@
     />
 
     <form-drawer
+      ref="formDrawer"
       :title="'布设卡口方案坐标点数据集'"
       :visible="drawer.visible"
       :showFooter="!drawer.isPreview"
       :dataSource="checkpoints"
+      :pagination="{ pageSize: 5, total: checkpoints.length }"
       @close="drawer.visible = false"
+      @cancel="handleOnModalCancel"
       @ok="handleOnSave"
     />
   </a-card>
@@ -195,28 +198,35 @@ export default {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
-    handleOpenModal() {
+    handleCreate() {
       this.modalVisible = true
+      this.$refs.formDrawer.reset()
     },
     handleModalOk(id) {
       this.modalVisible = false
+      this.designMarkers = []
       presetPlanApi.getById(id).then(res => {
         this.handleDrawMarkers(res.data.checkpoints, true)
       })
     },
     handleDrawMarkers(checkpoints, clickable) {
       this.clearMapVisible = true
-      checkpoints = checkpoints || []
+      if (checkpoints.length === 0) {
+        return
+      }
       checkpoints.forEach(point => {
-        var marker = L.marker([point.lat, point.lng], {
-          icon: new PresetIcon()
-        })
+        const marker = this.drawPresetMarker(point)
         this.markerLayerGroup.addLayer(marker)
         if (clickable) {
           marker.on('click', e => this.handleOnMarkerClick(e))
         }
       })
       this.map.fitBounds(this.markerLayerGroup.getBounds())
+    },
+    drawPresetMarker(point) {
+      return L.marker(point, {
+        icon: new PresetIcon()
+      })
     },
     handleOnMarkerClick(e) {
       const marker = e.target
@@ -239,8 +249,42 @@ export default {
       this.designMarkers = []
       this.clearMapVisible = false
     },
-    handlePreviewPlan() {},
-    handleEditPlan() {},
+    handlePreviewPlan(record) {
+      this.drawer.isPreview = true
+      designApi.getById(record.id).then(res => {
+        var checkpoints = res.data.checkpoints || []
+        this.handleDrawMarkers(checkpoints, false)
+      })
+    },
+    handleEditPlan(record) {
+      this.drawer.isPreview = false
+      // 获取预设卡口方案数据
+      const presetPromise = presetPlanApi.getById(record.id)
+      const designPromise = designApi.getById(record.id)
+      Promise.all([presetPromise, designPromise]).then(values => {
+        const preset = values[0].data
+        const design = values[1].data
+        this.$refs.formDrawer.edit(design)
+        // 绘制预设卡口
+        const presetPoints = preset.checkpoints.map(item => [
+          item.lat,
+          item.lng
+        ])
+        this.handleDrawMarkers(presetPoints, true)
+
+        const designNodes = design.checkpoints || []
+        this.markerLayerGroup.eachLayer(layer => {
+          const latlng = layer.getLatLng()
+          const hasValue = designNodes.some(item => {
+            return item.lat === latlng.lat && item.lng === latlng.lng
+          })
+          if (hasValue) {
+            this.designMarkers.push(layer)
+            layer.setIcon(new DesignIcon())
+          }
+        })
+      })
+    },
     handleDeleteById() {},
     handleResetForm() {
       this.drawer.visible = false
@@ -254,6 +298,10 @@ export default {
         this.$refs.table.refresh()
         this.handleResetForm()
       })
+    },
+    handleOnModalCancel() {
+      this.handleResetForm()
+      this.$refs.formDrawer.reset()
     }
   }
 }
