@@ -87,7 +87,9 @@
       :visible="drawer.visible"
       :showFooter="!drawer.isPreview"
       :dataSource="checkpoints"
+      :pagination="{ pageSize: 5, total: checkpoints.length }"
       @close="drawer.visible = false"
+      @cancel="handleFormDrawerCancel"
       @ok="handleSavePresetPlan"
     />
   </a-card>
@@ -341,14 +343,29 @@ export default {
         onCancel() {}
       })
     },
+    handleFormDrawerCancel() {
+      this.handleResetForm()
+      this.$refs.formDrawer.reset()
+    },
     handleSavePresetPlan(values) {
       var presetForm = Object.assign({}, values)
       presetForm.checkpoints = this.checkpoints
-      presetPlanApi.createOrUpdate(presetForm).then(res => {
-        this.$message.success('保存成功')
-        this.handleResetForm()
-        this.handleReloadTable()
-      })
+
+      const id = presetForm.id
+      if (id) {
+        this.$log.debug('编辑结果:', presetForm)
+        presetPlanApi.updateById(id, presetForm).then(res => {
+          this.$message.success('保存成功')
+          this.handleResetForm()
+          this.handleReloadTable()
+        })
+      } else {
+        presetPlanApi.create(presetForm).then(res => {
+          this.$message.success('保存成功')
+          this.handleResetForm()
+          this.handleReloadTable()
+        })
+      }
     },
     handleResetForm() {
       this.checkpoints = []

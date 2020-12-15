@@ -2,10 +2,18 @@ import { axios } from '@/utils/request'
 
 const presetPlanApi = {}
 
-presetPlanApi.createOrUpdate = function(parameter) {
+presetPlanApi.create = function(parameter) {
   return axios({
-    url: '/preset/create-update',
+    url: '/preset',
     method: 'post',
+    data: parameter
+  })
+}
+
+presetPlanApi.updateById = function(id, parameter) {
+  return axios({
+    url: `/preset/${id}`,
+    method: 'put',
     data: parameter
   })
 }
