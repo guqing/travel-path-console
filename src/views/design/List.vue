@@ -107,7 +107,7 @@ export default {
         isOpen: false,
         cursorStyle: null
       },
-      selectedPreset: {},
+      selectedPresetId: null,
       drawer: {
         isPreview: false,
         visible: false
@@ -273,6 +273,7 @@ export default {
         const design = values[1].data
         this.$refs.formDrawer.edit(design)
         // 绘制预设卡口
+        this.selectedPresetId = preset.id
         const presetPoints = preset.checkpoints.map(item => [
           item.lat,
           item.lng
@@ -296,12 +297,11 @@ export default {
     handleResetForm() {
       this.drawer.visible = false
       this.handleClearMap()
-      this.selectedPreset = {}
     },
     handleOnSave(values) {
       const params = Object.assign({}, values)
       params.checkpoints = this.checkpoints
-      params.presetId = this.selectedPreset.id
+      params.presetId = this.selectedPresetId
       if (params.id) {
         this.$log.debug('编辑布设卡口', params)
         designApi.updateById(params.id, params).then(res => {
