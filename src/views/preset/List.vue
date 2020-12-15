@@ -345,7 +345,6 @@ export default {
     },
     handleFormDrawerCancel() {
       this.handleResetForm()
-      this.$refs.formDrawer.reset()
     },
     handleSavePresetPlan(values) {
       var presetForm = Object.assign({}, values)
@@ -371,6 +370,7 @@ export default {
       this.checkpoints = []
       this.drawer.visible = false
       this.handleClearMap()
+      this.$refs.formDrawer.reset()
     },
     handleReloadTable() {
       // 刷新表格

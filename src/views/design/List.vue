@@ -107,6 +107,7 @@ export default {
         isOpen: false,
         cursorStyle: null
       },
+      selectedPreset: {},
       drawer: {
         isPreview: false,
         visible: false
@@ -123,6 +124,10 @@ export default {
         {
           title: '方案描述',
           dataIndex: 'description'
+        },
+        {
+          title: '预设卡口方案编号',
+          dataIndex: 'presetId'
         },
         {
           title: '方案卡口数',
@@ -206,6 +211,7 @@ export default {
       this.modalVisible = false
       this.designMarkers = []
       presetPlanApi.getById(id).then(res => {
+        this.selectedPreset = res.data
         this.handleDrawMarkers(res.data.checkpoints, true)
       })
     },
@@ -260,7 +266,7 @@ export default {
       this.handleClearMap()
       this.drawer.isPreview = false
       // 获取预设卡口方案数据
-      const presetPromise = presetPlanApi.getById(record.id)
+      const presetPromise = presetPlanApi.getById(record.presetId)
       const designPromise = designApi.getById(record.id)
       Promise.all([presetPromise, designPromise]).then(values => {
         const preset = values[0].data
@@ -290,10 +296,12 @@ export default {
     handleResetForm() {
       this.drawer.visible = false
       this.handleClearMap()
+      this.selectedPreset = {}
     },
     handleOnSave(values) {
       const params = Object.assign({}, values)
       params.checkpoints = this.checkpoints
+      params.presetId = this.selectedPreset.id
       if (params.id) {
         this.$log.debug('编辑布设卡口', params)
         designApi.updateById(params.id, params).then(res => {
