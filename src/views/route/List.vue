@@ -1,41 +1,45 @@
 <template>
   <div class="container">
     <a-row :gutter="[16, 16]" type="flex">
-      <a-col :span="4" :order="0">
+      <a-col :span="5" :order="0">
         <div class="editor-wrapper">
           <div class="editor-content">
-            <a-list item-layout="horizontal" :data-source="checkpoints">
-              <a-list-item slot="renderItem" slot-scope="item">
-                <a slot="actions">
-                  <a-icon type="eye" />
-                </a>
-                <a-list-item-meta :description="item.description">
-                  <a slot="title" href="#">{{ item.name }}</a>
-                  <div
-                    slot="avatar"
-                    class="editor-listLayer-media u-rSpace--m js-thumbnail"
-                    :style="{ background: item.avatarColor, color: '#fff' }"
-                  >
-                    <p class="CDB-text CDB-size-large is-semibold u-upperCase">
-                      {{ item.avatarText }}
-                      <img src="~@/assets/icons/route.svg" />
-                    </p>
-                  </div>
-                </a-list-item-meta>
-              </a-list-item>
-            </a-list>
-            <a-pagination
-              size="small"
-              :current="pagination.current"
-              :pageSize="pagination.pageSize"
-              :total="pagination.total"
-              @change="onPageChange"
-              hideOnSinglePage
-            />
+            <a-steps :current="stepCurrent" size="small">
+              <a-step title="选择方案" />
+              <a-step title="点选卡口序列" />
+              <a-step title="还原轨迹" />
+            </a-steps>
+            <DesignList
+              v-if="stepCurrent === 0"
+              @select="handlePlanSelect"
+            ></DesignList>
+            <div
+              :style="{
+                position: 'absolute',
+                bottom: '35px',
+                width: '100%',
+                textAlign: 'right',
+                left: 0,
+                padding: '0 15px 8px 15px',
+                borderRadius: '0 0 4px 4px'
+              }"
+            >
+              <a-button v-if="stepCurrent > 0" @click="handlePrev">
+                上一步
+              </a-button>
+              <a-button
+                v-if="showNext"
+                type="primary"
+                style="margin-left: 8px"
+                @click="handleOnNext"
+              >
+                下一步
+              </a-button>
+            </div>
           </div>
         </div>
       </a-col>
-      <a-col :span="20" :order="1">
+      <a-col :span="19" :order="1">
         <leaflet-map @onMapInit="initMap" style="height:76vh" />
       </a-col>
     </a-row>
@@ -44,61 +48,83 @@
 <script>
 import LeafletMap from '@/components/LeafletMap'
 import * as L from 'leaflet'
+import DesignList from './modules/DesignList'
 import designApi from '@/api/design'
-const colorList = ['#f56a00', '#7265e6', '#ffbf00', '#00a2ae']
+import { checkPointIcon, designIcon } from '@/utils/leafletHelper'
+
 export default {
   name: 'RouteList',
   components: {
-    LeafletMap
+    LeafletMap,
+    DesignList
   },
   data() {
     return {
-      checkpoints: [],
-      pagination: {
-        current: 1,
-        pageSize: 10,
-        total: 0
-      },
       map: {},
-      mapMark: {
-        isOpen: false,
-        cursorStyle: null
-      }
+      markerLayerGroup: {},
+      checkPointMarker: [],
+      stepCurrent: 0
     }
   },
-  created() {
-    this.loadDesignPlanData()
+  computed: {
+    showNext() {
+      return this.stepCurrent > 0 && this.stepCurrent < 2
+    },
+    checkpoints() {
+      return this.checkPointMarker.map(marker => {
+        return marker.getLatLng()
+      })
+    }
   },
   methods: {
     initMap(map) {
       this.map = map
       this.markerLayerGroup = L.featureGroup().addTo(this.map)
     },
-    handleClearMap() {
-      // 从集合中删除marker
-      // this.markerLayerGroup.clearLayers()
-      this.map.off('click')
-      // this.mapMark.isOpen = false
-      // this.checkpoints = []
-    },
-    onPageChange() {
-      this.loadData()
-    },
-    loadDesignPlanData() {
-      const queryParam = {
-        current: this.pagination.current,
-        pageSize: this.pagination.pageSize
+    handleDrawMarkers(checkpoints) {
+      this.clearMapVisible = true
+      if (checkpoints.length === 0) {
+        return
       }
-      designApi.list(queryParam).then(res => {
-        const { list, total } = res.data
-        for (const index in list) {
-          const element = list[index]
-          element.avatarText = element.name.substring(0, 1)
-          element.avatarColor = colorList[index % list.length]
-        }
-        this.checkpoints = list
-        this.pagination.total = total
+      checkpoints.forEach(point => {
+        const marker = this.drawBaseMarker(point)
+        this.markerLayerGroup.addLayer(marker)
+        marker.on('click', e => this.handleOnMarkerClick(e))
       })
+      this.map.fitBounds(this.markerLayerGroup.getBounds())
+    },
+    drawBaseMarker(point) {
+      return L.marker(point, {
+        icon: designIcon
+      })
+    },
+    handleOnMarkerClick(e) {
+      const marker = e.target
+      var index = this.checkPointMarker.indexOf(marker)
+      if (index > -1) {
+        this.checkPointMarker.splice(index, 1)
+        e.target.setIcon(designIcon)
+      } else {
+        this.checkPointMarker.push(e.target)
+        e.target.setIcon(checkPointIcon)
+      }
+    },
+    handlePlanSelect(value) {
+      this.stepCurrent = 1
+      designApi.getById(value.id).then(res => {
+        this.handleDrawMarkers(res.data.checkpoints)
+      })
+    },
+    handleClearMap() {
+      this.markerLayerGroup.clearLayers()
+      this.checkPointMarker = []
+    },
+    handlePrev() {
+      this.stepCurrent = this.stepCurrent - 1
+      this.handleClearMap()
+    },
+    handleOnNext() {
+      this.stepCurrent = this.stepCurrent + 1
     }
   }
 }
@@ -111,29 +137,6 @@ export default {
   background-color: #fff;
 }
 .editor-content {
-  padding: 0 8px;
-
-  .editor-listLayer-media {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 4px;
-  }
-  .CDB-text.is-semibold {
-    font-weight: 600;
-  }
-  .CDB-size-large {
-    font-size: 16px;
-    line-height: 22px;
-  }
-  .CDB-text {
-    font-family: 'Open Sans';
-    margin-bottom: 0;
-  }
-  .u-upperCase {
-    text-transform: uppercase;
-  }
+  padding: 15px 8px 0px 8px;
 }
 </style>

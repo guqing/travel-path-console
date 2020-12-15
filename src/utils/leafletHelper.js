@@ -10,6 +10,8 @@ export var CheckPointIcon = L.Icon.extend({
   }
 })
 
+export var checkPointIcon = new CheckPointIcon()
+
 export var PresetIcon = L.Icon.extend({
   options: {
     iconUrl: require('@/assets/checkpoint/geekblue.svg'),
@@ -29,3 +31,5 @@ export var DesignIcon = L.Icon.extend({
     iconAnchor: [13, 38]
   }
 })
+
+export var designIcon = new DesignIcon()
