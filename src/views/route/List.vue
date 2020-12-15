@@ -6,11 +6,21 @@
           <div class="editor-content">
             <a-list item-layout="horizontal" :data-source="checkpoints">
               <a-list-item slot="renderItem" slot-scope="item">
-                <a-list-item-meta
-                  description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-                >
-                  <a slot="title" href="https://www.antdv.com/">{{ item.title }}</a>
-                  <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+                <a slot="actions">
+                  <a-icon type="eye" />
+                </a>
+                <a-list-item-meta :description="item.description">
+                  <a slot="title" href="#">{{ item.name }}</a>
+                  <div
+                    slot="avatar"
+                    class="editor-listLayer-media u-rSpace--m js-thumbnail"
+                    :style="{ background: item.avatarColor, color: '#fff' }"
+                  >
+                    <p class="CDB-text CDB-size-large is-semibold u-upperCase">
+                      {{ item.avatarText }}
+                      <img src="~@/assets/icons/route.svg" />
+                    </p>
+                  </div>
                 </a-list-item-meta>
               </a-list-item>
             </a-list>
@@ -35,7 +45,7 @@
 import LeafletMap from '@/components/LeafletMap'
 import * as L from 'leaflet'
 import designApi from '@/api/design'
-
+const colorList = ['#f56a00', '#7265e6', '#ffbf00', '#00a2ae']
 export default {
   name: 'RouteList',
   components: {
@@ -57,7 +67,7 @@ export default {
     }
   },
   created() {
-    this.loadData()
+    this.loadDesignPlanData()
   },
   methods: {
     initMap(map) {
@@ -74,14 +84,20 @@ export default {
     onPageChange() {
       this.loadData()
     },
-    loadData() {
+    loadDesignPlanData() {
       const queryParam = {
         current: this.pagination.current,
         pageSize: this.pagination.pageSize
       }
       designApi.list(queryParam).then(res => {
-        this.checkpoints = res.data.list
-        this.pagination.total = res.data.total
+        const { list, total } = res.data
+        for (const index in list) {
+          const element = list[index]
+          element.avatarText = element.name.substring(0, 1)
+          element.avatarColor = colorList[index % list.length]
+        }
+        this.checkpoints = list
+        this.pagination.total = total
       })
     }
   }
@@ -93,5 +109,31 @@ export default {
   height: 76vh;
   transition: width 0.3s ease-in-out;
   background-color: #fff;
+}
+.editor-content {
+  padding: 0 8px;
+
+  .editor-listLayer-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+  }
+  .CDB-text.is-semibold {
+    font-weight: 600;
+  }
+  .CDB-size-large {
+    font-size: 16px;
+    line-height: 22px;
+  }
+  .CDB-text {
+    font-family: 'Open Sans';
+    margin-bottom: 0;
+  }
+  .u-upperCase {
+    text-transform: uppercase;
+  }
 }
 </style>
