@@ -9,10 +9,27 @@
               <a-step title="点选卡口序列" />
               <a-step title="还原轨迹" />
             </a-steps>
-            <DesignList
-              v-if="stepCurrent === 0"
-              @select="handlePlanSelect"
-            ></DesignList>
+            <div class="step-content">
+              <DesignList
+                v-if="stepCurrent === 0"
+                @select="handlePlanSelect"
+              ></DesignList>
+
+              <a-timeline v-if="stepCurrent === 1" style="margin-top:28px">
+                <a-timeline-item
+                  v-for="(checkpoint, index) in checkpoints"
+                  :key="index"
+                  :color="color(index)"
+                >
+                  <span style="margin-right:8px">序号:{{ index + 1 }}</span>
+                  <a-tag>{{ checkpoint.lat }},{{ checkpoint.lng }}</a-tag>
+                </a-timeline-item>
+                <a-empty :image="simpleImage" v-if="checkpoints.length === 0">
+                  <span slot="description">请点选车辆卡口序列,至少两个</span>
+                </a-empty>
+              </a-timeline>
+            </div>
+
             <div
               :style="{
                 position: 'absolute',
@@ -51,6 +68,7 @@ import * as L from 'leaflet'
 import DesignList from './modules/DesignList'
 import designApi from '@/api/design'
 import { checkPointIcon, designIcon } from '@/utils/leafletHelper'
+import { Empty } from 'ant-design-vue'
 
 export default {
   name: 'RouteList',
@@ -66,6 +84,9 @@ export default {
       stepCurrent: 0
     }
   },
+  beforeCreate() {
+    this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
+  },
   computed: {
     showNext() {
       return this.stepCurrent > 0 && this.stepCurrent < 2
@@ -74,6 +95,17 @@ export default {
       return this.checkPointMarker.map(marker => {
         return marker.getLatLng()
       })
+    },
+    color() {
+      return function(index) {
+        if (index === 0) {
+          return 'green'
+        }
+        if (index === this.checkpoints.length - 1) {
+          return 'red'
+        }
+        return 'gray'
+      }
     }
   },
   methods: {
@@ -124,7 +156,15 @@ export default {
       this.handleClearMap()
     },
     handleOnNext() {
-      this.stepCurrent = this.stepCurrent + 1
+      if (this.stepCurrent === 1) {
+        if (this.checkpoints.length < 2) {
+          this.$message.warning('请至少选择两个点')
+        } else {
+          console.log('生成轨迹')
+        }
+      } else {
+        this.stepCurrent = this.stepCurrent + 1
+      }
     }
   }
 }
@@ -138,5 +178,8 @@ export default {
 }
 .editor-content {
   padding: 15px 8px 0px 8px;
+}
+.step-content {
+  margin-top: 15px;
 }
 </style>
