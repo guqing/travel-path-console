@@ -101,7 +101,7 @@ import { STable } from '@/components'
 import presetPlanApi from '@/api/presetplan'
 import pick from 'lodash.pick'
 import FormDrawer from './modules/FormDrawer'
-// import { CheckPointIcon } from '@/utils/leafletHelper'
+import { defaultIcon } from '@/utils/leafletHelper'
 
 export default {
   name: 'PresetPlanList',
@@ -303,7 +303,10 @@ export default {
         var point = e.latlng
         this.checkpoints.push(point)
         // 返回的实际是markerLayer层
-        var marker = L.marker([point.lat, point.lng], { draggable: true })
+        var marker = L.marker([point.lat, point.lng], {
+          icon: defaultIcon,
+          draggable: true
+        })
         this.markerLayerGroup.addLayer(marker)
         // // 为marker添加相应事件
         marker.on('click', e => this.handleOnMarkerClick(e))

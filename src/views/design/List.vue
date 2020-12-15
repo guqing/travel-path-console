@@ -86,7 +86,7 @@ import { STable } from '@/components'
 import presetPlanApi from '@/api/presetplan'
 import designApi from '@/api/design'
 import PresetModal from './modules/PresetModal'
-import { PresetIcon, DesignIcon } from '@/utils/leafletHelper'
+import { uncheckedIcon, checkedIcon } from '@/utils/leafletHelper'
 import FormDrawer from '../preset/modules/FormDrawer'
 
 export default {
@@ -210,8 +210,8 @@ export default {
     handleModalOk(id) {
       this.modalVisible = false
       this.designMarkers = []
+      this.selectedPresetId = id
       presetPlanApi.getById(id).then(res => {
-        this.selectedPreset = res.data
         this.handleDrawMarkers(res.data.checkpoints, true)
       })
     },
@@ -231,7 +231,7 @@ export default {
     },
     drawPresetMarker(point) {
       return L.marker(point, {
-        icon: new PresetIcon()
+        icon: uncheckedIcon
       })
     },
     handleOnMarkerClick(e) {
@@ -239,10 +239,10 @@ export default {
       var index = this.designMarkers.indexOf(marker)
       if (index > -1) {
         this.designMarkers.splice(index, 1)
-        e.target.setIcon(new PresetIcon())
+        e.target.setIcon(uncheckedIcon)
       } else {
         this.designMarkers.push(e.target)
-        e.target.setIcon(new DesignIcon())
+        e.target.setIcon(checkedIcon)
       }
     },
     clearSelected() {
@@ -288,7 +288,7 @@ export default {
           })
           if (hasValue) {
             this.designMarkers.push(layer)
-            layer.setIcon(new DesignIcon())
+            layer.setIcon(checkedIcon)
           }
         })
       })

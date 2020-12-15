@@ -67,8 +67,15 @@ import LeafletMap from '@/components/LeafletMap'
 import * as L from 'leaflet'
 import DesignList from './modules/DesignList'
 import designApi from '@/api/design'
-import { checkPointIcon, designIcon } from '@/utils/leafletHelper'
+import {
+  startIcon,
+  endIcon,
+  waypointIcon,
+  checkedIcon,
+  uncheckedIcon
+} from '@/utils/leafletHelper'
 import { Empty } from 'ant-design-vue'
+import routeApi from '@/api/route'
 
 export default {
   name: 'RouteList',
@@ -80,6 +87,10 @@ export default {
     return {
       map: {},
       markerLayerGroup: {},
+      tracks: {
+        checkpoints: {},
+        layerGroup: null
+      },
       checkPointMarker: [],
       stepCurrent: 0
     }
@@ -127,7 +138,7 @@ export default {
     },
     drawBaseMarker(point) {
       return L.marker(point, {
-        icon: designIcon
+        icon: uncheckedIcon
       })
     },
     handleOnMarkerClick(e) {
@@ -135,10 +146,10 @@ export default {
       var index = this.checkPointMarker.indexOf(marker)
       if (index > -1) {
         this.checkPointMarker.splice(index, 1)
-        e.target.setIcon(designIcon)
+        e.target.setIcon(uncheckedIcon)
       } else {
         this.checkPointMarker.push(e.target)
-        e.target.setIcon(checkPointIcon)
+        e.target.setIcon(checkedIcon)
       }
     },
     handlePlanSelect(value) {
@@ -149,6 +160,9 @@ export default {
     },
     handleClearMap() {
       this.markerLayerGroup.clearLayers()
+      if (this.tracks.layerGroup) {
+        this.tracks.layerGroup.clearLayers()
+      }
       this.checkPointMarker = []
     },
     handlePrev() {
@@ -159,12 +173,53 @@ export default {
       if (this.stepCurrent === 1) {
         if (this.checkpoints.length < 2) {
           this.$message.warning('请至少选择两个点')
+          return
         } else {
-          console.log('生成轨迹')
+          this.handleRoute()
         }
-      } else {
-        this.stepCurrent = this.stepCurrent + 1
       }
+      this.stepCurrent = this.stepCurrent + 1
+    },
+    handleRoute() {
+      const length = this.checkpoints.length
+      const waypoints = []
+      for (let i = 1; i < length - 1; i++) {
+        const item = this.checkpoints[i]
+        waypoints.push(item)
+      }
+      const param = {
+        start: this.checkpoints[0],
+        end: this.checkpoints[length - 1],
+        waypoints: waypoints
+      }
+      this.tracks.checkpoints = param
+      routeApi.route(param).then(res => {
+        this.$log.debug('生成轨迹', res.data.length)
+        this.handleClearMap()
+        this.handleDrawPoline(res.data)
+        this.drwaPathMarker()
+      })
+    },
+    drwaPathMarker() {
+      const { start, end, waypoints } = this.tracks.checkpoints
+      L.marker(start, { icon: startIcon }).addTo(this.map)
+      L.marker(end, { icon: endIcon }).addTo(this.map)
+      waypoints.forEach(waypoint => {
+        L.marker(waypoint, { icon: waypointIcon }).addTo(this.map)
+      })
+    },
+    handleDrawPoline(paths) {
+      var polylines = []
+      paths.forEach(path => {
+        const points = path.points.map(item => [item.lat, item.lng])
+        var polyline = L.polyline(points, {
+          color: 'red',
+          weight: 3,
+          opacity: 0.8
+        })
+        polylines.push(polyline)
+      })
+      this.tracks.layerGroup = L.layerGroup(polylines).addTo(this.map)
     }
   }
 }
