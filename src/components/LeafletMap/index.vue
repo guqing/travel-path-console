@@ -72,6 +72,7 @@ export default {
 <style lang="less" scoped>
 .map-wrapper {
   height: 70vh;
+  width: 100%;
   margin-bottom: 24px;
 }
 html,
