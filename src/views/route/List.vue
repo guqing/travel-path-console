@@ -101,8 +101,8 @@ export default {
         data: [],
         columns: [
           {
-            title: '#',
-            scopedSlots: { customRender: 'serial' }
+            title: 'ID',
+            dataIndex: 'id'
           },
           {
             title: '#',
