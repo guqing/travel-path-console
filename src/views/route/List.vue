@@ -67,10 +67,11 @@ import LeafletMap from '@/components/LeafletMap'
 import * as L from 'leaflet'
 import DesignList from './modules/DesignList'
 import designApi from '@/api/design'
+import { createNumberedMarker } from '@/utils/leaflet/marker'
+
 import {
   startIcon,
   endIcon,
-  waypointIcon,
   checkedIcon,
   uncheckedIcon
 } from '@/utils/leafletHelper'
@@ -89,8 +90,10 @@ export default {
       markerLayerGroup: {},
       tracks: {
         checkpoints: {},
-        layerGroup: null
+        layerGroup: null,
+        markerGroup: null
       },
+      selectedPlanId: null,
       checkPointMarker: [],
       stepCurrent: 0
     }
@@ -154,7 +157,11 @@ export default {
     },
     handlePlanSelect(value) {
       this.stepCurrent = 1
-      designApi.getById(value.id).then(res => {
+      this.selectedPlanId = value.id
+      this.handleFetchDesignPlan()
+    },
+    handleFetchDesignPlan() {
+      designApi.getById(this.selectedPlanId).then(res => {
         this.handleDrawMarkers(res.data.checkpoints)
       })
     },
@@ -163,11 +170,17 @@ export default {
       if (this.tracks.layerGroup) {
         this.tracks.layerGroup.clearLayers()
       }
+      if (this.tracks.markerGroup) {
+        this.tracks.markerGroup.clearLayers()
+      }
       this.checkPointMarker = []
     },
     handlePrev() {
       this.stepCurrent = this.stepCurrent - 1
       this.handleClearMap()
+      if (this.stepCurrent === 1) {
+        this.handleFetchDesignPlan()
+      }
     },
     handleOnNext() {
       if (this.stepCurrent === 1) {
@@ -202,11 +215,21 @@ export default {
     },
     drwaPathMarker() {
       const { start, end, waypoints } = this.tracks.checkpoints
-      L.marker(start, { icon: startIcon }).addTo(this.map)
-      L.marker(end, { icon: endIcon }).addTo(this.map)
-      waypoints.forEach(waypoint => {
-        L.marker(waypoint, { icon: waypointIcon }).addTo(this.map)
+
+      const markers = []
+
+      const startMarker = L.marker(start, { icon: startIcon })
+      markers.push(startMarker)
+
+      const endMarker = L.marker(end, { icon: endIcon })
+      markers.push(endMarker)
+
+      waypoints.forEach((waypoint, index) => {
+        const waypointMarker = createNumberedMarker(waypoint, index + 1)
+        markers.push(waypointMarker)
       })
+      this.tracks.markerGroup = L.layerGroup(markers).addTo(this.map)
+      // L.marker(waypoint, { icon: waypointIcon }).addTo(this.map)
     },
     handleDrawPoline(paths) {
       var polylines = []
