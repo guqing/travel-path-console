@@ -84,6 +84,9 @@ import {
 import { Empty } from 'ant-design-vue'
 import routeApi from '@/api/route'
 
+const polineNomalOption = { color: 'darkgrey', weight: 4, opacity: 1 }
+const polineActiveOption = { color: 'red', weight: 5, opacity: 0.8 }
+
 export default {
   name: 'RouteList',
   components: {
@@ -127,6 +130,7 @@ export default {
           }
         ],
         selectedRow: {},
+        rowKeyLayerMap: [],
         checkpoints: {},
         layerGroup: null,
         markerGroup: null
@@ -280,37 +284,72 @@ export default {
       var polylines = []
       paths.forEach(path => {
         const points = path.points.map(item => [item.lat, item.lng])
-        var polyline = L.polyline(points, {
-          color: 'red',
-          weight: 3,
-          opacity: 0.8
-        })
+        var polyline = L.polyline(points, polineNomalOption)
+        this.registPolylineClickEvent(polyline)
         polylines.push(polyline)
+
+        this.tracks.rowKeyLayerMap.push({
+          rowKey: path.id,
+          layer: polyline
+        })
       })
       this.tracks.layerGroup = L.layerGroup(polylines).addTo(this.map)
+    },
+    registPolylineClickEvent(polyline) {
+      const that = this
+      polyline.off().on('click', function(e) {
+        // 取消表格选中
+        that.cancelTrackTableSelect()
+        // 绘制poline样式
+        that.tracks.layerGroup.eachLayer(layer => {
+          if (layer === e.target) {
+            layer.bringToFront()
+            layer.setStyle(polineActiveOption)
+          } else {
+            layer.setStyle(polineNomalOption)
+          }
+        })
+      })
+    },
+    cancelTrackTableSelect() {
+      const selectedRows = document.querySelectorAll('.table-row-selection')
+      if (selectedRows) {
+        selectedRows.forEach(row => {
+          row.classList.remove('table-row-selection')
+        })
+      }
     },
     tracksTableRowClick(record) {
       return {
         on: {
           click: e => {
             this.tracks.selectedRow = record
-
-            const selectedRows = document.querySelectorAll(
-              '.table-row-selection'
-            )
-            if (selectedRows) {
-              selectedRows.forEach(row => {
-                row.classList.remove('table-row-selection')
-              })
-            }
+            // 设置表格样式
+            this.cancelTrackTableSelect()
 
             const children = e.target.parentNode.children
             for (let i = 0; i < children.length; i++) {
               children[i].classList.add('table-row-selection')
             }
+
+            this.handleActivePoline()
           }
         }
       }
+    },
+    handleActivePoline() {
+      const selectedRowKey = this.tracks.selectedRow.id
+      // 修改poline样式
+      this.tracks.rowKeyLayerMap.forEach(item => {
+        const layer = item.layer
+        if (item.rowKey === selectedRowKey) {
+          layer.bringToFront()
+          this.map.fitBounds(layer.getBounds())
+          layer.setStyle(polineActiveOption)
+        } else {
+          layer.setStyle(polineNomalOption)
+        }
+      })
     }
   }
 }
