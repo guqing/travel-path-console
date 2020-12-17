@@ -10,8 +10,8 @@ import * as L from 'leaflet'
 
 // openstreetmap地图瓦片地址
 // const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png?{foo}'
-const tileUrlForMapbox =
-  'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?style=mapbox://styles/guqing/ckis880630pby19ohlzsqtuki&access_token=pk.eyJ1IjoiZ3VxaW5nIiwiYSI6ImNqdmtmNGh4bjBxdmg0OXFyMDI0dHc3emQifQ.AAGR_XTCwYALRFQmtAwmHA'
+const mapboxTileUrl =
+  'https://api.mapbox.com/styles/v1/guqing/ckis880630pby19ohlzsqtuki/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZ3VxaW5nIiwiYSI6ImNqdmtmNGh4bjBxdmg0OXFyMDI0dHc3emQifQ.AAGR_XTCwYALRFQmtAwmHA'
 
 export default {
   name: 'LeafletMap',
@@ -55,13 +55,12 @@ export default {
         zoomControl: true
       })
 
-      // tileUrl用来指定需要加载的瓦片服务地址,如果使用自定义瓦片服务可能需要重载L.TileLayer的getTileUrl方法
-      this.L.tileLayer(tileUrlForMapbox, {
+      // tileUrl用来指定需要加载的瓦片服务地址
+      this.L.tileLayer(mapboxTileUrl, {
         foo: 'bar',
         attribution:
           'Map data &copy; <a href="https://github.com/guqing">guqing</a>',
-        minZoom: 3 // 最大缩放级别
-        // maxZoom: 18 // 修小缩放级别
+        minZoom: 3
       }).addTo(this.map)
 
       // 传递初始化成功事件
