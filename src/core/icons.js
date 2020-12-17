@@ -7,5 +7,6 @@
  * 所有图标均从这里加载，方便管理
  */
 import bxAnaalyse from '@/assets/icons/bx-analyse.svg?inline' // path to your '*.svg?inline' file.
+import pathRoute from '@/assets/icons/path-route.svg.svg?inline'
 
-export { bxAnaalyse }
+export { bxAnaalyse, pathRoute }
