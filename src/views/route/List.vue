@@ -28,23 +28,30 @@
                   <span slot="description">请点选车辆卡口序列,至少两个</span>
                 </a-empty>
               </a-timeline>
-
-              <a-table
-                :columns="tracks.columns"
-                :pagination="{ pageSize: 10 }"
-                rowKey="id"
-                :currentRow="tracks.selectedRow"
-                :customRow="tracksTableRowClick"
-                :data-source="tracks.data"
-                v-if="stepCurrent === 2"
-              >
-                <span slot="serial" slot-scope="text, record, index">
-                  {{ index + 1 }}
-                </span>
-                <span slot="icon">
-                  <img src="@/assets/icons/alt_route.png" alt="轨迹" />
-                </span>
-              </a-table>
+              <div v-if="stepCurrent === 2">
+                <a-alert
+                  :message="tipsMessage"
+                  type="success"
+                  show-icon
+                  style="margin-bottom:8px"
+                />
+                <a-table
+                  :columns="tracks.columns"
+                  :pagination="{ pageSize: 8 }"
+                  rowKey="id"
+                  :currentRow="tracks.selectedRow"
+                  :customRow="tracksTableRowClick"
+                  :data-source="tracks.data"
+                  :scroll="{ x: true }"
+                >
+                  <span slot="serial" slot-scope="text, record, index">
+                    {{ index + 1 }}
+                  </span>
+                  <span slot="icon">
+                    <img src="@/assets/icons/alt_route.png" alt="轨迹" />
+                  </span>
+                </a-table>
+              </div>
             </div>
             <div class="editor-footer">
               <a-button v-if="stepCurrent > 0" @click="handlePrev">
@@ -73,19 +80,19 @@ import LeafletMap from '@/components/LeafletMap'
 import * as L from 'leaflet'
 import DesignList from './modules/DesignList'
 import designApi from '@/api/design'
-import { createNumberedMarker } from '@/utils/leaflet/marker'
+import { createNumberedMarker, numberedDivIcon } from '@/utils/leaflet/marker'
 
 import {
   startIcon,
   endIcon,
-  checkedIcon,
+  // checkedIcon,
   uncheckedIcon
 } from '@/utils/leafletHelper'
 import { Empty } from 'ant-design-vue'
 import routeApi from '@/api/route'
 
 const polineNomalOption = { color: 'darkgrey', weight: 4, opacity: 1 }
-const polineActiveOption = { color: 'red', weight: 5, opacity: 0.8 }
+const polineActiveOption = { color: '#f5222d', weight: 5, opacity: 0.8 }
 
 export default {
   name: 'RouteList',
@@ -152,6 +159,13 @@ export default {
         return marker.getLatLng()
       })
     },
+    tipsMessage() {
+      const length = this.tracks.data.length
+      if (this.tracks.data.length > 0) {
+        return `车辆出行轨迹还原成功,共搜寻到${length}条路径,最优解ID=1`
+      }
+      return '无法完成轨迹还原,请检查卡口序列之间是否可达'
+    },
     color() {
       return function(index) {
         if (index === 0) {
@@ -194,7 +208,9 @@ export default {
         e.target.setIcon(uncheckedIcon)
       } else {
         this.checkPointMarker.push(e.target)
-        e.target.setIcon(checkedIcon)
+        const length = this.checkPointMarker.length
+        // checkedIcon
+        e.target.setIcon(numberedDivIcon(length))
       }
     },
     handlePlanSelect(value) {
@@ -282,9 +298,17 @@ export default {
     },
     handleDrawPoline(paths) {
       var polylines = []
-      paths.forEach(path => {
+      let firstLayer = null
+      paths.forEach((path, index) => {
         const points = path.points.map(item => [item.lat, item.lng])
+
         var polyline = L.polyline(points, polineNomalOption)
+        if (index === 0) {
+          // 高亮第一条轨迹
+          firstLayer = polyline
+          polyline.setStyle(polineActiveOption)
+        }
+
         this.registPolylineClickEvent(polyline)
         polylines.push(polyline)
 
@@ -293,7 +317,11 @@ export default {
           layer: polyline
         })
       })
-      this.tracks.layerGroup = L.layerGroup(polylines).addTo(this.map)
+      this.tracks.layerGroup = L.featureGroup(polylines).addTo(this.map)
+      if (firstLayer) {
+        firstLayer.bringToFront()
+      }
+      this.map.fitBounds(this.tracks.layerGroup.getBounds())
     },
     registPolylineClickEvent(polyline) {
       const that = this
@@ -370,6 +398,7 @@ export default {
   display: flex;
   flex-direction: column;
   padding: 15px 8px 0px 8px;
+  overflow: hidden;
 }
 .step-content {
   flex: 1;
