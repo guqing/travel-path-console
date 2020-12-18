@@ -9,4 +9,12 @@ routeApi.route = parameter => {
     data: parameter
   })
 }
+
+routeApi.save = parameter => {
+  return axios({
+    url: '/route/save',
+    method: 'post',
+    data: parameter
+  })
+}
 export default routeApi

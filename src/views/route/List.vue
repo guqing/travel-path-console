@@ -50,8 +50,13 @@
                   <span slot="icon">
                     <img src="@/assets/icons/alt_route.png" alt="轨迹" />
                   </span>
-                  <template slot="action">
-                    <a href="javascript:void(0)">转存</a>
+                  <template slot="action" slot-scope="text, record">
+                    <a
+                      href="javascript:void(0)"
+                      @click="handleOnSavePath(record)"
+                    >
+                      转存
+                    </a>
                   </template>
                 </a-table>
               </div>
@@ -76,6 +81,31 @@
         <leaflet-map @onMapInit="initMap" style="height:100%" />
       </a-col>
     </a-row>
+
+    <a-modal
+      v-model="modal.visible"
+      title="保存车辆出行轨迹"
+      @ok="handleOnModalOk"
+    >
+      <a-form-model
+        ref="routeForm"
+        :model="modal.form"
+        :rules="modal.rules"
+        :label-col="modal.labelCol"
+        :wrapper-col="modal.wrapperCol"
+      >
+        <a-form-model-item ref="carNumber" label="车牌号" prop="carNumber">
+          <a-input
+            v-model="modal.form.carNumber"
+            @blur="
+              () => {
+                $refs.carNumber.onFieldBlur()
+              }
+            "
+          />
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -93,6 +123,7 @@ import {
 } from '@/utils/leafletHelper'
 import { Empty } from 'ant-design-vue'
 import routeApi from '@/api/route'
+import pick from 'lodash.pick'
 
 const polineNomalOption = { color: 'darkgrey', weight: 4, opacity: 1 }
 const polineActiveOption = { color: '#f5222d', weight: 5, opacity: 0.8 }
@@ -106,6 +137,19 @@ export default {
   data() {
     return {
       map: {},
+      routeForm: {},
+      modal: {
+        visible: false,
+        form: {},
+        rules: {
+          carNumber: [
+            { required: true, message: '请输入车牌号', trigger: 'blur' },
+            { min: 3, max: 10, message: '长度在3-10位之间', trigger: 'blur' }
+          ]
+        },
+        labelCol: { span: 4 },
+        wrapperCol: { span: 18 }
+      },
       markerLayerGroup: {},
       tracks: {
         data: [],
@@ -141,6 +185,7 @@ export default {
           {
             title: '操作',
             key: 'action',
+            fixed: 'right',
             scopedSlots: { customRender: 'action' }
           }
         ],
@@ -263,6 +308,7 @@ export default {
       this.stepCurrent = this.stepCurrent + 1
     },
     handleRoute() {
+      this.tracks.checkpoints = this.checkpoints
       const length = this.checkpoints.length
       const waypoints = []
       for (let i = 1; i < length - 1; i++) {
@@ -274,7 +320,7 @@ export default {
         end: this.checkpoints[length - 1],
         waypoints: waypoints
       }
-      this.tracks.checkpoints = param
+      this.tracks.markerPoints = param
       routeApi.route(param).then(res => {
         this.$log.debug('生成轨迹', res.data.length)
         // 给每条轨迹新增一个id属性用于改变样式,从1开始
@@ -289,7 +335,7 @@ export default {
       })
     },
     drwaPathMarker() {
-      const { start, end, waypoints } = this.tracks.checkpoints
+      const { start, end, waypoints } = this.tracks.markerPoints
 
       const markers = []
       // render start point marker
@@ -388,6 +434,29 @@ export default {
         } else {
           layer.setStyle(polineNomalOption)
         }
+      })
+    },
+    handleOnSavePath(record) {
+      this.routeForm = {}
+      this.routeForm = pick(
+        record,
+        'points',
+        'distance',
+        'time',
+        'averageSpeed',
+        'regularTurnCount',
+        'sharpTurnCount',
+        'uturnCount'
+      )
+      this.routeForm.checkpoints = this.tracks.checkpoints
+      this.modal.visible = true
+    },
+    handleOnModalOk() {
+      this.routeForm.carNumber = this.modal.form.carNumber
+      routeApi.save(this.routeForm).then(res => {
+        this.$message.success('转存成功')
+        this.routeForm = {}
+        this.modal.visible = false
       })
     }
   }
