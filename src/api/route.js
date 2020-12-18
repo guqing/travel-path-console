@@ -17,4 +17,12 @@ routeApi.save = parameter => {
     data: parameter
   })
 }
+
+routeApi.list = parameter => {
+  return axios({
+    url: '/route',
+    method: 'get',
+    params: parameter
+  })
+}
 export default routeApi
