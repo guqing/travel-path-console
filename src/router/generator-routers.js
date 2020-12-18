@@ -13,18 +13,23 @@ const constantRouterComponents = {
   '500': () => import(/* webpackChunkName: "error" */ '@/views/exception/500'),
 
   // 你需要动态引入的页面组件
-  'Workplace': () => import('@/views/dashboard/Workplace'),
-  'Analysis': () => import('@/views/dashboard/Analysis'),
+  Workplace: () => import('@/views/dashboard/Workplace'),
+  Analysis: () => import('@/views/dashboard/Analysis'),
 
   // exception
-  'Exception403': () => import(/* webpackChunkName: "fail" */ '@/views/exception/403'),
-  'Exception404': () => import(/* webpackChunkName: "fail" */ '@/views/exception/404'),
-  'Exception500': () => import(/* webpackChunkName: "fail" */ '@/views/exception/500')
+  Exception403: () =>
+    import(/* webpackChunkName: "fail" */ '@/views/exception/403'),
+  Exception404: () =>
+    import(/* webpackChunkName: "fail" */ '@/views/exception/404'),
+  Exception500: () =>
+    import(/* webpackChunkName: "fail" */ '@/views/exception/500')
 }
 
 // 前端未找到页面路由（固定不用改）
 const notFoundRouter = {
-  path: '*', redirect: '/500', hidden: true
+  path: '*',
+  redirect: '/404',
+  hidden: true
 }
 
 // 根级菜单
@@ -45,7 +50,7 @@ const rootRouter = {
  * @param token
  * @returns {Promise<Router>}
  */
-export const generatorDynamicRouter = (result) => {
+export const generatorDynamicRouter = result => {
   return new Promise(resolve => {
     const menuNav = []
     const childrenNav = []
@@ -68,7 +73,8 @@ export const generatorDynamicRouter = (result) => {
  */
 export const generator = (routerMap, parent) => {
   return routerMap.map(item => {
-    const { title, hidden, hideChildren, hiddenHeaderContent, target, icon } = item || {}
+    const { title, hidden, hideChildren, hiddenHeaderContent, target, icon } =
+      item || {}
 
     var permission = item.name
     if (item.perms) {
@@ -76,7 +82,7 @@ export const generator = (routerMap, parent) => {
     }
 
     let routerTarget = target
-    const path = item.path || `${parent && parent.path || ''}/${item.key}`
+    const path = item.path || `${(parent && parent.path) || ''}/${item.key}`
     if (path.startsWith('http://') || path.startsWith('https://')) {
       routerTarget = '_blank'
     }
@@ -89,7 +95,9 @@ export const generator = (routerMap, parent) => {
       // 该路由对应页面的 组件 :方案1
       // component: constantRouterComponents[item.component || item.key],
       // 该路由对应页面的 组件 :方案2 (动态加载)
-      component: (constantRouterComponents[item.component || item.key]) || (() => import(`@/views/${item.component}`)),
+      component:
+        constantRouterComponents[item.component || item.key] ||
+        (() => import(`@/views/${item.component}`)),
       // meta: 页面标题, 菜单图标, 页面权限(供指令权限用，可去掉)
       meta: {
         title: title,

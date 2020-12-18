@@ -31,7 +31,7 @@
               <div v-if="stepCurrent === 2">
                 <a-alert
                   :message="tipsMessage"
-                  type="success"
+                  :type="tipsType"
                   show-icon
                   style="margin-bottom:8px"
                 />
@@ -50,6 +50,9 @@
                   <span slot="icon">
                     <img src="@/assets/icons/alt_route.png" alt="轨迹" />
                   </span>
+                  <template slot="action">
+                    <a href="javascript:void(0)">转存</a>
+                  </template>
                 </a-table>
               </div>
             </div>
@@ -134,6 +137,11 @@ export default {
             title: '平均速度',
             dataIndex: 'averageSpeed',
             customRender: averageSpeed => averageSpeed.toFixed(2) + 'km/h'
+          },
+          {
+            title: '操作',
+            key: 'action',
+            scopedSlots: { customRender: 'action' }
           }
         ],
         selectedRow: {},
@@ -165,6 +173,9 @@ export default {
         return `车辆出行轨迹还原成功,共搜寻到${length}条路径,最优解ID=1`
       }
       return '无法完成轨迹还原,请检查卡口序列之间是否可达'
+    },
+    tipsType() {
+      return this.tracks.data.length > 0 ? 'success' : 'warning'
     },
     color() {
       return function(index) {
