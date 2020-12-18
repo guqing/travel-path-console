@@ -25,4 +25,11 @@ routeApi.list = parameter => {
     params: parameter
   })
 }
+
+routeApi.getById = id => {
+  return axios({
+    url: `/route/${id}`,
+    method: 'get'
+  })
+}
 export default routeApi

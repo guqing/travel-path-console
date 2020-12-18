@@ -13,8 +13,8 @@
             :pagination="pagination"
             @change="handleTableChange"
           >
-            <template slot="action">
-              <a href="javascript:void(0)">
+            <template slot="action" slot-scope="text, record">
+              <a href="javascript:void(0)" @click="handlePreview(record)">
                 预览
               </a>
             </template>
@@ -25,8 +25,14 @@
   </div>
 </template>
 <script>
+import * as L from 'leaflet'
 import LeafletMap from '@/components/LeafletMap'
 import routeApi from '@/api/route'
+import { startIcon, endIcon } from '@/utils/leafletHelper'
+import { createNumberedMarker } from '@/utils/leaflet/marker'
+
+const polineActiveOption = { color: '#f5222d', weight: 5, opacity: 0.8 }
+
 export default {
   name: 'PathList',
   components: {
@@ -35,6 +41,7 @@ export default {
   data() {
     return {
       map: {},
+      layerGroup: {},
       data: [],
       pagination: {},
       columns: [
@@ -104,6 +111,37 @@ export default {
       pager.current = pagination.current
       this.pagination = pager
       this.handleLoadData()
+    },
+    handlePreview(record) {
+      routeApi.getById(record.id).then(res => {
+        const { points, checkpoints } = res.data
+        this.drwaPath(points, checkpoints)
+      })
+    },
+    drwaPath(points, checkpoints) {
+      let waypointIndex = 1
+      const layers = []
+      for (let i = 0; i < checkpoints.length; i++) {
+        const point = checkpoints[i]
+        if (i === 0) {
+          const startMarker = L.marker(point, { icon: startIcon })
+          layers.push(startMarker)
+        } else if (i === checkpoints.length - 1) {
+          const endMarker = L.marker(point, { icon: endIcon })
+          layers.push(endMarker)
+        } else {
+          // 绘制途径点
+          const waypointMarker = createNumberedMarker(point, waypointIndex)
+          layers.push(waypointMarker)
+          waypointIndex++
+        }
+      }
+      // 绘制轨迹
+      var polyline = L.polyline(points, polineActiveOption)
+      layers.push(polyline)
+
+      this.layerGroup = L.featureGroup(layers).addTo(this.map)
+      this.map.fitBounds(this.layerGroup.getBounds())
     }
   }
 }
