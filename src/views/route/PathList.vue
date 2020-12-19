@@ -17,6 +17,17 @@
               <a href="javascript:void(0)" @click="handlePreview(record)">
                 预览
               </a>
+              <a-divider type="vertical" />
+              <a-popconfirm
+                title="确定要删除这条轨迹吗?"
+                ok-text="确定"
+                cancel-text="取消"
+                @confirm="handleDelete(record)"
+              >
+                <a href="javascript:void(0)">
+                  删除
+                </a>
+              </a-popconfirm>
             </template>
           </a-table>
         </a-card>
@@ -142,6 +153,12 @@ export default {
 
       this.layerGroup = L.featureGroup(layers).addTo(this.map)
       this.map.fitBounds(this.layerGroup.getBounds())
+    },
+    handleDelete(record) {
+      routeApi.deleteById(record.id).then(res => {
+        this.$message.success('删除成功')
+        this.handleLoadData()
+      })
     }
   }
 }

@@ -32,4 +32,11 @@ routeApi.getById = id => {
     method: 'get'
   })
 }
+
+routeApi.deleteById = id => {
+  return axios({
+    url: `/route/${id}`,
+    method: 'delete'
+  })
+}
 export default routeApi
