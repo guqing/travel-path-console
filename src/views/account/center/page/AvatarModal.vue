@@ -57,7 +57,7 @@
 import ossApi from '@/api/oss'
 
 export default {
-  data () {
+  data() {
     return {
       visible: false,
       id: null,
@@ -75,7 +75,7 @@ export default {
     }
   },
   methods: {
-    edit (file) {
+    edit(file) {
       this.visible = true
       const reader = new FileReader()
       // 把Array Buffer转化为blob 如果是base64不需要
@@ -85,24 +85,24 @@ export default {
         this.options.img = reader.result
       }
     },
-    close () {
+    close() {
       this.id = null
       this.visible = false
     },
-    cancelHandel () {
+    cancelHandel() {
       this.close()
     },
-    changeScale (num) {
+    changeScale(num) {
       num = num || 1
       this.$refs.cropper.changeScale(num)
     },
-    rotateLeft () {
+    rotateLeft() {
       this.$refs.cropper.rotateLeft()
     },
-    rotateRight () {
+    rotateRight() {
       this.$refs.cropper.rotateRight()
     },
-    beforeUpload (file) {
+    beforeUpload(file) {
       const reader = new FileReader()
       // 把Array Buffer转化为blob 如果是base64不需要
       // 转化为base64
@@ -117,13 +117,13 @@ export default {
     },
 
     // 上传图片（点击上传按钮）
-    finish (type) {
+    finish(type) {
       console.log('starting upload image...')
       const _this = this
       const formData = new FormData()
       // 输出
       if (type === 'blob') {
-        this.$refs.cropper.getCropBlob((data) => {
+        this.$refs.cropper.getCropBlob(data => {
           const img = window.URL.createObjectURL(data)
           this.model = true
           this.modelSrc = img
@@ -136,13 +136,13 @@ export default {
           })
         })
       } else {
-        this.$refs.cropper.getCropData((data) => {
+        this.$refs.cropper.getCropData(data => {
           this.model = true
           this.modelSrc = data
         })
       }
     },
-    okHandel () {
+    okHandel() {
       const vm = this
 
       vm.confirmLoading = true
@@ -153,7 +153,7 @@ export default {
       }, 2000)
     },
 
-    realTime (data) {
+    realTime(data) {
       this.previews = data
     }
   }

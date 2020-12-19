@@ -1,5 +1,5 @@
 <template>
-  <page-header-wrapper>
+  <page-header-wrapper :breadcrumb="false">
     <template v-slot:content>
       <div class="page-header-content">
         <div class="avatar">
@@ -7,22 +7,15 @@
         </div>
         <div class="content">
           <div class="content-title">
-            {{ timeFix }}，{{ userInfo.nickname }}<span class="welcome-text">，{{ welcome }}</span>
+            {{ timeFix }}，{{ userInfo.nickname
+            }}<span class="welcome-text">，{{ welcome }}</span>
           </div>
-          <div>前端工程师 | 蚂蚁金服 - 某某某事业群 - VUE平台</div>
-        </div>
-      </div>
-    </template>
-    <template v-slot:extraContent>
-      <div class="extra-content">
-        <div class="stat-item">
-          <a-statistic title="项目数" :value="56" />
-        </div>
-        <div class="stat-item">
-          <a-statistic title="团队内排名" :value="8" suffix="/ 24" />
-        </div>
-        <div class="stat-item">
-          <a-statistic title="项目访问" :value="2223" />
+          <div>
+            <img
+              src="https://v2.jinrishici.com/one.svg?font-size=16&color=gray"
+              alt="今日诗词"
+            />
+          </div>
         </div>
       </div>
     </template>
@@ -30,35 +23,6 @@
     <div>
       <a-row :gutter="24">
         <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
-          <a-card
-            :loading="loading"
-            style="margin-bottom: 24px;"
-            :bordered="false"
-            title="进行中的项目"
-            :body-style="{ padding: 0 }"
-          >
-            <a slot="extra">全部项目</a>
-            <div>
-              <a-card-grid class="project-card-grid" :key="i" v-for="(item, i) in projects">
-                <a-card :bordered="false" :body-style="{ padding: 0 }">
-                  <a-card-meta>
-                    <div slot="title" class="card-title">
-                      <a-avatar size="small" :src="item.cover" />
-                      <a>{{ item.title }}</a>
-                    </div>
-                    <div slot="description" class="card-description">
-                      {{ item.description }}
-                    </div>
-                  </a-card-meta>
-                  <div class="project-item">
-                    <a href="/#/">科学搬砖组</a>
-                    <span class="datetime">9小时前</span>
-                  </div>
-                </a-card>
-              </a-card-grid>
-            </div>
-          </a-card>
-
           <a-card :loading="loading" title="操作记录" :bordered="false">
             <a-list>
               <a-list-item :key="index" v-for="(item, index) in activities">
@@ -95,7 +59,7 @@ export default {
     PageHeaderWrapper,
     Ellipsis
   },
-  data () {
+  data() {
     return {
       timeFix: timeFix(),
       avatar: '',
@@ -114,33 +78,32 @@ export default {
   },
   computed: {
     ...mapState({
-      nickname: (state) => state.user.nickname,
-      welcome: (state) => state.user.welcome
+      nickname: state => state.user.nickname,
+      welcome: state => state.user.welcome
     }),
-    currentUser () {
+    currentUser() {
       return {
         name: this.userInfo.username,
         avatar: this.avatar
       }
     },
-    userInfo () {
+    userInfo() {
       return this.$store.getters.userInfo
     }
   },
-  created () {
+  created() {
     console.log(this.$router)
     this.user = this.userInfo
     this.avatar = this.userInfo.avatar
     this.handleListActivity()
   },
   methods: {
-    handleLogPageChange (current) {
+    handleLogPageChange(current) {
       this.pagination.current = current
       this.handleListActivity()
     },
-    getProjects () {
-    },
-    handleListActivity () {
+    getProjects() {},
+    handleListActivity() {
       const param = {
         current: this.pagination.current,
         pageSize: this.pagination.pageSize
@@ -150,8 +113,7 @@ export default {
         this.pagination.total = res.data.total
       })
     },
-    getTeams () {
-    }
+    getTeams() {}
   }
 }
 </script>

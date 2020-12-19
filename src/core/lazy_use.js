@@ -49,7 +49,8 @@ import {
   TreeSelect,
   FormModel,
   Pagination,
-  Empty
+  Empty,
+  Timeline
 } from 'ant-design-vue'
 import Viser from 'viser-vue'
 
@@ -107,6 +108,7 @@ Vue.use(TreeSelect)
 Vue.use(FormModel)
 Vue.use(Pagination)
 Vue.use(Empty)
+Vue.use(Timeline)
 
 Vue.prototype.$confirm = Modal.confirm
 Vue.prototype.$message = message
@@ -123,4 +125,5 @@ Vue.use(PageLoading)
 Vue.use(PermissionHelper)
 Vue.use(VueCropper)
 
-process.env.NODE_ENV !== 'production' && console.warn('[antd-pro] NOTICE: Antd use lazy-load.')
+process.env.NODE_ENV !== 'production' &&
+  console.warn('[antd-pro] NOTICE: Antd use lazy-load.')

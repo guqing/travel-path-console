@@ -5,9 +5,9 @@ import { message } from 'ant-design-vue'
  * 被包裹的目标方法将会被限定速率执行
  */
 const limitclick = Vue.directive('limitclick', {
-  inserted: function (el, binding) {
+  inserted: function(el, binding) {
     let openDelay = false
-    el.onclick = function (e) {
+    el.onclick = function(e) {
       if (openDelay) {
         message.warning('你点的太快了，手速慢一点')
         return

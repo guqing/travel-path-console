@@ -12,10 +12,10 @@
                     {
                       required: true,
                       message: '请输入原始密码',
-                      whitespace: false,
-                    },
-                  ],
-                },
+                      whitespace: false
+                    }
+                  ]
+                }
               ]"
             />
           </a-form-item>
@@ -29,13 +29,13 @@
                     {
                       required: true,
                       message: '请输入新密码',
-                      whitespace: false,
+                      whitespace: false
                     },
                     {
-                      validator: validateToNextPassword,
-                    },
-                  ],
-                },
+                      validator: validateToNextPassword
+                    }
+                  ]
+                }
               ]"
             />
           </a-form-item>
@@ -48,13 +48,13 @@
                   rules: [
                     {
                       required: true,
-                      message: '再次输入新密码',
+                      message: '再次输入新密码'
                     },
                     {
-                      validator: compareToFirstPassword,
-                    },
-                  ],
-                },
+                      validator: compareToFirstPassword
+                    }
+                  ]
+                }
               ]"
             />
           </a-form-item>
@@ -72,18 +72,18 @@
 import userApi from '@/api/user'
 
 export default {
-  data () {
+  data() {
     return {
       confirmDirty: false,
       confirmPassword: '',
       validateMessage: {}
     }
   },
-  beforeCreate () {
+  beforeCreate() {
     this.form = this.$form.createForm(this, { name: 'updatePassword' })
   },
   methods: {
-    handleSubmit (e) {
+    handleSubmit(e) {
       this.form.validateFieldsAndScroll((err, values) => {
         const user = {
           oldPassword: values.oldPassword,
@@ -95,11 +95,11 @@ export default {
         }
       })
     },
-    handleConfirmBlur (e) {
+    handleConfirmBlur(e) {
       const value = e.target.value
       this.confirmDirty = this.confirmDirty || !!value
     },
-    compareToFirstPassword (rule, value, validateCallback) {
+    compareToFirstPassword(rule, value, validateCallback) {
       const form = this.form
       if (value && value !== form.getFieldValue('newPassword')) {
         validateCallback('两次密码不一致，请重新输入')
@@ -107,7 +107,7 @@ export default {
         validateCallback()
       }
     },
-    validateToNextPassword (rule, value, validateCallback) {
+    validateToNextPassword(rule, value, validateCallback) {
       const form = this.form
       if (value && this.confirmDirty) {
         form.validateFields(['confirmPassword'], { force: true })
@@ -116,7 +116,7 @@ export default {
         validateCallback('密码长度必须在3-16字符之间')
       }
     },
-    handleUpdatePassword (formValues) {
+    handleUpdatePassword(formValues) {
       userApi
         .updatePassword(formValues)
         .then(res => {

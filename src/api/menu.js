@@ -2,14 +2,14 @@ import { axios } from '@/utils/request'
 
 const menuApi = {}
 
-menuApi.listRouterMap = function () {
+menuApi.listRouterMap = function() {
   return axios({
     url: '/menu/router',
     method: 'get'
   })
 }
 
-menuApi.listTreeMenu = function (parameter) {
+menuApi.listTreeMenu = function(parameter) {
   return axios({
     url: '/menu',
     method: 'get',
@@ -17,13 +17,13 @@ menuApi.listTreeMenu = function (parameter) {
   })
 }
 
-menuApi.getById = function (parameter) {
+menuApi.getById = function(parameter) {
   return axios({
     url: `/menu/${parameter}`,
     method: 'get'
   })
 }
-menuApi.saveOrUpdate = function (parameter) {
+menuApi.saveOrUpdate = function(parameter) {
   return axios({
     url: `/menu/save`,
     method: 'post',
@@ -31,7 +31,7 @@ menuApi.saveOrUpdate = function (parameter) {
   })
 }
 
-menuApi.deleteByIds = function (parameter) {
+menuApi.deleteByIds = function(parameter) {
   return axios({
     url: `/menu`,
     method: 'delete',

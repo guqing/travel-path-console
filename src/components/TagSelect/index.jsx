@@ -31,7 +31,7 @@ export default {
       default: false
     }
   },
-  data () {
+  data() {
     return {
       expand: false,
       localCheckAll: false,
@@ -40,7 +40,7 @@ export default {
     }
   },
   methods: {
-    onChange (checked) {
+    onChange(checked) {
       const key = Object.keys(this.items).filter(key => key === checked.value)
       this.items[key] = checked.checked
       const bool = Object.values(this.items).lastIndexOf(false)
@@ -50,13 +50,13 @@ export default {
         this.localCheckAll = false
       }
     },
-    onCheckAll (checked) {
+    onCheckAll(checked) {
       Object.keys(this.items).forEach(v => {
         this.items[v] = checked.checked
       })
       this.localCheckAll = checked.checked
     },
-    getItemsKey (items) {
+    getItemsKey(items) {
       const totalItem = {}
       items.forEach(item => {
         totalItem[item.componentOptions.propsData && item.componentOptions.propsData.value] = false
@@ -64,7 +64,7 @@ export default {
       return totalItem
     },
     // CheckAll Button
-    renderCheckAll () {
+    renderCheckAll() {
       const props = {
         on: {
           change: (checked) => {
@@ -78,11 +78,11 @@ export default {
       return !this.hideCheckAll && checkAllElement || null
     },
     // expandable
-    renderExpandable () {
+    renderExpandable() {
 
     },
     // render option
-    renderTags (items) {
+    renderTags(items) {
       const listeners = {
         change: (checked) => {
           this.onChange(checked)
@@ -97,7 +97,7 @@ export default {
       })
     }
   },
-  render () {
+  render() {
     const { $props: { prefixCls } } = this
     const classString = {
       [`${prefixCls}`]: true

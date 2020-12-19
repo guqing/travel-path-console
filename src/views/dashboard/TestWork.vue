@@ -11,15 +11,21 @@
           <div>
             <a-form :form="form" layout="inline">
               <a-form-item label="自定义名称">
-                <a-input v-decorator="['tabName', {rules: [{required: true, message: '请输入新的 Tab 名称'}]}]"/>
+                <a-input v-decorator="['tabName', { rules: [{ required: true, message: '请输入新的 Tab 名称' }] }]" />
               </a-form-item>
             </a-form>
           </div>
         </template>
-        <a-button @click="() => visible = !visible" style="margin-right: 16px;">修改当前 Tab 名称</a-button>
+        <a-button @click="() => (visible = !visible)" style="margin-right: 16px;">修改当前 Tab 名称</a-button>
       </a-popconfirm>
 
-      <a-popconfirm :visible="visible2" @confirm="confirm2" @cancel="() => visible2 = false" okText="确定" cancelText="取消">
+      <a-popconfirm
+        :visible="visible2"
+        @confirm="confirm2"
+        @cancel="() => (visible2 = false)"
+        okText="确定"
+        cancelText="取消"
+      >
         <template v-slot:title>
           <div>
             <p>页面 KEY 是由页面的路由 <code>path</code> 决定的</p>
@@ -30,12 +36,12 @@
                 <a-input v-decorator="['tabKey', { initialValue: '/dashboard/workplace' }]" />
               </a-form-item>
               <a-form-item label="自定义名称">
-                <a-input v-decorator="['tabName', {rules: [{required: true, message: '请输入新的 Tab 名称'}]}]"/>
+                <a-input v-decorator="['tabName', { rules: [{ required: true, message: '请输入新的 Tab 名称' }] }]" />
               </a-form-item>
             </a-form>
           </div>
         </template>
-        <a-button @click="() => visible2 = !visible2">修改某一个 Tab 名称</a-button>
+        <a-button @click="() => (visible2 = !visible2)">修改某一个 Tab 名称</a-button>
       </a-popconfirm>
     </div>
     <a-divider />
@@ -50,26 +56,26 @@
 <script>
 export default {
   name: 'TestWork',
-  data () {
+  data() {
     return {
       visible: false,
       visible2: false
     }
   },
-  created () {
+  created() {
     this.form = this.$form.createForm(this)
     this.form2 = this.$form.createForm(this)
   },
   methods: {
-    handleCloseCurrentTab () {
+    handleCloseCurrentTab() {
       this.$multiTab.closeCurrentPage() // or this.$multiTab.close()
     },
-    handleOpenTab () {
+    handleOpenTab() {
       this.$multiTab.open('/features/task')
     },
 
-    handleOpenLoading () {
-      this.$nextTick(function () {
+    handleOpenLoading() {
+      this.$nextTick(function() {
         console.log('this', this)
         console.log('this.$refs.tInput', this.$refs.tInput)
       })
@@ -78,7 +84,7 @@ export default {
         this.$loading.hide()
       }, 5000)
     },
-    handleOpenLoadingCustomTip () {
+    handleOpenLoadingCustomTip() {
       this.$loading.show({ tip: '自定义提示语' })
       setTimeout(() => {
         this.$loading.hide()
@@ -86,7 +92,7 @@ export default {
     },
 
     // confirm
-    confirm (e) {
+    confirm(e) {
       e.stopPropagation()
       const { path } = this.$route
       this.form.validateFields((err, values) => {
@@ -96,10 +102,10 @@ export default {
         }
       })
     },
-    cancel () {
+    cancel() {
       this.visible = false
     },
-    confirm2 (e) {
+    confirm2(e) {
       e.stopPropagation()
       this.form2.validateFields((err, values) => {
         if (!err) {
@@ -112,6 +118,4 @@ export default {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

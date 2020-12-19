@@ -113,7 +113,7 @@ export default {
     STable,
     UserModal
   },
-  data () {
+  data() {
     return {
       loadingState: {
         query: false,
@@ -141,7 +141,7 @@ export default {
         {
           title: '性别',
           dataIndex: 'gender',
-          customRender: function (text, value) {
+          customRender: function(text, value) {
             switch (text) {
               case '0':
                 return <a-tag color="green">男性</a-tag>
@@ -155,7 +155,7 @@ export default {
         {
           title: '邮箱',
           dataIndex: 'email',
-          customRender: (text) => {
+          customRender: text => {
             if (text) {
               return text
             }
@@ -166,7 +166,7 @@ export default {
           title: '手机号',
           dataIndex: 'mobile',
           scopedSlots: { customRender: 'mobile' },
-          customRender: (text) => {
+          customRender: text => {
             if (text) {
               return text
             }
@@ -181,7 +181,7 @@ export default {
         {
           title: '状态',
           dataIndex: 'status',
-          customRender: function (text, value) {
+          customRender: function(text, value) {
             switch (text) {
               case 0:
                 return '正常'
@@ -213,25 +213,28 @@ export default {
         Object.assign(queryRequest, this.queryParam)
 
         this.$log.debug('loadData request parameters:', queryRequest)
-        return userApi.list(queryRequest).then(res => {
-          console.log(res.data)
-          return {
-            pageSize: res.data.pageSize,
-            pageNo: res.data.current,
-            totalCount: res.data.total,
-            totalPage: res.data.pages,
-            data: res.data.list
-          }
-        }).catch(err => {
-          this.$message.error(`查询出错:${err}`)
-          return {
-            pageSize: 0,
-            pageNo: 1,
-            totalCount: 0,
-            totalPage: 0,
-            data: []
-          }
-        })
+        return userApi
+          .list(queryRequest)
+          .then(res => {
+            console.log(res.data)
+            return {
+              pageSize: res.data.pageSize,
+              pageNo: res.data.current,
+              totalCount: res.data.total,
+              totalPage: res.data.pages,
+              data: res.data.list
+            }
+          })
+          .catch(err => {
+            this.$message.error(`查询出错:${err}`)
+            return {
+              pageSize: 0,
+              pageNo: 1,
+              totalCount: 0,
+              totalPage: 0,
+              data: []
+            }
+          })
       },
 
       selectedRowKeys: [],
@@ -239,38 +242,38 @@ export default {
     }
   },
   computed: {
-    rowSelection () {
+    rowSelection() {
       return {
         selectedRowKeys: this.selectedRowKeys,
         onChange: this.onSelectChange
       }
     },
-    tagColor () {
-      return function (index) {
+    tagColor() {
+      return function(index) {
         if (index > this.tagColors.length) {
           return this.tagColors[this.tagColors.length % index]
         }
         return this.tagColors[index]
       }
     },
-    tableOpsVisible () {
+    tableOpsVisible() {
       return this.selectedRowKeys.length > 0
     }
   },
   methods: {
-    handleChange (value, key, column, record) {
+    handleChange(value, key, column, record) {
       record[column.dataIndex] = value
     },
     // eslint-disable-next-line
-    del (row) {
+    del(row) {
       this.$log.debug('删除用户:', row.username)
       this.handleDeleteUser(`真的要删除用户 ${row.username} 吗?`, [row.username])
     },
-    handleDeleteInBatch () {
+    handleDeleteInBatch() {
       this.$log.debug('批量删除用户:', this.selectedRowKeys)
       this.handleDeleteUser('真的要批量删除所选中的用户吗?', this.selectedRowKeys)
     },
-    handleDeleteUser (message, userNames) {
+    handleDeleteUser(message, userNames) {
       const that = this
       this.$confirm({
         title: '警告',
@@ -278,22 +281,22 @@ export default {
         okText: '删除',
         okType: 'danger',
         cancelText: '取消',
-        onOk () {
+        onOk() {
           userApi.deleteUser(userNames).then(res => {
             that.$message.success('删除用户成功')
             that.$refs.table.refresh()
           })
         },
-        onCancel () {
+        onCancel() {
           that.$log.info('Cancel')
         }
       })
     },
-    onSelectChange (selectedRowKeys, selectedRows) {
+    onSelectChange(selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
-    handleSearch () {
+    handleSearch() {
       this.loadingState.query = true
       this.$log.debug('搜索条件:', this.queryParam)
       this.$refs.table.refresh()
@@ -301,7 +304,7 @@ export default {
         this.loadingState.query = false
       }, 1500)
     },
-    handleSearchReset () {
+    handleSearchReset() {
       this.loadingState.reset = true
       this.queryParam = {}
       this.$refs.table.refresh()
@@ -309,15 +312,15 @@ export default {
         this.loadingState.reset = false
       }, 1500)
     },
-    onDatePickerChange (dates, dateStrings) {
+    onDatePickerChange(dates, dateStrings) {
       this.queryParam.createTimeFrom = dateStrings[0]
       this.queryParam.createTimeTo = dateStrings[1]
     },
-    handleModalOk () {
+    handleModalOk() {
       this.$log.debug('user create success')
       this.$refs.table.refresh()
     },
-    handleResetPassword (row) {
+    handleResetPassword(row) {
       const that = this
       this.$confirm({
         title: '警告',
@@ -325,21 +328,21 @@ export default {
         okText: '重置',
         okType: 'danger',
         cancelText: '取消',
-        onOk () {
+        onOk() {
           that.$log.debug('重置用户密码', row.username)
           userApi.resetPassword(row.username).then(res => {
             that.$message.success('重置密码成功')
           })
         },
-        onCancel () {
+        onCancel() {
           that.$log.info('Cancel')
         }
       })
     },
-    handleLockUserInBatch () {
+    handleLockUserInBatch() {
       this.handleLockUser(this.selectedRowKeys)
     },
-    handleLockUser (userNames) {
+    handleLockUser(userNames) {
       const that = this
       this.$confirm({
         title: '警告',
@@ -347,14 +350,14 @@ export default {
         okText: '锁定',
         okType: 'danger',
         cancelText: '取消',
-        onOk () {
+        onOk() {
           that.$log.debug('所用用户', userNames)
           userApi.lockUser(userNames).then(res => {
             that.$message.success('锁定用户成功')
             that.$refs.table.refresh()
           })
         },
-        onCancel () {
+        onCancel() {
           that.$log.info('Cancel')
         }
       })

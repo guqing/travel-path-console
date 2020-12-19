@@ -5,7 +5,7 @@
         <a-row :gutter="48">
           <a-col :md="8" :sm="24">
             <a-form-item label="角色ID">
-              <a-input placeholder="请输入"/>
+              <a-input placeholder="请输入" />
             </a-form-item>
           </a-col>
           <a-col :md="8" :sm="24">
@@ -28,7 +28,6 @@
     </div>
 
     <s-table :columns="columns" :data="loadData">
-
       <span slot="actions" slot-scope="text, record">
         <a-tag v-for="(action, index) in record.actionList" :key="index">{{ action.describe }}</a-tag>
       </span>
@@ -41,9 +40,7 @@
         <a @click="handleEdit(record)">编辑</a>
         <a-divider type="vertical" />
         <a-dropdown>
-          <a class="ant-dropdown-link">
-            更多 <a-icon type="down" />
-          </a>
+          <a class="ant-dropdown-link"> 更多 <a-icon type="down" /> </a>
           <a-menu slot="overlay">
             <a-menu-item>
               <a href="javascript:;">详情</a>
@@ -59,14 +56,14 @@
       </span>
     </s-table>
 
-    <a-modal
-      title="操作"
-      :width="800"
-      v-model="visible"
-      @ok="handleOk"
-    >
-      <a-form :autoFormCreate="(form)=>{this.form = form}">
-
+    <a-modal title="操作" :width="800" v-model="visible" @ok="handleOk">
+      <a-form
+        :autoFormCreate="
+          form => {
+            this.form = form
+          }
+        "
+      >
         <a-form-item
           :labelCol="labelCol"
           :wrapperCol="wrapperCol"
@@ -87,49 +84,28 @@
           <a-input placeholder="起一个名字" v-model="mdl.name" id="permission_name" />
         </a-form-item>
 
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="状态"
-          hasFeedback
-          validateStatus="warning"
-        >
+        <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="状态" hasFeedback validateStatus="warning">
           <a-select v-model="mdl.status">
             <a-select-option value="1">正常</a-select-option>
             <a-select-option value="2">禁用</a-select-option>
           </a-select>
         </a-form-item>
 
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="描述"
-          hasFeedback
-        >
-          <a-textarea :rows="5" v-model="mdl.describe" placeholder="..." id="describe"/>
+        <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="描述" hasFeedback>
+          <a-textarea :rows="5" v-model="mdl.describe" placeholder="..." id="describe" />
         </a-form-item>
 
         <a-divider />
 
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="赋予权限"
-          hasFeedback
-        >
-          <a-select
-            style="width: 100%"
-            mode="multiple"
-            v-model="mdl.actions"
-            :allowClear="true"
-          >
-            <a-select-option v-for="(action, index) in permissionList" :key="index" :value="action.value">{{ action.label }}</a-select-option>
+        <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="赋予权限" hasFeedback>
+          <a-select style="width: 100%" mode="multiple" v-model="mdl.actions" :allowClear="true">
+            <a-select-option v-for="(action, index) in permissionList" :key="index" :value="action.value">{{
+              action.label
+            }}</a-select-option>
           </a-select>
         </a-form-item>
-
       </a-form>
     </a-modal>
-
   </a-card>
 </template>
 
@@ -141,9 +117,10 @@ export default {
   components: {
     STable
   },
-  data () {
+  data() {
     return {
-      description: '列表使用场景：后台管理中的权限管理以及角色管理，可用于基于 RBAC 设计的角色权限控制，颗粒度细到每一个操作类型。',
+      description:
+        '列表使用场景：后台管理中的权限管理以及角色管理，可用于基于 RBAC 设计的角色权限控制，颗粒度细到每一个操作类型。',
 
       visible: false,
       labelCol: {
@@ -192,16 +169,18 @@ export default {
       permissionList: null,
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
-        return this.$http.get('/permission', {
-          params: Object.assign(parameter, this.queryParam)
-        }).then(res => {
-          const result = res.result
-          result.data.map(permission => {
-            permission.actionList = JSON.parse(permission.actionData)
-            return permission
+        return this.$http
+          .get('/permission', {
+            params: Object.assign(parameter, this.queryParam)
           })
-          return result
-        })
+          .then(res => {
+            const result = res.result
+            result.data.map(permission => {
+              permission.actionList = JSON.parse(permission.actionData)
+              return permission
+            })
+            return result
+          })
       },
 
       selectedRowKeys: [],
@@ -209,7 +188,7 @@ export default {
     }
   },
   filters: {
-    statusFilter (status) {
+    statusFilter(status) {
       const statusMap = {
         1: '正常',
         2: '禁用'
@@ -217,11 +196,11 @@ export default {
       return statusMap[status]
     }
   },
-  created () {
+  created() {
     this.loadPermissionList()
   },
   methods: {
-    loadPermissionList () {
+    loadPermissionList() {
       // permissionList
       new Promise(resolve => {
         const data = [
@@ -238,19 +217,17 @@ export default {
         this.permissionList = res
       })
     },
-    handleEdit (record) {
+    handleEdit(record) {
       this.mdl = Object.assign({}, record)
       console.log(this.mdl)
       this.visible = true
     },
-    handleOk () {
-
-    },
-    onChange (selectedRowKeys, selectedRows) {
+    handleOk() {},
+    onChange(selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
-    toggleAdvanced () {
+    toggleAdvanced() {
       this.advanced = !this.advanced
     }
   },

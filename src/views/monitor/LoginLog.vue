@@ -68,7 +68,7 @@ export default {
   components: {
     STable
   },
-  data () {
+  data() {
     return {
       queryParam: {},
       columns: [
@@ -113,39 +113,42 @@ export default {
         queryRequest.pageSize = parameter.pageSize
         Object.assign(queryRequest, this.queryParam)
         this.$log.debug('loadData.parameter', queryRequest)
-        return loginLogApi.list(queryRequest).then(res => {
-          return {
-            pageSize: res.data.pageSize,
-            pageNo: res.data.current,
-            totalCount: res.data.total,
-            totalPage: res.data.pages,
-            data: res.data.list
-          }
-        }).catch(err => {
-          this.$message.error(`查询出错:${err}`)
-          return {
-            pageSize: 0,
-            pageNo: 1,
-            totalCount: 0,
-            totalPage: 0,
-            data: []
-          }
-        })
+        return loginLogApi
+          .list(queryRequest)
+          .then(res => {
+            return {
+              pageSize: res.data.pageSize,
+              pageNo: res.data.current,
+              totalCount: res.data.total,
+              totalPage: res.data.pages,
+              data: res.data.list
+            }
+          })
+          .catch(err => {
+            this.$message.error(`查询出错:${err}`)
+            return {
+              pageSize: 0,
+              pageNo: 1,
+              totalCount: 0,
+              totalPage: 0,
+              data: []
+            }
+          })
       },
       selectedRowKeys: [],
       selectedRows: []
     }
   },
   methods: {
-    onDatePickerChange (dates, dateStrings) {
+    onDatePickerChange(dates, dateStrings) {
       this.queryParam.createFrom = dateStrings[0]
       this.queryParam.createTo = dateStrings[1]
     },
-    onSelectChange (selectedRowKeys, selectedRows) {
+    onSelectChange(selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
-    resetSearchForm () {
+    resetSearchForm() {
       this.queryParam = {
         createFrom: null,
         createTo: null

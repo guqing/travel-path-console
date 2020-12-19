@@ -14,14 +14,14 @@
                   {
                     required: true,
                     message: '请输入用户名',
-                    trigger: 'blur',
+                    trigger: 'blur'
                   },
                   {
                     validator: validateUsername,
-                    trigger: 'blur',
-                  },
-                ],
-              },
+                    trigger: 'blur'
+                  }
+                ]
+              }
             ]"
           />
         </a-form-item>
@@ -32,9 +32,9 @@
               {
                 rules: [
                   { required: rules.passwordRequired, message: '请输入密码', whitespace: true },
-                  { min: 3, message: '字符长度必须大于3' },
-                ],
-              },
+                  { min: 3, message: '字符长度必须大于3' }
+                ]
+              }
             ]"
           />
         </a-form-item>
@@ -46,14 +46,14 @@
                 rules: [
                   {
                     type: 'email',
-                    message: '邮箱地址格式不正确',
+                    message: '邮箱地址格式不正确'
                   },
                   {
                     validator: validateEmail,
-                    trigger: 'blur',
-                  },
-                ],
-              },
+                    trigger: 'blur'
+                  }
+                ]
+              }
             ]"
           />
         </a-form-item>
@@ -90,7 +90,7 @@ const validateRoles = (rule, value, callback) => {
 
 export default {
   name: 'UserModal',
-  data () {
+  data() {
     return {
       rules: {
         passwordRequired: true,
@@ -110,37 +110,37 @@ export default {
       confirmLoading: false
     }
   },
-  beforeCreate () {
+  beforeCreate() {
     this.form = this.$form.createForm(this)
     this.$log.debug('form::', this.form)
   },
-  created () {
+  created() {
     this.handleRoleList()
   },
   methods: {
-    handleRoleList () {
+    handleRoleList() {
       roleApi.options().then(res => {
         this.roles = res.data
       })
     },
-    add () {
+    add() {
       this.visible = true
     },
-    edit (record) {
+    edit(record) {
       this.visible = true
       // 编辑时不校验密码
       this.rules.passwordRequired = false
       this.editParam = Object.assign({}, record)
       this.$nextTick(() => {
         this.form.setFieldsValue(pick(this.editParam, 'id', 'username', 'password', 'email'))
-        this.form.setFieldsValue({ 'roleIds': this.editParam.roleIds.map(Number) || [] })
+        this.form.setFieldsValue({ roleIds: this.editParam.roleIds.map(Number) || [] })
       })
     },
-    close () {
+    close() {
       this.$emit('close')
       this.visible = false
     },
-    handleOk () {
+    handleOk() {
       const that = this
       // 触发表单验证
       this.form.validateFields((err, values) => {
@@ -158,32 +158,38 @@ export default {
         }
       })
     },
-    handleUpdateUser (values) {
-      userApi.update(values).then(res => {
-        this.$message.success('更新成功')
-        this.$emit('ok')
-      }).finally(() => {
-        setTimeout(() => {
-          this.confirmLoading = false
-        }, 1500)
-        this.close()
-      })
+    handleUpdateUser(values) {
+      userApi
+        .update(values)
+        .then(res => {
+          this.$message.success('更新成功')
+          this.$emit('ok')
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.confirmLoading = false
+          }, 1500)
+          this.close()
+        })
     },
-    handleCreateUser (values) {
-      userApi.create(values).then(res => {
-        this.$message.success('保存成功')
-        this.$emit('ok')
-      }).finally(() => {
-        setTimeout(() => {
-          this.confirmLoading = false
-        }, 1500)
-        this.close()
-      })
+    handleCreateUser(values) {
+      userApi
+        .create(values)
+        .then(res => {
+          this.$message.success('保存成功')
+          this.$emit('ok')
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.confirmLoading = false
+          }, 1500)
+          this.close()
+        })
     },
-    handleCancel () {
+    handleCancel() {
       this.close()
     },
-    validateEmail (rule, value, callback) {
+    validateEmail(rule, value, callback) {
       // 没有做任何修改
       if (this.editParam.email === value) {
         callback()
@@ -198,7 +204,7 @@ export default {
         }
       })
     },
-    validateUsername (rule, value, callback) {
+    validateUsername(rule, value, callback) {
       if (!/^[A-Za-z0-9]+$/.test(value)) {
         callback(new Error('只能输入字母或数字'))
       } else if (this.editParam.username === value) {

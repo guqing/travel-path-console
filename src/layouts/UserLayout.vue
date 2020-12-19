@@ -35,10 +35,10 @@ import { deviceMixin } from '@/store/device-mixin'
 export default {
   name: 'UserLayout',
   mixins: [deviceMixin],
-  mounted () {
+  mounted() {
     document.body.classList.add('userLayout')
   },
-  beforeDestroy () {
+  beforeDestroy() {
     document.body.classList.remove('userLayout')
   }
 }

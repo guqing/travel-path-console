@@ -19,23 +19,23 @@ export default {
       type: String
     }
   },
-  data () {
+  data() {
     return {
       editor: null,
       editorContent: null
     }
   },
   watch: {
-    value (val) {
+    value(val) {
       this.editorContent = val
       this.editor.txt.html(val)
     }
   },
-  mounted () {
+  mounted() {
     this.initEditor()
   },
   methods: {
-    initEditor () {
+    initEditor() {
       this.editor = new WEditor(this.$refs.editor)
       // this.editor.onchangeTimeout = 200
       this.editor.customConfig.onchange = (html) => {

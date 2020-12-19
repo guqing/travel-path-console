@@ -5,7 +5,7 @@
         <a-row :gutter="48">
           <a-col :md="8" :sm="24">
             <a-form-item label="角色ID">
-              <a-input placeholder="请输入"/>
+              <a-input placeholder="请输入" />
             </a-form-item>
           </a-col>
           <a-col :md="8" :sm="24">
@@ -27,19 +27,9 @@
       </a-form>
     </div>
 
-    <s-table
-      ref="table"
-      size="default"
-      :columns="columns"
-      :data="loadData"
-    >
-      <div
-        slot="expandedRowRender"
-        slot-scope="record"
-        style="margin: 0">
-        <a-row
-          :gutter="24"
-          :style="{ marginBottom: '12px' }">
+    <s-table ref="table" size="default" :columns="columns" :data="loadData">
+      <div slot="expandedRowRender" slot-scope="record" style="margin: 0">
+        <a-row :gutter="24" :style="{ marginBottom: '12px' }">
           <a-col :span="12" v-for="(role, index) in record.permissions" :key="index" :style="{ marginBottom: '12px' }">
             <a-col :span="4">
               <span>{{ role.permissionName }}：</span>
@@ -55,9 +45,7 @@
         <a @click="$refs.modal.edit(record)">编辑</a>
         <a-divider type="vertical" />
         <a-dropdown>
-          <a class="ant-dropdown-link">
-            更多 <a-icon type="down" />
-          </a>
+          <a class="ant-dropdown-link"> 更多 <a-icon type="down" /> </a>
           <a-menu slot="overlay">
             <a-menu-item>
               <a href="javascript:;">详情</a>
@@ -74,7 +62,6 @@
     </s-table>
 
     <role-modal ref="modal" @ok="handleOk"></role-modal>
-
   </a-card>
 </template>
 
@@ -88,9 +75,10 @@ export default {
     STable,
     RoleModal
   },
-  data () {
+  data() {
     return {
-      description: '列表使用场景：后台管理中的权限管理以及角色管理，可用于基于 RBAC 设计的角色权限控制，颗粒度细到每一个操作类型。',
+      description:
+        '列表使用场景：后台管理中的权限管理以及角色管理，可用于基于 RBAC 设计的角色权限控制，颗粒度细到每一个操作类型。',
 
       visible: false,
 
@@ -119,7 +107,8 @@ export default {
           title: '创建时间',
           dataIndex: 'createTime',
           sorter: true
-        }, {
+        },
+        {
           title: '操作',
           width: '150px',
           dataIndex: 'action',
@@ -128,11 +117,13 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
-        return this.$http.get('/role', {
-          params: Object.assign(parameter, this.queryParam)
-        }).then(res => {
-          return res.result
-        })
+        return this.$http
+          .get('/role', {
+            params: Object.assign(parameter, this.queryParam)
+          })
+          .then(res => {
+            return res.result
+          })
       },
 
       selectedRowKeys: [],
@@ -140,7 +131,7 @@ export default {
     }
   },
   methods: {
-    handleEdit (record) {
+    handleEdit(record) {
       this.mdl = Object.assign({}, record)
 
       this.mdl.permissions.forEach(permission => {
@@ -152,15 +143,15 @@ export default {
       console.log(this.mdl)
       this.visible = true
     },
-    handleOk () {
+    handleOk() {
       // 新增/修改 成功时，重载列表
       this.$refs.table.refresh()
     },
-    onChange (selectedRowKeys, selectedRows) {
+    onChange(selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
-    toggleAdvanced () {
+    toggleAdvanced() {
       this.advanced = !this.advanced
     }
   },

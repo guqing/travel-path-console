@@ -83,7 +83,7 @@ export default {
     STable,
     ActionModal
   },
-  data () {
+  data() {
     return {
       mdl: {},
       // 高级搜索 展开/关闭
@@ -115,7 +115,7 @@ export default {
           title: '执行耗时',
           dataIndex: 'executionTime',
           sorter: true,
-          customRender: (text) => {
+          customRender: text => {
             return <a-tag color="green">{text} ms</a-tag>
           }
         },
@@ -146,48 +146,49 @@ export default {
         queryRequest.pageSize = parameter.pageSize
         Object.assign(queryRequest, this.queryParam)
         this.$log.debug('loadData.parameter', queryRequest)
-        return actionLogApi.list(queryRequest).then(res => {
-          return {
-            pageSize: res.data.pageSize,
-            pageNo: res.data.current,
-            totalCount: res.data.total,
-            totalPage: res.data.pages,
-            data: res.data.list
-          }
-        }).catch(err => {
-          this.$message.error(`查询出错:${err}`)
-          return {
-            pageSize: 0,
-            pageNo: 1,
-            totalCount: 0,
-            totalPage: 0,
-            data: []
-          }
-        })
+        return actionLogApi
+          .list(queryRequest)
+          .then(res => {
+            return {
+              pageSize: res.data.pageSize,
+              pageNo: res.data.current,
+              totalCount: res.data.total,
+              totalPage: res.data.pages,
+              data: res.data.list
+            }
+          })
+          .catch(err => {
+            this.$message.error(`查询出错:${err}`)
+            return {
+              pageSize: 0,
+              pageNo: 1,
+              totalCount: 0,
+              totalPage: 0,
+              data: []
+            }
+          })
       },
       selectedRowKeys: [],
       selectedRows: []
     }
   },
   methods: {
-    onDatePickerChange (dates, dateStrings) {
+    onDatePickerChange(dates, dateStrings) {
       this.queryParam.createFrom = dateStrings[0]
       this.queryParam.createTo = dateStrings[1]
     },
-    handleDelete (record) {
+    handleDelete(record) {
       this.$log.debug('删除记录:', record)
     },
-    handleOk () {
-
-    },
-    onSelectChange (selectedRowKeys, selectedRows) {
+    handleOk() {},
+    onSelectChange(selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
-    toggleAdvanced () {
+    toggleAdvanced() {
       this.advanced = !this.advanced
     },
-    resetSearchForm () {
+    resetSearchForm() {
       this.queryParam = {
         createFrom: null,
         createTo: null
