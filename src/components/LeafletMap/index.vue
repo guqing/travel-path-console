@@ -7,6 +7,8 @@
 <script>
 import 'leaflet/dist/leaflet.css'
 import * as L from 'leaflet'
+import 'leaflet-loading/src/Control.Loading.js'
+import 'leaflet-loading/src/Control.Loading.css'
 
 // openstreetmap地图瓦片地址
 // const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png?{foo}'
@@ -52,7 +54,8 @@ export default {
         maxBounds: bounds,
         center: [22.545583, 113.915731],
         zoom: 14,
-        zoomControl: true
+        zoomControl: true,
+        loadingControl: true
       })
 
       // tileUrl用来指定需要加载的瓦片服务地址

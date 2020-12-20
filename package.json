@@ -18,6 +18,7 @@
     "core-js": "^3.1.2",
     "enquire.js": "^2.1.6",
     "leaflet": "^1.7.1",
+    "leaflet-loading": "^0.1.24",
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
     "lodash.pick": "^4.4.0",
