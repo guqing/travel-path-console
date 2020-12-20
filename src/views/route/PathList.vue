@@ -10,6 +10,7 @@
             :columns="columns"
             :data-source="data"
             rowKey="id"
+            :loading="loading"
             :pagination="pagination"
             @change="handleTableChange"
           >
@@ -55,6 +56,7 @@ export default {
       layerGroup: {},
       data: [],
       pagination: {},
+      loading: false,
       columns: [
         {
           title: 'ID',
@@ -111,11 +113,20 @@ export default {
       this.map = map
     },
     handleLoadData() {
-      routeApi.list().then(res => {
-        const { list, total } = res.data
-        this.data = list
-        this.pagination.total = total
-      })
+      this.loading = true
+      routeApi
+        .list()
+        .then(res => {
+          const { list, total } = res.data
+          this.data = list
+          this.pagination.total = total
+          this.loading = false
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.loading = false
+          }, 1000)
+        })
     },
     handleTableChange(pagination) {
       const pager = { ...this.pagination }

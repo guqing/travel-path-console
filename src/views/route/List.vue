@@ -39,6 +39,7 @@
                   :columns="tracks.columns"
                   :pagination="{ pageSize: 8 }"
                   rowKey="id"
+                  :loading="loading.table"
                   :currentRow="tracks.selectedRow"
                   :customRow="tracksTableRowClick"
                   :data-source="tracks.data"
@@ -138,6 +139,10 @@ export default {
     return {
       map: {},
       routeForm: {},
+      loading: {
+        table: false,
+        map: false
+      },
       modal: {
         visible: false,
         form: {},
@@ -308,6 +313,7 @@ export default {
       this.stepCurrent = this.stepCurrent + 1
     },
     handleRoute() {
+      this.loading.table = true
       this.tracks.checkpoints = this.checkpoints
       const length = this.checkpoints.length
       const waypoints = []
@@ -321,18 +327,27 @@ export default {
         waypoints: waypoints
       }
       this.tracks.markerPoints = param
-      routeApi.route(param).then(res => {
-        this.$log.debug('生成轨迹', res.data.length)
-        // 给每条轨迹新增一个id属性用于改变样式,从1开始
-        res.data.forEach((item, index) => {
-          item.id = index + 1
+      routeApi
+        .route(param)
+        .then(res => {
+          this.loading.table = false
+          this.$log.debug('生成轨迹', res.data.length)
+          // 给每条轨迹新增一个id属性用于改变样式,从1开始
+          res.data.forEach((item, index) => {
+            item.id = index + 1
+          })
+          this.tracks.data = res.data
+          // 对轨迹进行相应操作
+          this.handleClearMap()
+          // 同步绘制
+          this.handleDrawPoline(res.data)
+          this.drwaPathMarker()
         })
-        this.tracks.data = res.data
-        // 对轨迹进行相应操作
-        this.handleClearMap()
-        this.handleDrawPoline(res.data)
-        this.drwaPathMarker()
-      })
+        .finally(() => {
+          setTimeout(() => {
+            this.loading.table = false
+          }, 1000)
+        })
     },
     drwaPathMarker() {
       const { start, end, waypoints } = this.tracks.markerPoints
