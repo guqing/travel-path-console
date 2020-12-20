@@ -10,8 +10,7 @@ const user = {
     welcome: '',
     avatar: '',
     roles: [],
-    info: {},
-    routerMap: []
+    info: {}
   },
   mutations: {
     SET_TOKEN: (state, token) => {
@@ -29,9 +28,6 @@ const user = {
     },
     SET_INFO: (state, info) => {
       state.info = info
-    },
-    SET_ROUTERMAP: (state, routerMap) => {
-      state.routerMap = routerMap
     }
   },
   actions: {
@@ -118,7 +114,9 @@ const user = {
 
 function getToken(tokenInfo) {
   const current = new Date()
-  const expireTime = current.setTime(current.getTime() + 1000 * tokenInfo.expires_in)
+  const expireTime = current.setTime(
+    current.getTime() + 1000 * tokenInfo.expires_in
+  )
 
   return {
     access_token: tokenInfo.access_token,
@@ -132,7 +130,10 @@ function setUserInfo(result, commit) {
   // commit('SET_ROLES', [result.roleName])
   commit('SET_INFO', result)
   commit('SET_ROLES', result.roleIds)
-  commit('SET_NAME', { name: result.nickname || result.username, welcome: welcome() })
+  commit('SET_NAME', {
+    name: result.nickname || result.username,
+    welcome: welcome()
+  })
   if (!result.avatar) {
     var avatar = '/avatar.png'
     commit('SET_AVATAR', avatar)

@@ -3,6 +3,7 @@
  */
 import { constantRouterMap } from '@/config/router.config'
 import { generatorDynamicRouter } from '@/router/generator-routers'
+import menuApi from '@/api/menu'
 
 const permission = {
   state: {
@@ -16,13 +17,17 @@ const permission = {
     }
   },
   actions: {
-    GenerateRoutes({ commit }, data) {
-      return new Promise(resolve => {
-        const { token } = data
-        generatorDynamicRouter(token).then(routers => {
-          console.log('GenerateRoutes----------->', routers)
-          commit('SET_ROUTERS', routers)
-          resolve()
+    GenerateRoutes({ commit }) {
+      return new Promise((resolve, reject) => {
+        menuApi.listRouterMap().then(res => {
+          generatorDynamicRouter(res.data)
+            .then(routers => {
+              commit('SET_ROUTERS', routers)
+              resolve(routers)
+            })
+            .catch(err => {
+              reject(err)
+            })
         })
       })
     }

@@ -19,7 +19,13 @@
         </a-spin>
       </a-col>
       <a-col :lg="12" :md="24">
-        <a-form-model ref="menuForm" :model="menuForm" :rules="rules" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form-model
+          ref="menuForm"
+          :model="menuForm"
+          :rules="rules"
+          :label-col="labelCol"
+          :wrapper-col="wrapperCol"
+        >
           <a-form-model-item label="上级菜单">
             <a-tree-select
               allowClear
@@ -35,50 +41,113 @@
             <a-input placeholder="例如：用户管理" v-model="menuForm.title" />
           </a-form-model-item>
           <a-form-model-item label="资源类型">
-            <a-radio-group default-value="0" button-style="solid" v-model="menuForm.type">
+            <a-radio-group
+              default-value="0"
+              button-style="solid"
+              v-model="menuForm.type"
+            >
               <a-radio-button value="0"> 菜单 </a-radio-button>
               <a-radio-button value="1"> 按钮 </a-radio-button>
             </a-radio-group>
           </a-form-model-item>
-          <a-form-model-item label="访问路径" v-show="showMenuFormItem" prop="path">
-            <a-input v-model="menuForm.path" placeholder="以 / 开头，例如：/user/list" />
+          <a-form-model-item
+            label="访问路径"
+            v-show="showMenuFormItem"
+            prop="path"
+          >
+            <a-input
+              v-model="menuForm.path"
+              placeholder="以 / 开头，例如：/user/list"
+            />
           </a-form-model-item>
-          <a-form-model-item label="路由名称" v-show="showMenuFormItem" prop="name">
-            <a-input v-model="menuForm.name" placeholder="只能是英文，例如：UserList" />
+          <a-form-model-item
+            label="路由名称"
+            v-show="showMenuFormItem"
+            prop="name"
+          >
+            <a-input
+              v-model="menuForm.name"
+              placeholder="只能是英文，例如：UserList"
+            />
           </a-form-model-item>
-          <a-form-model-item label="组件路径" v-show="showMenuFormItem" prop="component">
-            <a-input v-model="menuForm.component" placeholder="相对于views下的组件，例如:user/UserList" />
+          <a-form-model-item
+            label="组件路径"
+            v-show="showMenuFormItem"
+            prop="component"
+          >
+            <a-input
+              v-model="menuForm.component"
+              placeholder="相对于views下的组件，例如:user/UserList"
+            />
           </a-form-model-item>
           <a-form-model-item label="权限标识">
-            <a-input v-model="menuForm.perms" placeholder="使用冒号分割层级，例如user:list" />
+            <a-input
+              v-model="menuForm.perms"
+              placeholder="使用冒号分割层级，例如user:list"
+            />
           </a-form-model-item>
           <a-form-model-item label="图标">
-            <a-input v-model="menuForm.icon" @click="handleSelectIcon" placeholder="选择一个图标可以展示在菜单标题左侧">
-              <a-icon slot="suffix" :type="menuForm.icon || 'question-circle'" title="图标预览" />
+            <a-input
+              v-model="menuForm.icon"
+              @click="handleSelectIcon"
+              placeholder="选择一个图标可以展示在菜单标题左侧"
+            >
+              <a-icon
+                slot="suffix"
+                :type="menuForm.icon || 'question-circle'"
+                title="图标预览"
+              />
             </a-input>
           </a-form-model-item>
           <a-col :style="{ display: moreFormItem ? 'block' : 'none' }">
             <a-form-model-item label="重定向地址" v-show="showMenuFormItem">
-              <a-input v-model="menuForm.redirect" placeholder="如果填写，点击时会重定向到该地址" />
+              <a-input
+                v-model="menuForm.redirect"
+                placeholder="如果填写，点击时会重定向到该地址"
+              />
             </a-form-model-item>
             <a-form-model-item label="是否缓存组件" v-show="showMenuFormItem">
-              <a-switch v-model="menuForm.keepAlive" checked-children="是" un-checked-children="否" default-checked />
+              <a-switch
+                v-model="menuForm.keepAlive"
+                checked-children="是"
+                un-checked-children="否"
+                default-checked
+              />
             </a-form-model-item>
             <a-form-model-item label="是否隐藏菜单栏" v-show="showMenuFormItem">
-              <a-switch v-model="menuForm.hidden" checked-children="显示" un-checked-children="隐藏" />
+              <a-switch
+                v-model="menuForm.hidden"
+                checked-children="显示"
+                un-checked-children="隐藏"
+              />
             </a-form-model-item>
             <a-form-model-item label="排序">
-              <a-input v-model="menuForm.sortIndex" placeholder="菜单显示排序" />
+              <a-input
+                v-model="menuForm.sortIndex"
+                placeholder="菜单显示排序"
+              />
             </a-form-model-item>
           </a-col>
           <a-form-model-item :wrapper-col="menuFormButtonWrapperCol">
-            <a-button type="primary" @click="handleSaveOrUpdateMenu" :loading="loadingState.save" v-action:save>
+            <a-button
+              type="primary"
+              @click="handleSaveOrUpdateMenu"
+              :loading="loadingState.save"
+              v-action:save
+            >
               保存
             </a-button>
-            <a-button :style="{ marginLeft: '8px' }" @click="handleResetMenuForm" :loading="loadingState.reset">
+            <a-button
+              :style="{ marginLeft: '8px' }"
+              @click="handleResetMenuForm"
+              :loading="loadingState.reset"
+            >
               重置
             </a-button>
-            <a :style="{ marginLeft: '8px' }" @click="moreFormItem = !moreFormItem">
+            <a
+              :style="{ marginLeft: '8px' }"
+              @click="moreFormItem = !moreFormItem"
+            >
               更多 <a-icon :type="moreFormItem ? 'up' : 'down'" />
             </a>
           </a-form-model-item>
@@ -90,7 +159,10 @@
           @cancel="iconSelect.visible = false"
           @ok="handleIconSelectOk"
         >
-          <icon-selector v-model="iconSelect.selected" @change="handleChangeIcon" />
+          <icon-selector
+            v-model="iconSelect.selected"
+            @change="handleChangeIcon"
+          />
         </a-modal>
       </a-col>
     </a-row>
@@ -100,13 +172,13 @@
 <script>
 import menuApi from '@/api/menu'
 import { baseMixin } from '@/store/app-mixin'
-import { ROUTER_MAP } from '@/store/mutation-types'
 import IconSelector from '@/components/IconSelector'
-import storage from 'store'
 
 const validatePath = (rule, value, callback) => {
   if (value !== '') {
-    var result = /^[A-Za-z0-9/]+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(value)
+    var result = /^[A-Za-z0-9/]+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(
+      value
+    )
     if (result) {
       callback()
     } else {
@@ -125,7 +197,9 @@ const validateComponentName = (rule, value, callback) => {
 }
 const validateComponentPath = (rule, value, callback) => {
   if (value !== '') {
-    var result = /^[A-Za-z0-9/]+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(value)
+    var result = /^[A-Za-z0-9/]+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(
+      value
+    )
     if (result) {
       callback()
     } else {
@@ -154,7 +228,11 @@ export default {
       treeDataLoading: false,
       rules: {
         title: [
-          { required: true, message: '请输入菜单或按钮的名称', trigger: 'blur' },
+          {
+            required: true,
+            message: '请输入菜单或按钮的名称',
+            trigger: 'blur'
+          },
           { max: 150, message: '长度不能超过150字符', trigger: 'blur' }
         ],
         path: [{ validator: validatePath, trigger: 'change' }],
@@ -267,7 +345,6 @@ export default {
             .then(res => {
               this.$message.success('保存成功')
               this.listTreeMenu()
-              storage.remove(ROUTER_MAP)
               this.handleResetMenuForm()
             })
             .finally(() => {
