@@ -1,6 +1,12 @@
 <template>
   <div class="main">
-    <a-form id="formLogin" class="user-layout-login" ref="formLogin" :form="form" @submit="handleSubmit">
+    <a-form
+      id="formLogin"
+      class="user-layout-login"
+      ref="formLogin"
+      :form="form"
+      @submit="handleSubmit"
+    >
       <a-tabs
         :activeKey="customActiveKey"
         :tabBarStyle="{ textAlign: 'center', borderBottom: 'unset' }"
@@ -15,12 +21,19 @@
               v-decorator="[
                 'username',
                 {
-                  rules: [{ required: true, message: '请输入帐户名或邮箱地址' }, { validator: handleUsernameOrEmail }],
+                  rules: [
+                    { required: true, message: '请输入帐户名或邮箱地址' },
+                    { validator: handleUsernameOrEmail }
+                  ],
                   validateTrigger: 'change'
                 }
               ]"
             >
-              <a-icon slot="prefix" type="user" :style="{ color: 'rgba(0,0,0,.25)' }" />
+              <a-icon
+                slot="prefix"
+                type="user"
+                :style="{ color: 'rgba(0,0,0,.25)' }"
+              />
             </a-input>
           </a-form-item>
 
@@ -38,11 +51,15 @@
                 }
               ]"
             >
-              <a-icon slot="prefix" type="lock" :style="{ color: 'rgba(0,0,0,.25)' }" />
+              <a-icon
+                slot="prefix"
+                type="lock"
+                :style="{ color: 'rgba(0,0,0,.25)' }"
+              />
             </a-input>
           </a-form-item>
         </a-tab-pane>
-        <a-tab-pane key="tab2" tab="手机号登录">
+        <!-- <a-tab-pane key="tab2" tab="手机号登录">
           <a-form-item>
             <a-input
               size="large"
@@ -95,12 +112,16 @@
               ></a-button>
             </a-col>
           </a-row>
-        </a-tab-pane>
+        </a-tab-pane> -->
       </a-tabs>
 
       <a-form-item>
         <a-checkbox v-decorator="['rememberMe']" checked>自动登录</a-checkbox>
-        <router-link :to="{ name: 'recover', params: { user: 'aaa' } }" class="forge-password" style="float: right">
+        <router-link
+          :to="{ name: 'recover', params: { user: 'aaa' } }"
+          class="forge-password"
+          style="float: right"
+        >
           忘记密码</router-link
         >
       </a-form-item>
@@ -118,16 +139,22 @@
         </a-button>
       </a-form-item>
 
-      <div class="user-login-other">
+      <!-- <div class="user-login-other">
         <span>其他登录方式</span>
         <a>
-          <a-icon class="item-icon" type="github" @click="handleSocialLogin('github')"></a-icon>
+          <a-icon
+            class="item-icon"
+            type="github"
+            @click="handleSocialLogin('github')"
+          ></a-icon>
         </a>
         <a>
           <a-icon class="item-icon" type="weibo-circle"></a-icon>
         </a>
-        <router-link class="register" :to="{ name: 'register' }"> 注册账户 </router-link>
-      </div>
+        <router-link class="register" :to="{ name: 'register' }">
+          注册账户
+        </router-link>
+      </div> -->
     </a-form>
     <!--
     <two-step-captcha
@@ -198,7 +225,10 @@ export default {
 
       state.loginBtn = true
 
-      const validateFieldsKey = customActiveKey === 'tab1' ? ['username', 'password'] : ['mobile', 'captcha']
+      const validateFieldsKey =
+        customActiveKey === 'tab1'
+          ? ['username', 'password']
+          : ['mobile', 'captcha']
 
       validateFields(validateFieldsKey, { force: true }, (err, values) => {
         if (!err) {
@@ -266,7 +296,9 @@ export default {
       console.log('login error:', err)
       this.$notification['error']({
         message: '错误',
-        description: ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试',
+        description:
+          ((err.response || {}).data || {}).message ||
+          '请求出现错误，请稍后再试',
         duration: 4
       })
     },
