@@ -31,7 +31,11 @@
     <br />
     <a-row>
       <a-col :lg="2" :md="2">
-        <a-upload name="file" :beforeUpload="beforeUpload" :showUploadList="false">
+        <a-upload
+          name="file"
+          :beforeUpload="beforeUpload"
+          :showUploadList="false"
+        >
           <a-button icon="upload">选择图片</a-button>
         </a-upload>
       </a-col>
@@ -54,7 +58,7 @@
   </a-modal>
 </template>
 <script>
-import ossApi from '@/api/oss'
+import userApi from '@/api/user'
 
 export default {
   data() {
@@ -71,11 +75,13 @@ export default {
         autoCropHeight: 200,
         fixedBox: true
       },
+      fileName: '',
       previews: {}
     }
   },
   methods: {
     edit(file) {
+      this.fileName = file.name
       this.visible = true
       const reader = new FileReader()
       // 把Array Buffer转化为blob 如果是base64不需要
@@ -118,7 +124,7 @@ export default {
 
     // 上传图片（点击上传按钮）
     finish(type) {
-      console.log('starting upload image...')
+      this.$log.debug('starting upload image...')
       const _this = this
       const formData = new FormData()
       // 输出
@@ -127,11 +133,11 @@ export default {
           const img = window.URL.createObjectURL(data)
           this.model = true
           this.modelSrc = img
-          formData.append('object', data, this.fileName)
+          formData.append('file', data, this.fileName)
           // 调用接口上传文件
-          ossApi.createObject(formData).then(res => {
-            console.log('success, upload response:', res.objectContent.httpRequest.uri)
-            _this.$emit('success', res.objectContent.httpRequest.uri)
+          userApi.uploadAvatar(formData).then(res => {
+            this.$log.debug('success, upload response:', res.data)
+            _this.$emit('success', res.data)
             _this.visible = false
           })
         })

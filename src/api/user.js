@@ -44,6 +44,14 @@ userApi.updateAvatar = function(parameter) {
   })
 }
 
+userApi.uploadAvatar = function(parameter) {
+  return axios({
+    url: `/user/avatar/upload`,
+    method: 'post',
+    data: parameter
+  })
+}
+
 userApi.updatePassword = function(parameter) {
   return axios({
     url: '/user/password',
@@ -59,7 +67,7 @@ userApi.resetPassword = function(parameter) {
   })
 }
 
-userApi.checkUsername = (parameter) => {
+userApi.checkUsername = parameter => {
   return axios({
     url: `/user/check/username`,
     method: 'get',
@@ -67,7 +75,7 @@ userApi.checkUsername = (parameter) => {
   })
 }
 
-userApi.checkEmail = (parameter) => {
+userApi.checkEmail = parameter => {
   return axios({
     url: `/user/check/email`,
     method: 'get',
@@ -75,21 +83,21 @@ userApi.checkEmail = (parameter) => {
   })
 }
 
-userApi.lockUser = (parameter) => {
+userApi.lockUser = parameter => {
   return axios({
     url: `/user/lock/${parameter}`,
     method: 'put'
   })
 }
 
-userApi.unlockUser = (parameter) => {
+userApi.unlockUser = parameter => {
   return axios({
     url: `/user/unlock/${parameter}`,
     method: 'put'
   })
 }
 
-userApi.deleteUser = (parameter) => {
+userApi.deleteUser = parameter => {
   return axios({
     url: `/user`,
     method: 'delete',
