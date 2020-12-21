@@ -15,7 +15,11 @@
           </a-col>
           <a-col :md="4" :sm="24">
             <a-form-item label="用户状态">
-              <a-select placeholder="请选择" default-value="0" v-model="queryParam.status">
+              <a-select
+                placeholder="请选择"
+                default-value="0"
+                v-model="queryParam.status"
+              >
                 <a-select-option value="0">正常</a-select-option>
                 <a-select-option value="1">禁用</a-select-option>
               </a-select>
@@ -23,14 +27,27 @@
           </a-col>
           <a-col :md="5" :sm="24">
             <a-form-item label="创建时间">
-              <a-range-picker style="width: 100%;" @change="onDatePickerChange" />
+              <a-range-picker
+                style="width: 100%;"
+                @change="onDatePickerChange"
+              />
             </a-form-item>
           </a-col>
 
           <a-col :md="4" :sm="24">
             <span class="table-page-search-submitButtons">
-              <a-button type="primary" @click="handleSearch" :loading="loadingState.query">查询</a-button>
-              <a-button style="margin-left: 8px;" @click="handleSearchReset" :loading="loadingState.reset">
+              <a-button
+                type="primary"
+                @click="handleSearch"
+                :loading="loadingState.query"
+              >
+                查询
+              </a-button>
+              <a-button
+                style="margin-left: 8px;"
+                @click="handleSearchReset"
+                :loading="loadingState.reset"
+              >
                 重置
               </a-button>
             </span>
@@ -40,14 +57,27 @@
     </div>
 
     <div class="table-operator">
-      <a-button type="primary" icon="plus" v-action:add @click="$refs.modal.add()">新建</a-button>
+      <a-button
+        type="primary"
+        icon="plus"
+        v-action:add
+        @click="$refs.modal.add()"
+      >
+        新建
+      </a-button>
       <a-dropdown v-show="tableOpsVisible">
         <a-menu slot="overlay">
-          <a-menu-item key="1" v-action:delete @click="handleDeleteInBatch"><a-icon type="delete" />删除</a-menu-item>
+          <a-menu-item key="1" v-action:delete @click="handleDeleteInBatch">
+            <a-icon type="delete" />删除
+          </a-menu-item>
           <!-- lock | unlock -->
-          <a-menu-item key="2" v-action:update @click="handleLockUserInBatch()"><a-icon type="lock" />锁定</a-menu-item>
+          <a-menu-item key="2" v-action:update @click="handleLockUserInBatch()">
+            <a-icon type="lock" />锁定
+          </a-menu-item>
         </a-menu>
-        <a-button style="margin-left: 8px;"> 批量操作 <a-icon type="down" /> </a-button>
+        <a-button style="margin-left: 8px;">
+          批量操作 <a-icon type="down" />
+        </a-button>
       </a-dropdown>
     </div>
 
@@ -62,33 +92,57 @@
       :rowSelection="rowSelection"
     >
       <template slot="roleNames" slot-scope="text">
-        <a-tag :color="tagColor(index)" v-for="(roleName, index) in text" :key="index">
+        <a-tag
+          :color="tagColor(index)"
+          v-for="(roleName, index) in text"
+          :key="index"
+        >
           {{ roleName }}
         </a-tag>
       </template>
 
       <template slot="action" slot-scope="text, record">
-        <div class="editable-row-operations" v-hasAnyPermission="['update', 'delete', 'reset']">
+        <div
+          class="editable-row-operations"
+          v-hasAnyPermission="['update', 'delete', 'reset']"
+        >
           <span>
-            <a class="edit" v-action:update @click="$refs.modal.edit(record)">修改</a>
-            <a-divider type="vertical" v-hasAnyPermission="['update', 'delete', 'reset']" />
+            <a class="edit" v-action:update @click="$refs.modal.edit(record)">
+              修改
+            </a>
+            <a-divider
+              type="vertical"
+              v-hasAnyPermission="['update', 'delete', 'reset']"
+            />
             <a-dropdown>
               <a class="ant-dropdown-link"> 更多 <a-icon type="down" /> </a>
               <a-menu slot="overlay">
                 <a-menu-item>
                   <a href="javascript:;">详情</a>
                 </a-menu-item>
-                <a-menu-item v-if="record.status === 0" v-action:update @click="handleLockUser([record.username])">
+                <a-menu-item
+                  v-if="record.status === 0"
+                  v-action:update
+                  @click="handleLockUser([record.username])"
+                >
                   <a href="javascript:;">锁定</a>
                 </a-menu-item>
                 <a-menu-item v-if="record.status === 1" v-action:update>
                   <a href="javascript:;" @click="handleLockUserInBatch">解锁</a>
                 </a-menu-item>
                 <a-menu-item>
-                  <a href="javascript:;" v-action:delete @click="del(record)">删除</a>
+                  <a href="javascript:;" v-action:delete @click="del(record)">
+                    删除
+                  </a>
                 </a-menu-item>
                 <a-menu-item>
-                  <a href="javascript:;" @click="handleResetPassword(record)" v-action:reset>重置密码</a>
+                  <a
+                    href="javascript:;"
+                    @click="handleResetPassword(record)"
+                    v-action:reset
+                  >
+                    重置密码
+                  </a>
                 </a-menu-item>
               </a-menu>
             </a-dropdown>
@@ -137,20 +191,6 @@ export default {
         {
           title: '昵称',
           dataIndex: 'nickname'
-        },
-        {
-          title: '性别',
-          dataIndex: 'gender',
-          customRender: function(text, value) {
-            switch (text) {
-              case '0':
-                return <a-tag color="green">男性</a-tag>
-              case '1':
-                return <a-tag color="pink">女性</a-tag>
-              default:
-                return <a-tag>保密</a-tag>
-            }
-          }
         },
         {
           title: '邮箱',
@@ -267,11 +307,16 @@ export default {
     // eslint-disable-next-line
     del(row) {
       this.$log.debug('删除用户:', row.username)
-      this.handleDeleteUser(`真的要删除用户 ${row.username} 吗?`, [row.username])
+      this.handleDeleteUser(`真的要删除用户 ${row.username} 吗?`, [
+        row.username
+      ])
     },
     handleDeleteInBatch() {
       this.$log.debug('批量删除用户:', this.selectedRowKeys)
-      this.handleDeleteUser('真的要批量删除所选中的用户吗?', this.selectedRowKeys)
+      this.handleDeleteUser(
+        '真的要批量删除所选中的用户吗?',
+        this.selectedRowKeys
+      )
     },
     handleDeleteUser(message, userNames) {
       const that = this

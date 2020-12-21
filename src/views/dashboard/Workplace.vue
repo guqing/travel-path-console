@@ -19,30 +19,41 @@
         </div>
       </div>
     </template>
-
-    <div>
-      <a-row :gutter="24">
-        <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
-          <a-card :loading="loading" title="操作记录" :bordered="false">
-            <a-list>
-              <a-list-item :key="index" v-for="(item, index) in activities">
-                <a-list-item-meta :description="item.createTime">
-                  <span slot="title">{{ item.operation }}</span>
-                </a-list-item-meta>
-                <ellipsis :length="35" tooltip>{{ item.username }}</ellipsis>
-              </a-list-item>
-            </a-list>
-            <a-pagination
-              v-model="pagination.current"
-              :pageSize="pagination.pageSize"
-              :total="pagination.total"
-              @change="handleLogPageChange"
-              style="text-align: right;"
-            />
-          </a-card>
-        </a-col>
-      </a-row>
-    </div>
+    <a-row :gutter="24">
+      <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
+        <a-card :loading="loading" title="车辆轨迹" :bordered="false">
+          <a-table
+            :columns="path.columns"
+            :data-source="path.data"
+            rowKey="id"
+            :pagination="path.pagination"
+            @change="handlePathTableChange"
+          >
+          </a-table>
+        </a-card>
+      </a-col>
+    </a-row>
+    <a-row :gutter="[24, 24]">
+      <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
+        <a-card :loading="loading" title="操作记录" :bordered="false">
+          <a-list>
+            <a-list-item :key="index" v-for="(item, index) in activities">
+              <a-list-item-meta :description="item.createTime">
+                <span slot="title">{{ item.operation }}</span>
+              </a-list-item-meta>
+              <ellipsis :length="35" tooltip>{{ item.username }}</ellipsis>
+            </a-list-item>
+          </a-list>
+          <a-pagination
+            v-model="pagination.current"
+            :pageSize="pagination.pageSize"
+            :total="pagination.total"
+            @change="handleLogPageChange"
+            style="text-align: right;"
+          />
+        </a-card>
+      </a-col>
+    </a-row>
   </page-header-wrapper>
 </template>
 
@@ -52,6 +63,7 @@ import { mapState } from 'vuex'
 import Ellipsis from '@/components/Ellipsis'
 import { PageHeaderWrapper } from '@ant-design-vue/pro-layout'
 import actionLogApi from '@/api/action-log'
+import routeApi from '@/api/route'
 
 export default {
   name: 'Workplace',
@@ -65,10 +77,53 @@ export default {
       avatar: '',
       user: {},
 
-      projects: [],
       loading: false,
       activities: [],
-      teams: [],
+      path: {
+        data: [],
+        pagination: {},
+        columns: [
+          {
+            title: 'ID',
+            dataIndex: 'id'
+          },
+          {
+            title: '车牌号',
+            dataIndex: 'carNumber'
+          },
+          {
+            title: '距离',
+            dataIndex: 'distance',
+            customRender: distance => distance.toFixed(2) + '米'
+          },
+          {
+            title: '通行时间',
+            dataIndex: 'time',
+            customRender: time => (time / 1000).toFixed(2) + '秒'
+          },
+          {
+            title: '平均速度',
+            dataIndex: 'averageSpeed',
+            customRender: averageSpeed => averageSpeed.toFixed(2) + 'km/h'
+          },
+          {
+            title: '缓转弯',
+            dataIndex: 'regularTurnCount'
+          },
+          {
+            title: '急转弯',
+            dataIndex: 'sharpTurnCount'
+          },
+          {
+            title: '掉头',
+            dataIndex: 'uturnCount'
+          },
+          {
+            title: '创建时间',
+            dataIndex: 'createTime'
+          }
+        ]
+      },
       pagination: {
         current: 1,
         pageSize: 5,
@@ -92,28 +147,37 @@ export default {
     }
   },
   created() {
-    console.log(this.$router)
     this.user = this.userInfo
     this.avatar = this.userInfo.avatar
     this.handleListActivity()
+    this.handleListPath()
   },
   methods: {
     handleLogPageChange(current) {
       this.pagination.current = current
       this.handleListActivity()
     },
-    getProjects() {},
     handleListActivity() {
       const param = {
         current: this.pagination.current,
         pageSize: this.pagination.pageSize
       }
-      actionLogApi.list(param).then(res => {
+      actionLogApi.listByUser(param).then(res => {
         this.activities = res.data.list
         this.pagination.total = res.data.total
       })
     },
-    getTeams() {}
+    handleListPath() {
+      routeApi.list().then(res => {
+        const { list, total } = res.data
+        this.path.data = list
+        this.path.pagination.total = total
+      })
+    },
+    handlePathTableChange(current) {
+      this.path.pagination.current = current
+      this.handleListPath()
+    }
   }
 }
 </script>

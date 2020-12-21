@@ -37,7 +37,6 @@ const user = {
         login(userInfo)
           .then(response => {
             var token = getToken(response.data)
-            console.log(response.data)
             storage.set(ACCESS_TOKEN, token, 7 * 24 * 60 * 60 * 1000)
             commit('SET_TOKEN', token)
             resolve()
