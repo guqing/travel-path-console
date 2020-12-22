@@ -6,6 +6,11 @@
       </a-col>
       <a-col :xs="24" :sm="24" :md="24" style="height:40%">
         <a-card :bordered="false">
+          <div class="table-operator">
+            <a-button type="primary" @click="handleClearMap">
+              清空地图
+            </a-button>
+          </div>
           <a-table
             :columns="columns"
             :data-source="data"
@@ -53,7 +58,7 @@ export default {
   data() {
     return {
       map: {},
-      layerGroup: {},
+      layerGroup: null,
       data: [],
       pagination: {},
       loading: false,
@@ -112,6 +117,11 @@ export default {
     initMap(map) {
       this.map = map
     },
+    handleClearMap() {
+      if (this.layerGroup) {
+        this.layerGroup.clearLayers()
+      }
+    },
     handleLoadData() {
       this.loading = true
       routeApi
@@ -141,6 +151,7 @@ export default {
       })
     },
     drwaPath(points, checkpoints) {
+      this.handleClearMap()
       let waypointIndex = 1
       const layers = []
       for (let i = 0; i < checkpoints.length; i++) {
