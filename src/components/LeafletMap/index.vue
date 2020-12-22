@@ -66,6 +66,14 @@ export default {
         minZoom: 3
       }).addTo(this.map)
 
+      // 绘制地图边界
+      L.rectangle(bounds, {
+        width: 2,
+        color: '#000',
+        opacity: 0.3,
+        fill: false
+      }).addTo(this.map)
+
       // 传递初始化成功事件
       this.$emit('onMapInit', this.map)
     }

@@ -1,12 +1,16 @@
 <template>
   <global-footer class="footer custom-render">
     <template v-slot:links>
-      <a href="https://www.github.com/vueComponent/pro-layout" target="_blank">Pro Layout</a>
+      <!-- <a href="https://www.github.com/vueComponent/pro-layout" target="_blank">
+        Pro Layout
+      </a>
       <a href="https://www.github.com/guqing" target="_blank">Github</a>
-      <a href="https://www.github.com/sendya/" target="_blank">@guqing</a>
+      <a href="https://www.github.com/sendya/" target="_blank">@guqing</a> -->
     </template>
     <template v-slot:copyright>
-      <a href="https://github.com/vueComponent" target="_blank">guqing</a>
+      <span>
+        Proudly power by TP Analysis
+      </span>
     </template>
   </global-footer>
 </template>
