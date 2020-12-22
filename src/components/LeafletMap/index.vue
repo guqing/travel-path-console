@@ -28,8 +28,8 @@ export default {
       required: false,
       default: () => {
         return [
-          [22.48744083540382, 113.82100948291293],
-          [22.646375320398256, 114.08628945990554]
+          [32.948, 107.708],
+          [37.139, 113.161]
         ]
       }
     }
@@ -52,7 +52,7 @@ export default {
       var bounds = L.latLngBounds(corner1, corner2)
       this.map = new L.Map('mapContainer', {
         maxBounds: bounds,
-        center: [22.545583, 113.915731],
+        center: [34.26099394982405, 108.94237697124483],
         zoom: 14,
         zoomControl: true,
         loadingControl: true
