@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <a-row :gutter="[16, 16]" type="flex" style="height:100%">
-      <a-col :xs="24" :sm="24" :md="6" :lg="6" :order="0">
+      <a-col :xs="24" :sm="24" :md="6" :lg="7" :order="0">
         <div class="editor-wrapper">
           <div class="editor-content">
             <a-steps :current="stepCurrent" size="small">
@@ -18,7 +18,7 @@
 
               <div v-if="stepCurrent === 1">
                 <a-alert
-                  message="决策权重总和不能大于1，当前权重总和为: 1"
+                  :message="weightTipsMessage"
                   type="info"
                   show-icon
                   style="margin-bottom:15px"
@@ -143,7 +143,7 @@
           </div>
         </div>
       </a-col>
-      <a-col :xs="24" :sm="24" :md="18" :lg="18" :order="1">
+      <a-col :xs="24" :sm="24" :md="18" :lg="17" :order="1">
         <leaflet-map @onMapInit="initMap" style="height:100%" />
       </a-col>
     </a-row>
@@ -269,6 +269,7 @@ export default {
       selectedPlanId: null,
       checkPointMarker: [],
       stepCurrent: 0,
+      weightTotal: 0,
       weightFormValueValid: {},
       weightCheckPassed: false
     }
@@ -294,6 +295,9 @@ export default {
       })
     },
     tipsMessage() {
+      if (this.loading.table) {
+        return '加载中...'
+      }
       const length = this.tracks.data.length
       if (this.tracks.data.length > 0) {
         return `车辆出行轨迹还原成功,共搜寻到${length}条路径,最优解ID=1`
@@ -316,6 +320,9 @@ export default {
     },
     stepNextDisable() {
       return !this.weightCheckPassed
+    },
+    weightTipsMessage() {
+      return '决策权重总和不能大于1，当前权重总和为:' + this.weightTotal
     }
   },
   methods: {
@@ -326,6 +333,7 @@ export default {
         // 权重小数计算避免精度丢失
         weightSum = add(weightSum, this.weightFormValueValid[key])
       })
+      this.weightTotal = weightSum
       if (weightSum === 1) {
         this.weightCheckPassed = true
       } else {
@@ -435,7 +443,7 @@ export default {
         .finally(() => {
           setTimeout(() => {
             this.loading.table = false
-          }, 1000)
+          }, 3000)
         })
     },
     drwaPathMarker() {
