@@ -9,4 +9,11 @@ userOptionApi.listRoutWeights = function() {
   })
 }
 
+userOptionApi.updateRoutWeights = function(parameter) {
+  return axios({
+    url: '/users/options/route/weights',
+    method: 'put',
+    data: parameter
+  })
+}
 export default userOptionApi

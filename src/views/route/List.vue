@@ -567,12 +567,25 @@ export default {
       userOptionApi.listRoutWeights().then(res => {
         this.weightForm.setFieldsValue(res.data)
       })
+    },
+    handleUpdateRouteWeights() {
+      this.weightForm.validateFields((err, values) => {
+        if (err) {
+          return
+        }
+        userOptionApi.updateRoutWeights(values).then(res => {
+          this.$message.success('权重已更新')
+        })
+      })
     }
   },
   watch: {
-    stepCurrent(val) {
+    stepCurrent(val, old) {
       if (val === 1) {
         this.handleListRouteWeights()
+      }
+      if (old === 1 && val === 2) {
+        this.handleUpdateRouteWeights()
       }
       if (val === 2) {
         this.handleFetchDesignPlan()
