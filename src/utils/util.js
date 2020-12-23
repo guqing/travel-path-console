@@ -1,11 +1,24 @@
 export function timeFix() {
   const time = new Date()
   const hour = time.getHours()
-  return hour < 9 ? '早上好' : hour <= 11 ? '上午好' : hour <= 13 ? '中午好' : hour < 20 ? '下午好' : '晚上好'
+  return hour < 9
+    ? '早上好'
+    : hour <= 11
+    ? '上午好'
+    : hour <= 13
+    ? '中午好'
+    : hour < 20
+    ? '下午好'
+    : '晚上好'
 }
 
 export function welcome() {
-  const arr = ['休息一会儿吧', '准备吃什么呢?', '要不要打一把 DOTA', '我猜你可能累了']
+  const arr = [
+    '休息一会儿吧',
+    '准备吃什么呢?',
+    '要不要打一把 DOTA',
+    '我猜你可能累了'
+  ]
   const index = Math.floor(Math.random() * arr.length)
   return arr[index]
 }
@@ -17,7 +30,7 @@ export function UUID() {
     arr.push(str.substr(Math.floor(Math.random() * 0x10), 1))
   }
   arr[14] = 4
-  arr[19] = str.substr(arr[19] & 0x3 | 0x8, 1)
+  arr[19] = str.substr((arr[19] & 0x3) | 0x8, 1)
   arr[8] = arr[13] = arr[18] = arr[23] = '-'
   return arr.join('')
 }
@@ -36,7 +49,7 @@ export function handleScrollHeader(callback) {
   let timer = 0
 
   let beforeScrollTop = window.pageYOffset
-  callback = callback || function() { }
+  callback = callback || function() {}
   window.addEventListener(
     'scroll',
     event => {
@@ -59,7 +72,7 @@ export function handleScrollHeader(callback) {
 
 export function isIE() {
   const bw = window.navigator.userAgent
-  const compare = (s) => bw.indexOf(s) >= 0
+  const compare = s => bw.indexOf(s) >= 0
   const ie11 = (() => 'ActiveXObject' in window)()
   return compare('MSIE') || ie11
 }
@@ -76,4 +89,27 @@ export function removeLoadingAnimate(id = '', timeout = 1500) {
   setTimeout(() => {
     document.body.removeChild(document.getElementById(id))
   }, timeout)
+}
+
+export function add(num1, num2) {
+  console.log(num1, num2)
+  if (num1 === null) {
+    num1 = ''
+  }
+  if (num2 === null) {
+    num2 = ''
+  }
+  var p1 = 0
+  var p2 = 0
+  if (num1.toString().split('.').length > 1) {
+    p1 = num1.toString().split('.')[1].length
+  }
+  if (num2.toString().split('.').length > 1) {
+    p2 = num2.toString().split('.')[1].length
+  }
+  var p = p1 > p2 ? p1 : p2
+  var n1 = num1 * Math.pow(10, p)
+  var n2 = num2 * Math.pow(10, p)
+  var result = (n1 + n2) / Math.pow(10, p)
+  return result
 }

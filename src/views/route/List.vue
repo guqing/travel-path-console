@@ -6,6 +6,7 @@
           <div class="editor-content">
             <a-steps :current="stepCurrent" size="small">
               <a-step title="选择方案" />
+              <a-step title="决策权重" />
               <a-step title="点选卡口序列" />
               <a-step title="还原轨迹" />
             </a-steps>
@@ -15,7 +16,70 @@
                 @select="handlePlanSelect"
               ></DesignList>
 
-              <a-timeline v-if="stepCurrent === 1" style="margin-top:28px">
+              <div v-if="stepCurrent === 1">
+                <a-alert
+                  message="决策权重总和不能大于1，当前权重总和为: 1"
+                  type="info"
+                  show-icon
+                  style="margin-bottom:15px"
+                />
+                <a-form
+                  ref="weightForm"
+                  :form="weightForm"
+                  :label-col="{ span: 4 }"
+                  :wrapper-col="{ span: 18 }"
+                >
+                  <a-form-item label="距离">
+                    <a-input-number
+                      :min="0"
+                      :max="1"
+                      v-decorator="['topsis_weight_distance']"
+                      style="width:100%"
+                    />
+                  </a-form-item>
+                  <a-form-item label="通行时间">
+                    <a-input-number
+                      :min="0"
+                      :max="1"
+                      v-decorator="['topsis_weight_time']"
+                      style="width:100%"
+                    />
+                  </a-form-item>
+                  <a-form-item label="平均速度">
+                    <a-input-number
+                      :min="0"
+                      :max="1"
+                      v-decorator="['topsis_weight_average_speed']"
+                      style="width:100%"
+                    />
+                  </a-form-item>
+                  <a-form-item label="转弯次数">
+                    <a-input-number
+                      :min="0"
+                      :max="1"
+                      v-decorator="['topsis_weight_regular_turn']"
+                      style="width:100%"
+                    />
+                  </a-form-item>
+                  <a-form-item label="急转弯次数">
+                    <a-input-number
+                      :min="0"
+                      :max="1"
+                      v-decorator="['topsis_weight_sharp_turn']"
+                      style="width:100%"
+                    />
+                  </a-form-item>
+                  <a-form-item label="掉头次数">
+                    <a-input-number
+                      :min="0"
+                      :max="1"
+                      v-decorator="['topsis_weight_u_turn']"
+                      style="width:100%"
+                    />
+                  </a-form-item>
+                </a-form>
+              </div>
+              <a-timeline v-if="stepCurrent === 2" style="margin-top:28px">
                 <a-timeline-item
                   v-for="(checkpoint, index) in checkpoints"
                   :key="index"
@@ -28,7 +92,7 @@
                   <span slot="description">请点选车辆卡口序列,至少两个</span>
                 </a-empty>
               </a-timeline>
-              <div v-if="stepCurrent === 2">
+              <div v-if="stepCurrent === 3">
                 <a-alert
                   :message="tipsMessage"
                   :type="tipsType"
@@ -68,6 +132,7 @@
               </a-button>
               <a-button
                 v-if="showNext"
+                :disabled="stepNextDisable"
                 type="primary"
                 style="margin-left: 8px"
                 @click="handleOnNext"
@@ -115,7 +180,7 @@ import * as L from 'leaflet'
 import DesignList from './modules/DesignList'
 import designApi from '@/api/design'
 import { createNumberedMarker, numberedDivIcon } from '@/utils/leaflet/marker'
-
+import { add } from '@/utils/util'
 import {
   startIcon,
   endIcon,
@@ -202,15 +267,25 @@ export default {
       },
       selectedPlanId: null,
       checkPointMarker: [],
-      stepCurrent: 0
+      stepCurrent: 0,
+      weightFormValueValid: {},
+      weightCheckPassed: false
     }
   },
   beforeCreate() {
     this.simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
+    this.weightForm = this.$form.createForm(this, {
+      name: 'weightForm',
+      onValuesChange: (props, values) => {
+        // 拷贝属性
+        Object.assign(this.weightFormValueValid, values)
+        this.handleValidWeight()
+      }
+    })
   },
   computed: {
     showNext() {
-      return this.stepCurrent > 0 && this.stepCurrent < 2
+      return this.stepCurrent > 0 && this.stepCurrent < 3
     },
     checkpoints() {
       return this.checkPointMarker.map(marker => {
@@ -237,9 +312,25 @@ export default {
         }
         return 'gray'
       }
+    },
+    stepNextDisable() {
+      return !this.weightCheckPassed
     }
   },
   methods: {
+    handleValidWeight() {
+      // 校验
+      let weightSum = 0
+      Object.keys(this.weightFormValueValid).forEach(key => {
+        // 权重小数计算避免精度丢失
+        weightSum = add(weightSum, this.weightFormValueValid[key])
+      })
+      if (weightSum === 1) {
+        this.weightCheckPassed = true
+      } else {
+        this.weightCheckPassed = false
+      }
+    },
     initMap(map) {
       this.map = map
       this.markerLayerGroup = L.featureGroup().addTo(this.map)
@@ -277,7 +368,6 @@ export default {
     handlePlanSelect(value) {
       this.stepCurrent = 1
       this.selectedPlanId = value.id
-      this.handleFetchDesignPlan()
     },
     handleFetchDesignPlan() {
       designApi.getById(this.selectedPlanId).then(res => {
@@ -297,12 +387,16 @@ export default {
     handlePrev() {
       this.stepCurrent = this.stepCurrent - 1
       this.handleClearMap()
-      if (this.stepCurrent === 1) {
+      if (this.stepCurrent === 2) {
         this.handleFetchDesignPlan()
       }
     },
     handleOnNext() {
-      if (this.stepCurrent === 1) {
+      const currentStep = this.stepCurrent + 1
+      if (currentStep === 2) {
+        this.handleFetchDesignPlan()
+      }
+      if (currentStep === 3) {
         if (this.checkpoints.length < 2) {
           this.$message.warning('请至少选择两个点')
           return
@@ -310,7 +404,7 @@ export default {
           this.handleRoute()
         }
       }
-      this.stepCurrent = this.stepCurrent + 1
+      this.stepCurrent = currentStep
     },
     handleRoute() {
       this.loading.table = true
