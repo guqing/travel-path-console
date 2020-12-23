@@ -92,7 +92,6 @@ export function removeLoadingAnimate(id = '', timeout = 1500) {
 }
 
 export function add(num1, num2) {
-  console.log(num1, num2)
   if (num1 === null) {
     num1 = ''
   }

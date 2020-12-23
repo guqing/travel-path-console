@@ -179,6 +179,7 @@ import LeafletMap from '@/components/LeafletMap'
 import * as L from 'leaflet'
 import DesignList from './modules/DesignList'
 import designApi from '@/api/design'
+import userOptionApi from '@/api/userOptions'
 import { createNumberedMarker, numberedDivIcon } from '@/utils/leaflet/marker'
 import { add } from '@/utils/util'
 import {
@@ -387,15 +388,9 @@ export default {
     handlePrev() {
       this.stepCurrent = this.stepCurrent - 1
       this.handleClearMap()
-      if (this.stepCurrent === 2) {
-        this.handleFetchDesignPlan()
-      }
     },
     handleOnNext() {
       const currentStep = this.stepCurrent + 1
-      if (currentStep === 2) {
-        this.handleFetchDesignPlan()
-      }
       if (currentStep === 3) {
         if (this.checkpoints.length < 2) {
           this.$message.warning('请至少选择两个点')
@@ -567,6 +562,21 @@ export default {
         this.routeForm = {}
         this.modal.visible = false
       })
+    },
+    handleListRouteWeights() {
+      userOptionApi.listRoutWeights().then(res => {
+        this.weightForm.setFieldsValue(res.data)
+      })
+    }
+  },
+  watch: {
+    stepCurrent(val) {
+      if (val === 1) {
+        this.handleListRouteWeights()
+      }
+      if (val === 2) {
+        this.handleFetchDesignPlan()
+      }
     }
   }
 }
