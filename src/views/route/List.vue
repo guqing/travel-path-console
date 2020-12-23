@@ -33,7 +33,14 @@
                     <a-input-number
                       :min="0"
                       :max="1"
-                      v-decorator="['topsis_weight_distance']"
+                      v-decorator="[
+                        'topsis_weight_distance',
+                        {
+                          rules: [
+                            { required: true, message: '请输入距离的决策权重' }
+                          ]
+                        }
+                      ]"
                       style="width:100%"
                     />
                   </a-form-item>
@@ -41,7 +48,17 @@
                     <a-input-number
                       :min="0"
                       :max="1"
-                      v-decorator="['topsis_weight_time']"
+                      v-decorator="[
+                        'topsis_weight_time',
+                        {
+                          rules: [
+                            {
+                              required: true,
+                              message: '请输入通行时间的决策权重'
+                            }
+                          ]
+                        }
+                      ]"
                       style="width:100%"
                     />
                   </a-form-item>
@@ -49,7 +66,17 @@
                     <a-input-number
                       :min="0"
                       :max="1"
-                      v-decorator="['topsis_weight_average_speed']"
+                      v-decorator="[
+                        'topsis_weight_average_speed',
+                        {
+                          rules: [
+                            {
+                              required: true,
+                              message: '请输入平均速度的决策权重'
+                            }
+                          ]
+                        }
+                      ]"
                       style="width:100%"
                     />
                   </a-form-item>
@@ -57,7 +84,17 @@
                     <a-input-number
                       :min="0"
                       :max="1"
-                      v-decorator="['topsis_weight_regular_turn']"
+                      v-decorator="[
+                        'topsis_weight_regular_turn',
+                        {
+                          rules: [
+                            {
+                              required: true,
+                              message: '请输入转弯次数的决策权重'
+                            }
+                          ]
+                        }
+                      ]"
                       style="width:100%"
                     />
                   </a-form-item>
@@ -65,7 +102,17 @@
                     <a-input-number
                       :min="0"
                       :max="1"
-                      v-decorator="['topsis_weight_sharp_turn']"
+                      v-decorator="[
+                        'topsis_weight_sharp_turn',
+                        {
+                          rules: [
+                            {
+                              required: true,
+                              message: '请输入急转弯次数的决策权重'
+                            }
+                          ]
+                        }
+                      ]"
                       style="width:100%"
                     />
                   </a-form-item>
@@ -73,7 +120,17 @@
                     <a-input-number
                       :min="0"
                       :max="1"
-                      v-decorator="['topsis_weight_u_turn']"
+                      v-decorator="[
+                        'topsis_weight_u_turn',
+                        {
+                          rules: [
+                            {
+                              required: true,
+                              message: '请输入掉头次数的决策权重'
+                            }
+                          ]
+                        }
+                      ]"
                       style="width:100%"
                     />
                   </a-form-item>
