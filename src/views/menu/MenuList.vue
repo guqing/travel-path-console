@@ -1,8 +1,42 @@
 <template>
   <a-card :bordered="false">
+    <div class="table-page-search-wrapper">
+      <a-form layout="inline">
+        <a-row :gutter="15">
+          <a-col :md="4" :sm="24">
+            <a-form-item>
+              <a-input placeholder="标题" v-model="queryParam.title" />
+            </a-form-item>
+          </a-col>
+          <a-col :md="4" :sm="24">
+            <span class="table-page-search-submitButtons">
+              <a-button type="primary" @click="handleSearch">查询</a-button>
+              <a-button style="margin-left: 8px;" @click="handleSearchReset">
+                重置
+              </a-button>
+              <a-dropdown v-show="menuOpsVisible">
+                <a-menu slot="overlay">
+                  <a-menu-item
+                    key="1"
+                    v-action:delete
+                    @click="handleDeleteInBatch"
+                  >
+                    <a-icon type="delete" />删除
+                  </a-menu-item>
+                </a-menu>
+                <a-button style="margin-left: 8px;">
+                  批量操作 <a-icon type="down" />
+                </a-button>
+              </a-dropdown>
+            </span>
+          </a-col>
+        </a-row>
+      </a-form>
+    </div>
+
     <a-row :gutter="8" type="flex" justify="center">
       <a-col :lg="12" :md="24" :order="isMobile ? 1 : 0">
-        <a-spin tip="Loading..." :spinning="treeDataLoading">
+        <a-spin tip="加载中..." :spinning="treeDataLoading">
           <a-tree
             v-model="checkedMenuKeys"
             checkable
@@ -80,7 +114,15 @@
               placeholder="相对于views下的组件，例如:user/UserList"
             />
           </a-form-model-item>
-          <a-form-model-item label="权限标识">
+          <a-form-model-item>
+            <span slot="label">
+              权限标识&nbsp;
+              <a-tooltip
+                title="user:list中user表示组件名称,list表示按钮操作标识"
+              >
+                <a-icon type="question-circle-o" />
+              </a-tooltip>
+            </span>
             <a-input
               v-model="menuForm.perms"
               placeholder="使用冒号分割层级，例如user:list"
@@ -94,8 +136,8 @@
             >
               <a-icon
                 slot="suffix"
-                :type="menuForm.icon || 'question-circle'"
-                title="图标预览"
+                :type="menuForm.icon"
+                v-if="menuForm.icon"
               />
             </a-input>
           </a-form-model-item>
@@ -114,11 +156,19 @@
                 default-checked
               />
             </a-form-model-item>
-            <a-form-model-item label="是否隐藏菜单栏" v-show="showMenuFormItem">
+            <a-form-model-item v-show="showMenuFormItem">
+              <span slot="label">
+                是否隐藏菜单栏&nbsp;
+                <a-tooltip
+                  title="当菜单类型为菜单时如果开启了隐藏则始终不会显示"
+                >
+                  <a-icon type="question-circle-o" />
+                </a-tooltip>
+              </span>
               <a-switch
                 v-model="menuForm.hidden"
-                checked-children="显示"
-                un-checked-children="隐藏"
+                checked-children="隐藏"
+                un-checked-children="显示"
               />
             </a-form-model-item>
             <a-form-model-item label="排序">
@@ -185,16 +235,9 @@ const validatePath = (rule, value, callback) => {
       callback(new Error('请输入合法的访问url'))
     }
   }
+  callback()
 }
-const validateComponentName = (rule, value, callback) => {
-  if (value !== '') {
-    if (/^[A-Za-z0-9]+$/.test(value)) {
-      callback()
-    } else {
-      callback(new Error('只能输入字母或数字'))
-    }
-  }
-}
+
 const validateComponentPath = (rule, value, callback) => {
   if (value !== '') {
     var result = /^[A-Za-z0-9/]+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(
@@ -206,6 +249,7 @@ const validateComponentPath = (rule, value, callback) => {
       callback(new Error('请输入合法的组件路径'))
     }
   }
+  callback()
 }
 export default {
   name: 'TreeList',
@@ -236,7 +280,26 @@ export default {
           { max: 150, message: '长度不能超过150字符', trigger: 'blur' }
         ],
         path: [{ validator: validatePath, trigger: 'change' }],
-        name: [{ validator: validateComponentName, trigger: 'change' }],
+        name: [
+          {
+            validator: (rule, value, callback) => {
+              if (!this.menuForm.type || this.menuForm.type === '0') {
+                if (!value) {
+                  callback(new Error('资源类型为菜单时不能为空'))
+                } else if (value !== '') {
+                  if (/^[A-Za-z0-9]+$/.test(value)) {
+                    callback()
+                  } else {
+                    callback(new Error('只能输入字母或数字'))
+                  }
+                } else {
+                  callback()
+                }
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
         component: [{ validator: validateComponentPath, trigger: 'change' }]
       },
       moreFormItem: false,
@@ -258,6 +321,9 @@ export default {
   computed: {
     showMenuFormItem() {
       return (this.menuForm.type || '0') === '0'
+    },
+    menuOpsVisible() {
+      return this.checkedMenuKeys.length > 0
     }
   },
   methods: {
@@ -280,7 +346,7 @@ export default {
     listTreeMenu() {
       this.treeDataLoading = true
       menuApi
-        .listTreeMenu()
+        .listTreeMenu(this.queryParam)
         .then(res => {
           this.menuTreeData = res.data
         })
@@ -293,14 +359,14 @@ export default {
         })
     },
     onTreeMenuExpand(expandedKeys) {
-      console.log('onExpand', expandedKeys)
+      this.$log.debug('onExpand', expandedKeys)
       // if not set autoExpandParent to false, if children expanded, parent can not collapse.
       // or, you can remove all expanded children keys.
       this.expandedMenuKeys = expandedKeys
       this.autoExpandParent = false
     },
     onTreeMenuCheck(checkedMenuKeys) {
-      console.log('onCheck', checkedMenuKeys)
+      this.$log.debug('onCheck', checkedMenuKeys)
     },
     onSelect(selectedKeys, event) {
       this.handleToggleTreeMenu(selectedKeys, event)
@@ -311,6 +377,9 @@ export default {
         menuApi.getById(id).then(res => {
           this.menuForm = res.data
           this.handleMenuFormValueConvert()
+          if (res.data.parentId === 0) {
+            this.menuForm.parentId = null
+          }
         })
       }
     },
@@ -345,12 +414,12 @@ export default {
             .then(res => {
               this.$message.success('保存成功')
               this.listTreeMenu()
-              this.handleResetMenuForm()
+              this.handleReset()
             })
             .finally(() => {
               setTimeout(() => {
                 this.loadingState.save = false
-              }, 1500)
+              }, 1000)
             })
         } else {
           setTimeout(() => {
@@ -359,15 +428,46 @@ export default {
         }
       })
     },
-    handleResetMenuForm() {
-      this.loadingState.reset = true
-      console.log('清除表单执行')
+    handleReset() {
       this.menuForm = {}
       this.checkedMenuKeys = []
       this.expandedMenuKeys = []
+    },
+    handleResetMenuForm() {
+      this.$log.debug('清除表单执行')
+      this.loadingState.reset = true
+      this.handleReset()
       setTimeout(() => {
         this.loadingState.reset = false
       }, 1500)
+    },
+    handleSearch() {
+      this.listTreeMenu()
+    },
+    handleSearchReset() {
+      this.queryParam = {}
+      this.listTreeMenu()
+    },
+    handleDeleteInBatch() {
+      const that = this
+      this.$confirm({
+        title: '警告',
+        content: `确定要删除所选中的菜单吗?`,
+        okText: '删除',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk() {
+          that.$log.debug('批量删除菜单或按钮', that.checkedMenuKeys)
+          menuApi.deleteByIds(that.checkedMenuKeys).then(res => {
+            that.$message.success('删除成功')
+            that.handleReset()
+            that.listTreeMenu()
+          })
+        },
+        onCancel() {
+          that.$log.info('Cancel')
+        }
+      })
     }
   }
 }
