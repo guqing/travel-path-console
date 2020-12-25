@@ -27,7 +27,7 @@ groupApi.createOrUpdate = function(parameter) {
 
 groupApi.deleteByIds = function(parameter) {
   return axios({
-    url: `/admin/group`,
+    url: `/group`,
     method: 'delete',
     data: parameter
   })
