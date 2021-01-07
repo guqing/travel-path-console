@@ -2,7 +2,11 @@
   <a-card :bordered="false">
     <a-row :gutter="8" type="flex" justify="center">
       <a-col :lg="8" :md="24" :order="isMobile ? 1 : 0">
-        <a-form-model :model="roleForm" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form-model
+          :model="roleForm"
+          :label-col="labelCol"
+          :wrapper-col="wrapperCol"
+        >
           <a-form-model-item label="角色名称">
             <a-input v-model="roleForm.roleName" />
           </a-form-model-item>
@@ -29,8 +33,19 @@
             />
           </a-form-model-item>
           <a-form-model-item :wrapper-col="roleFormButtonWrapperCol">
-            <a-button type="primary" @click="handleSaveOrUpdateRole" :loading="loadingState.save">保存</a-button>
-            <a-button :style="{ marginLeft: '15px' }" @click="handleResetRoleForm">重置</a-button>
+            <a-button
+              type="primary"
+              @click="handleSaveOrUpdateRole"
+              :loading="loadingState.save"
+            >
+              保存
+            </a-button>
+            <a-button
+              :style="{ marginLeft: '15px' }"
+              @click="handleResetRoleForm"
+            >
+              重置
+            </a-button>
           </a-form-model-item>
         </a-form-model>
       </a-col>
@@ -41,7 +56,10 @@
             <a-row :gutter="15">
               <a-col :md="8" :sm="24">
                 <a-form-item label="角色名称">
-                  <a-input placeholder="角色名称" v-model="queryParam.roleName" />
+                  <a-input
+                    placeholder="角色名称"
+                    v-model="queryParam.roleName"
+                  />
                 </a-form-item>
               </a-col>
               <a-col :md="8" :sm="24">
@@ -51,19 +69,36 @@
               </a-col>
               <a-col :md="8" :sm="24">
                 <span class="table-page-search-submitButtons">
-                  <a-button type="primary" @click="handleSearch" :loading="loadingState.query">查询</a-button>
-                  <a-button style="margin-left: 8px" @click="handleResetSearchForm" :loading="loadingState.reset">
+                  <a-button
+                    type="primary"
+                    @click="handleSearch"
+                    :loading="loadingState.query"
+                  >
+                    查询
+                  </a-button>
+                  <a-button
+                    style="margin-left: 8px"
+                    @click="handleResetSearchForm"
+                    :loading="loadingState.reset"
+                  >
                     重置
                   </a-button>
                 </span>
               </a-col>
             </a-row>
           </a-form>
-          <a-dropdown v-if="selectedRoleKeys.length > 0" style="margin-top: 15px;">
+          <a-dropdown
+            v-if="selectedRoleKeys.length > 0"
+            style="margin-top: 15px;"
+          >
             <a-menu slot="overlay">
-              <a-menu-item key="1" @click="handleBatchDeleteRole"><a-icon type="delete" />删除</a-menu-item>
+              <a-menu-item key="1" @click="handleBatchDeleteRole">
+                <a-icon type="delete" />删除
+              </a-menu-item>
             </a-menu>
-            <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /> </a-button>
+            <a-button style="margin-left: 8px">
+              批量操作 <a-icon type="down" />
+            </a-button>
           </a-dropdown>
         </div>
 
@@ -75,7 +110,10 @@
           :data="loadData"
           showPagination="auto"
           :alert="false"
-          :rowSelection="{ selectedRoleKeys: selectedRoleKeys, onChange: onRoleSelectChange }"
+          :rowSelection="{
+            selectedRoleKeys: selectedRoleKeys,
+            onChange: onRoleSelectChange
+          }"
         >
           <span slot="action" slot-scope="text, record">
             <template>
@@ -205,7 +243,9 @@ export default {
       roleApi.getById(roleId).then(res => {
         var menuIdArray = res.data.menuIds || []
         var menuIdStringArray = menuIdArray.map(String)
-        var childrenMenuKeys = this.handleTreeChildrenIdsSelector(menuIdStringArray)
+        var childrenMenuKeys = this.handleTreeChildrenIdsSelector(
+          menuIdStringArray
+        )
         this.checkedMenuKeys = childrenMenuKeys
         this.expandedMenuKeys = this.editExpandedMenuKeys
         // 回显示到表单
@@ -228,7 +268,10 @@ export default {
     },
     onMenuSelect(selectedMenuKeys, info) {
       this.$log.debug('onMenuSelect', info.node.dataRef.key)
-      var parentIds = this.findParentIdsById(this.menuTreeData, info.node.dataRef.key)
+      var parentIds = this.findParentIdsById(
+        this.menuTreeData,
+        info.node.dataRef.key
+      )
       this.$log.debug('on menu select find all parent ids:', parentIds)
 
       this.selectedMenuKeys = selectedMenuKeys

@@ -25,4 +25,11 @@ groupApi.createOrUpdate = function(parameter) {
   })
 }
 
+groupApi.deleteByIds = function(parameter) {
+  return axios({
+    url: `/group`,
+    method: 'delete',
+    data: parameter
+  })
+}
 export default groupApi
